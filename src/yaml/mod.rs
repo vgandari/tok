@@ -51,7 +51,7 @@ pub fn update_fields(
 	}
 	// Update node cost
 	if (data.env == "unchecked") | (data.env == "checked") {
-		// node.borrow_mut().node_cost = 1;
+		// node.borrow_mut().cost = 1;
 		if (data.ys > 0) | (data.ye > 0) {
 			let a = Utc.ymd(data.ys, data.ms, data.ds);
 			let b = Utc.ymd(data.ye, data.me, data.de + 1);
@@ -60,14 +60,14 @@ pub fn update_fields(
 			}
 		}
 	} else {
-		node.borrow_mut().node_cost = 1
+		node.borrow_mut().cost = 1
 			+ data.main.len() as u64
 			+ data.pre.len() as u64
 			+ data.post.len() as u64;
 	}
-	let tree_cost = node.borrow().node_cost;
-	node.borrow_mut().tree_cost = tree_cost;
-	node.borrow_mut().data = data;
+	let tree_cost = node.borrow().cost;
+	node.borrow_mut().set_tree_cost(tree_cost);
+	node.borrow_mut().set_data(data);
 	node.borrow_mut().dedup_after();
 	node.borrow_mut().dedup_before();
 	node.clone()
@@ -85,30 +85,35 @@ pub struct YamlData {
 	pub label: String,
 	/// LaTeX environment (if defined)
 	pub env: String,
-	/// Text to add to LaTeX file; comes before main content in LaTeX
-	/// file, useful for providing brief introduction to the topic
-	/// outside that node's environment (e.g. a theorem)
+	/// Text to add to LaTeX file before main content;
+	/// remains outside any environment;
+	/// useful for providing brief introduction to the topic
+	/// in a given YAML file
 	pub pre: String,
-	/// Text to add to LaTeX file; main content in LaTeX file
+	/// Text to add to LaTeX file inside environment declared in `env`
+	/// key, if any
 	pub main: String,
+	/// Text to add to LaTeX file after main content;
+	/// remains outside any environment;
+	/// useful for providing brief introduction to the topic
+	/// in a given YAML file
+	pub post: String,
 	/// Text to include in a listing (may be a file)
 	pub listtext: String,
 	/// Specify language for syntax highlighting in listings
 	pub lang: String,
 	/// Lines to include from a listing from a file
 	pub lines: Vec<u64>,
-	/// Additional discussion outside LaTeX environment or as a
-	/// continuation
-	pub post: String,
-	/// Text to provide in a Proof environment after this node's main
-	/// text; intended for nodes that provide theorems
+	/// List of proofs to place immediately after `main` text (intended
+	/// for `env=thm` only);
+	/// input as sequence of multiline strings in YAML file
 	pub pfs: Vec<String>,
 	/// Alternate labels
 	pub alt: Vec<String>,
 	// example of other items that will not be included as successors
-	pub example_of: Vec<String>,
+	// pub example_of: Vec<String>,
 	// examples of this item to include
-	pub example_paths: Vec<String>,
+	// pub example_paths: Vec<String>,
 	/// Link to Wikipedia page; if empty, will result in a link to a
 	/// Wikipedia search query for this node's label; if not empty,
 	/// author-provided link will be used instead
@@ -138,8 +143,8 @@ pub struct YamlData {
 	pub de: u32,
 	/// Duration (for task types)
 	pub duration: i64,
-	/// we allow different types of predecessors
-	/// so that we can talk about relationships between items
+	// we allow different types of predecessors
+	// so that we can talk about relationships between items
 	pub gen: Vec<String>,
 	pub case: Vec<String>,
 }
@@ -157,8 +162,8 @@ impl YamlData {
 			post: String::from(""),
 			pfs: vec![],
 			alt: vec![],
-			example_of: vec![],
-			example_paths: vec![],
+			// example_of: vec![],
+			// example_paths: vec![],
 			wiki: String::from(""),
 			nowiki: false,
 			urls: HashMap::new(),

@@ -19,52 +19,52 @@ args:
       short: C
       long: crib
       help: |
-        "Crib sheet" or "Cheat sheet" mode
+        [INOP] "Crib sheet" or "Cheat sheet" mode
         (overrides -a or --all flag; default is "full text" mode)
       takes_value: false
   - draft:
       short: d
       long: draft
       help: |
-        [INOP] include "DRAFT" watermark (default is no
+        [INOP] Include "DRAFT" watermark (default is no
         watermark)
       takes_value: false
   - engine:
       short: e
       long: engine
       help: |
-        [INOP] choose LaTeX engine (default is xetex)
+        [INOP] Choose LaTeX engine (default is xetex)
       takes_value: false
   - examples:
       short: g
       long: examples
       help: |
-        include examples in textbook (default is hidden)
+        [INOP] Include examples in textbook (default is hidden)
       takes_value: false
   - output:
       short: o
       long: output
       help: |
-        [INOP] choose output file name for .tex and .pdf
+        [INOP] Choose output file name for .tex and .pdf
         files (default is 'zzz')
       takes_value: true
   - preamble:
       short: P
       long: preamble
       help: |
-        [INOP] choose preamble file
+        [INOP] Choose preamble file
       takes_value: false
   - proofs:
       short: p
       long: proofs
       help: |
-        hide proofs
+        Hide proofs
       takes_value: false
   - questions:
       short: q
       long: questions
       help: |
-        show questions for author to answer in a future draft (default
+        Show questions for author to answer in a future draft (default
         is hidden)
       takes_value: false
   - reverse:
@@ -73,23 +73,28 @@ args:
       help: |
         Reverses branch sorting better suited for task lists
       takes_value: false
+  - url:
+      short: u
+      long: url
+      help: |
+        [INOP] Show links to URLs
+      takes_value: false
   - wiki:
       short: w
       long: wiki
       help: |
-        show wikipedia links (does not show for nodes where
+        Show wikipedia links (does not show for nodes where
         nowiki key takes on true value; default is hidden)
       takes_value: false
-  - generalizations_before:
-      short: g
-      long: generalizations_before
+  - exercises:
+      short: x
+      long: exercises
       help: |
-        treat paths in gen sequence as predecessors and paths in case
-        sequence as successors (default is opposite)
+        [INOP] Show exercises
       takes_value: false
-# - exercises:
-#   short: x
-#   long: exercises
-#   help: |
-#     show exercises
-#   takes_value: false
+  - generalizations_before:
+      long: gen-before
+      help: |
+        [INOP] Treat paths in gen sequence as predecessors and paths
+        in case sequence as successors (default is opposite)
+      takes_value: false

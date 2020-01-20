@@ -25,13 +25,14 @@ pub fn add_predecessor<T>(
 	let num_predecessors = node.borrow_mut().num_predecessors();
 
 	// Add predecessor
-	node.borrow_mut().predecessors.push(predecessor.clone());
+	node.borrow_mut().push_predecessor(predecessor.clone());
 
 	// Ensure additional predecessor is not a duplicate
 	// predecessor.borrow_mut().incr_num_successors();
 	if num_predecessors < node.borrow_mut().num_predecessors() {
 		predecessor.borrow_mut().incr_num_successors();
-		node.borrow_mut().tree_cost += predecessor.borrow().tree_cost;
+		let update = predecessor.borrow().tree_cost();
+		node.borrow_mut().add_to_tree_cost(update);
 	}
 }
 
@@ -163,15 +164,15 @@ pub fn topological_sort<T>(
 	let mut sorted_nodes = vec![];
 	while stack.is_empty() == false {
 		let v = stack.pop().unwrap();
-		if v.borrow().discovered == false {
+		if v.borrow().is_discovered() == false {
 			// This condition prevents nodes from being marked discovered
 			// prematurely
 			if v.borrow().has_single_successor() {
-				v.borrow_mut().discovered = true;
+				v.borrow_mut().mark_discovered();
 			}
 
 			// This is part of the normal DFS
-			for w in v.borrow().predecessors.iter() {
+			for w in v.borrow().predecessors().iter() {
 				if w.borrow().has_multiple_successors() {
 					w.borrow_mut().decr_num_successors();
 				} else {
@@ -179,7 +180,7 @@ pub fn topological_sort<T>(
 				}
 			}
 
-			if v.borrow().discovered == true {
+			if v.borrow().is_discovered() == true {
 				sorted_nodes.push(v.clone());
 			}
 		}

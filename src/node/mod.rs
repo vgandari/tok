@@ -2,26 +2,30 @@ use std::{cell::RefCell, rc::Rc};
 
 /// Compile PDF from generated tex file "zzz.tex"
 pub struct Node<T> {
-	/// Path to corresponding YAML file; also used as reflabel in LaTeX
-	pub path: String,
-	/// Vector of pointers to predecessor nodes; necessary for
-	/// constructing tree
-	pub predecessors: Vec<Rc<RefCell<Node<T>>>>,
-	pub after: Vec<String>,
-	pub before: Vec<String>,
+	/// Flag for topological sort
+	discovered: bool,
+	/// Cost of tree rooted at this node; used for sorting branches
+	tree_cost: u64,
+	/// Number of successors (used for breaking cycles in topological
+	/// sort)
+	num_successors: u64,
 	/// Cost of this node; used for computing tree cost; uses length of
 	/// text string as heuristic for how long it takes to master the
 	/// content provided in this node
-	pub node_cost: u64,
-	/// Cost of tree rooted at this node; used for sorting branches
-	pub tree_cost: u64,
-
-	/// Number of successors (used for breaking cycles in Depth First
-	/// Search/Sort)
-	num_successors: u64,
+	pub cost: u64,
+	/// YAML key; Path to corresponding YAML file; also used as reflabel in LaTeX
+	pub path: String,
+	/// Sequence of file paths with node data that this node must come
+	/// after; relationship may be broken if tok detects cycles
+	pub after: Vec<String>,
+	/// Sequence of file paths with node data that this node must come
+	/// before; relationship may be broken if tok detects cycles
+	pub before: Vec<String>,
+	/// Vector of pointers to predecessor nodes; necessary for
+	/// constructing tree; not a YAML key
+	predecessors: Vec<Rc<RefCell<Node<T>>>>,
 	/// Data contained in this node
-	pub data: T,
-	pub discovered: bool,
+	data: T,
 }
 
 impl<T> PartialEq for Node<T> {
@@ -48,8 +52,26 @@ impl<T> Node<T> {
 			discovered: false,
 			data: data,
 			tree_cost: 1,
-			node_cost: 1,
+			cost: 1,
 		}))
+	}
+
+	/// Store data in node
+	pub fn set_data(
+		&mut self,
+		data: T,
+	) {
+		self.data = data;
+	}
+
+	/// Check if node is discovered; used in topological sort
+	pub fn is_discovered(&self) -> bool {
+		self.discovered
+	}
+
+	/// Mark node as discovered; used in topological sort
+	pub fn mark_discovered(&mut self) {
+		self.discovered = true;
 	}
 
 	/// Decrement number of successors
@@ -79,6 +101,38 @@ impl<T> Node<T> {
 			.predecessors
 			.sort_by(|a, b| a.borrow().path.cmp(&b.borrow().path));
 		self.predecessors.dedup();
+	}
+
+	pub fn push_predecessor(
+		&mut self,
+		pred_ref: Rc<RefCell<Node<T>>>,
+	) {
+		self.predecessors.push(pred_ref);
+	}
+	pub fn predecessors(&self) -> Vec<Rc<RefCell<Node<T>>>> {
+		self.predecessors.clone()
+	}
+
+	pub fn tree_cost(&self) -> u64 {
+		self.tree_cost
+	}
+
+	pub fn set_tree_cost(
+		&mut self,
+		tree_cost: u64,
+	) {
+		self.tree_cost = tree_cost;
+	}
+
+	pub fn data(&self) -> &T {
+		&self.data
+	}
+
+	pub fn add_to_tree_cost(
+		&mut self,
+		update: u64,
+	) {
+		self.tree_cost += update;
 	}
 
 	pub fn dedup_after(&mut self) {

@@ -5,10 +5,16 @@
 `tok` (stands for Tree of Knowledge) is a command line tool for
 generating a textbook based on the learning objectives the user (reader)
 has.
-The input is a YAML file or set of YAML files where each file contains
-information about a topic of interest.
+
+`tok` reads from YAML files that each store information for a topic of
+interest, selects the indicated LaTeX environment indicated in the YAML
+file, and organizes all topics before generating a TEX file based on
+the dependency relationships expressed within the YAML files.
+`tok` then compiles the TEX file into a PDF.
+
 Each YAML file also contains information about its dependencies (other
 YAML files) and which LaTeX environment to use.
+
 The generated textbook is meant to be read in a purely sequential manner
 (assuming the dependency relationships are defined correctly and
 completely in all the YAML files).
@@ -68,11 +74,17 @@ Also, depending on which file names `tok` receives as arguments, the
 question of what to include and what to leave out for a given set of
 topics is answered.
 
+(For more information about supported YAML keys, see the section on
+[Writing YAML Files]().)
+
 Finally, because, each topic is (ideally) written independent of
 context, `tok` allows a user (reader) to customize the organization of
 the textbook according to their learning style using the `-r` option
 without changing the dependency relationships defined in the YAML files'
 `after` and `before` keys.
+
+(For more information about supported command line options, see the
+section on [Usage]().)
 
 ## Requirements
 
@@ -85,16 +97,22 @@ Install Rust and `cargo` from
 ### Running
 
 At the moment, `tok` is hardcoded to use `xelatex` to compile PDFs.
-You can choose to use whichever LaTeX you want on the generated TEX file
-instead.
+
+If you would like to use a different LaTeX engine, you can process the
+generated TEX file on your own using that LaTeX engine.
+
+The output of `tok` and `xelatex` will be under a directory called
+`output` relative to where `tok` was run.
 
 ## Build
 
-From the command line a the root of the project, run
+From the command line, run
 
 ```sh
 $ cargo build --release
 ```
+
+from the `tok` project root.
 
 ## Install
 
@@ -104,12 +122,38 @@ If you would like to install `tok` to your PATH, run
 $ cargo install --path .
 ```
 
+from the `tok` project root.
+
 By default, `cargo` will install `tok` in `$HOME/.cargo/bin`.
 Make sure this is in your PATH.
 If you configured `cargo` to install binaries somewhere else, make sure
 that directory is in your PATH.
 
+## Building the Documentation
+
+In the `tok` project root, run
+
+```sh
+$ cargo doc --no-deps
+```
+
+The documentation will be found under `./target/doc/tok/index.html`
+relative to the `tok` project root.
+
 ## Usage
+
+### Command Line Options
+
+You can view the various options by
+
+```sh
+$ tok --help
+```
+
+Options labeled `[INOP]` are currently inoperable and have no effect on
+the output.
+
+### Building a PDF from YAML Files
 
 From the command line, running
 
@@ -129,35 +173,44 @@ the generated textbook.
 All the files must be in the same directory, and the command must be
 executed in that directory.
 
-After the program finishes running, there will be a file called
-`zzz.pdf`.
-
-If you would like to explore/edit the book directly, you may do so by
-editing `zzz.tex` and generating a new PDF from LaTeX (using the LaTeX
-engine of your choice).
-
-### Command Line Options
-
-You can view the various options by
+To include all files in your document's project directory, run
 
 ```sh
-$ tok --help
+tok `find . -name '*.yaml' -print`
 ```
 
-Note that some options may be labeled `[INOP]`.
-That means that these options are inoperable and have no effect in the
-current version.
+in your document's project directory.
 
-## For Authors: Writing YAML Files
+The ouput will be `./output/main.pdf`.
 
-`tok` uses YAML files to represent topics of interest and to extract the
-necessary information to properly format each topic within the book.
-The YAML files also express dependency relationships between each other,
-so even providing only one YAML file may produce a very large volume,
-depending on the dependency relationship between the topic expressed in
-that YAML file and other topics (i.e. how advanced the topic is).
-It also depends, of course, on how many YAML files are already written
-and available to `tok`.
+You can customize the preamble, frontmatter, and backmatter in
+`./texinput/preamble.tex`, `./texinput/frontmatter.tex`, and
+`./texinput/backmatter.tex`, respectively.
+
+You can also modify `./output/main.tex` directly and reprocess it using
+the LaTeX engine of your choosing to generate a PDF if `xelatex` does
+not produce the desired output.
+
+### Writing YAML Files
+
+Before writing content for your document, learn the
+[YAML syntax](https://learnxinyminutes.com/docs/yaml/).
+The official website for YAML is [here](https://yaml.org/).
+
+#### YAML Keys
+
+First, build the documentation (see above)
+
+```sh
+cargo doc --no-deps
+```
+
+The YAML keys that `tok` supports are documented in
+`./target/doc/tok/yaml/struct.YamlData.html` and
+`./target/doc/tok/node/struct.Node.html`.
+
+Keys that are `String` types must contain valid LaTeX syntax in order
+for the PDF to build.
 
 ### Why YAML?
 
@@ -174,33 +227,6 @@ YAML is also a superset of JSON.
 TOML syntax requires quotes around strings, so YAML removes this extra
 overhead.
 
-### YAML Keys
-
-- [ ] Provide guide for all keys, make code reflect this section
-
-The `pre`, `main`, and `post` keys should be multiline strings (unless
-you have very little to say about a given topic!):
-
-```yaml
-pre: |
-  Verbatim text
-  that spans multiple lines
-  and copies special "characters"
-  verbatim\\\ <-not escaped characters!
-```
-
-Note the pipe `|` and indented text.
-
-The `main` key in particular uses the LaTeX environment defined in the
-`env` key.
-Make sure this environment is defined in your preamble if not using the
-default preamble.
-
-> Note: The verbatim multiline strings are meant to store
-> LaTeX-formatted text. They will be copied into the generated TEX file.
-> That is, for `pre`, `main`, and `post`, write as if you are writing
-> directly into the resulting TEX file!
-
 ### Conventions
 
 Use `\eqref` for referencing equations.
@@ -210,16 +236,18 @@ Name equations using `\label{eq:<path>__<name>}`, replacing `<path>`
 with the path to the current file, and `<name>` with the name you would
 like to use for this equation.
 
-## As a To Do List Generator
+## As a Project Management Tool
 
 The `unchecked` and `checked` types allow you to make to do list items
 the same way you would create an item to include in your textbook.
-The difference between `unchecked` and `checked` is that `unchecked` produces
-and unchecked box and `checked` produces a checked box.
-The boxes can be toggled on and off in the resulting PDF.
+The difference between `unchecked` and `checked` is that `unchecked`
+produces and unchecked box and `checked` produces a checked box.
+The boxes can be toggled on and off in the resulting PDF, although this
+will not update the original YAML files.
 
-For generating task lists, the `-r` option is recommended.
+The default sorting algorithm prioritizes items on the critical path.
+With the `-r` option, the "lowest hanging fruit" comes first.
 
-## For Developers (and the curious): How it Works
+## Contributing
 
-- [ ] Write this section
+Feel free to open an issue or submit a pull request.

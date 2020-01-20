@@ -36,8 +36,8 @@ fn write_proofs(
 	file: &mut File,
 ) {
 	if options.show_proofs == true {
-		if node.borrow().data.pfs.is_empty() == false {
-			for proof in &node.borrow().data.pfs {
+		if node.borrow().data().pfs.is_empty() == false {
+			for proof in &node.borrow().data().pfs {
 				file.write_all(b"\n\\begin{proof}\n").expect("");
 				file.write_all(proof.as_bytes()).expect("");
 				file.write_all(b"\\end{proof}\n").expect("");
@@ -126,24 +126,26 @@ pub fn write_to_tex(
 		file.write_all(node.borrow().path.as_bytes()).expect("");
 		file.write_all(b"\n").expect("");
 		// Write label if env is unspecified
-		if node.borrow().data.env.is_empty() == true {
+		if node.borrow().data().env.is_empty() == true {
 			file.write_all(b"\\noindent\n{\\bfseries ").expect("");
 			file
-				.write_all(node.borrow().data.label.as_bytes())
+				.write_all(node.borrow().data().label.as_bytes())
 				.expect("");
 			file.write_all(b"}\n\n").expect("");
 		}
 
 		// Write pretext
 		if (options.crib == false)
-			& (node.borrow().data.pre.is_empty() == false)
+			& (node.borrow().data().pre.is_empty() == false)
 		{
-			file.write_all(node.borrow().data.pre.as_bytes()).expect("");
+			file
+				.write_all(node.borrow().data().pre.as_bytes())
+				.expect("");
 			file.write_all(b"\n").expect("");
 		}
 
 		// Write main text
-		match node.borrow().data.env.as_str() {
+		match node.borrow().data().env.as_str() {
 			// Task
 			"unchecked" => {
 				file
@@ -154,11 +156,11 @@ pub fn write_to_tex(
 				file.write_all(b"\\noindent\n\\begin{Form}\n").expect("");
 				file.write_all(b"\\CheckBox[]{}\n").expect("");
 				file
-					.write_all(node.borrow().data.label.as_bytes())
+					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"\n\\end{Form}\n\n").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 			}
 			// Completed Task
@@ -171,27 +173,27 @@ pub fn write_to_tex(
 				file.write_all(b"\\noindent\n\\begin{Form}\n").expect("");
 				file.write_all(b"\\CheckBox[checked]{}\n").expect("");
 				file
-					.write_all(node.borrow().data.label.as_bytes())
+					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"\n\\end{Form}\n").expect("");
 				file.write_all(b"\n\\end{Form}\n\n").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				if node.borrow().data.duration > 1 {
+				if node.borrow().data().duration > 1 {
 					file.write_all(b"\n{\\bfseries Task Duration: ").expect("");
 					file
 						.write_all(
-							node.borrow().data.duration.to_string().as_bytes(),
+							node.borrow().data().duration.to_string().as_bytes(),
 						)
 						.expect("");
 					file.write_all(b" days}").expect("");
 					file.write_all(b"\n").expect("");
-				} else if node.borrow().data.duration > 0 {
+				} else if node.borrow().data().duration > 0 {
 					file.write_all(b"\n{\\bfseries Task Duration: ").expect("");
 					file
 						.write_all(
-							node.borrow().data.duration.to_string().as_bytes(),
+							node.borrow().data().duration.to_string().as_bytes(),
 						)
 						.expect("");
 					file.write_all(b" day}").expect("");
@@ -207,7 +209,7 @@ pub fn write_to_tex(
 				if options.crib == false {
 					file.write_all(b"\\begin{abstract}\n").expect("");
 					file
-						.write_all(node.borrow().data.main.as_bytes())
+						.write_all(node.borrow().data().main.as_bytes())
 						.expect("");
 					file.write_all(b"\\end{abstract}\n").expect("");
 				}
@@ -216,13 +218,13 @@ pub fn write_to_tex(
 			"def" => {
 				file.write_all(b"\\begin{definition}[").expect("");
 				file
-					.write_all(node.borrow().data.label.as_bytes())
+					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"]\\label{def:").expect("");
 				file.write_all(node.borrow().path.as_bytes()).expect("");
 				file.write_all(b"}\n").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 				file.write_all(b"\\end{definition}\n").expect("");
 			}
@@ -231,13 +233,13 @@ pub fn write_to_tex(
 				if options.examples == true {
 					file.write_all(b"\\begin{example}[").expect("");
 					file
-						.write_all(node.borrow().data.label.as_bytes())
+						.write_all(node.borrow().data().label.as_bytes())
 						.expect("");
 					file.write_all(b"]\\label{eg:").expect("");
 					file.write_all(node.borrow().path.as_bytes()).expect("");
 					file.write_all(b"}\n").expect("");
 					file
-						.write_all(node.borrow().data.main.as_bytes())
+						.write_all(node.borrow().data().main.as_bytes())
 						.expect("");
 					file.write_all(b"\\end{example}\n").expect("");
 				}
@@ -246,13 +248,13 @@ pub fn write_to_tex(
 			"lem" => {
 				file.write_all(b"\\begin{lemma}[").expect("");
 				file
-					.write_all(node.borrow().data.label.as_bytes())
+					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"]\\label{lem:").expect("");
 				file.write_all(node.borrow().path.as_bytes()).expect("");
 				file.write_all(b"}\n").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 				file.write_all(b"\\end{lemma}\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
@@ -261,13 +263,13 @@ pub fn write_to_tex(
 			"thm" => {
 				file.write_all(b"\\begin{theorem}[").expect("");
 				file
-					.write_all(node.borrow().data.label.as_bytes())
+					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"]\\label{thm:").expect("");
 				file.write_all(node.borrow().path.as_bytes()).expect("");
 				file.write_all(b"}\n").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 				file.write_all(b"\\end{theorem}\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
@@ -276,13 +278,13 @@ pub fn write_to_tex(
 			"cor" => {
 				file.write_all(b"\\begin{corollary}[").expect("");
 				file
-					.write_all(node.borrow().data.label.as_bytes())
+					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"]\\label{cor:").expect("");
 				file.write_all(node.borrow().path.as_bytes()).expect("");
 				file.write_all(b"}\n").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 				file.write_all(b"\\end{corollary}\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
@@ -291,11 +293,11 @@ pub fn write_to_tex(
 			"rem" => {
 				file.write_all(b"\\begin{remark}[").expect("");
 				file
-					.write_all(node.borrow().data.label.as_bytes())
+					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"]").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 				file.write_all(b"\\end{remark}").expect("");
 			}
@@ -305,19 +307,19 @@ pub fn write_to_tex(
 			"lst" => {
 				if options.crib == false {
 					file
-						.write_all(node.borrow().data.main.as_bytes())
+						.write_all(node.borrow().data().main.as_bytes())
 						.expect("");
 					file.write_all(b"\\begin{lstlisting}").expect("");
-					if node.borrow().data.lang.is_empty() == false {
+					if node.borrow().data().lang.is_empty() == false {
 						file.write_all(b"[language=").expect("");
 						file
-							.write_all(node.borrow().data.lang.as_bytes())
+							.write_all(node.borrow().data().lang.as_bytes())
 							.expect("");
 						file.write_all(b"]").expect("");
 					}
 					file.write_all(b"\n").expect("");
 					file
-						.write_all(node.borrow().data.listtext.as_bytes())
+						.write_all(node.borrow().data().listtext.as_bytes())
 						.expect("");
 					file.write_all(b"\n").expect("");
 					file.write_all(b"\\end{lstlisting}\n").expect("");
@@ -327,25 +329,27 @@ pub fn write_to_tex(
 			// Code listing from file
 			"lstfile" => {
 				if options.crib == false {
-					file.write_all(node.borrow().data.pre.as_bytes()).expect("");
+					file
+						.write_all(node.borrow().data().pre.as_bytes())
+						.expect("");
 					file.write_all(b"\\lstinputlisting").expect("");
-					if node.borrow().data.lang.is_empty() == false {
+					if node.borrow().data().lang.is_empty() == false {
 						file.write_all(b"[language=").expect("");
 						file
-							.write_all(node.borrow().data.lang.as_bytes())
+							.write_all(node.borrow().data().lang.as_bytes())
 							.expect("");
 
-						if node.borrow().data.lines.is_empty() == false {
+						if node.borrow().data().lines.is_empty() == false {
 							file.write_all(b", firstline=").expect("");
 							file
 								.write_all(
-									node.borrow().data.lines[0].to_string().as_bytes(),
+									node.borrow().data().lines[0].to_string().as_bytes(),
 								)
 								.expect("");
 							file.write_all(b", lastline=").expect("");
 							file
 								.write_all(
-									node.borrow().data.lines[1].to_string().as_bytes(),
+									node.borrow().data().lines[1].to_string().as_bytes(),
 								)
 								.expect("");
 						}
@@ -354,11 +358,11 @@ pub fn write_to_tex(
 					file.write_all(b"{").expect("");
 					file.write_all(b"\n").expect("");
 					file
-						.write_all(node.borrow().data.listtext.as_bytes())
+						.write_all(node.borrow().data().listtext.as_bytes())
 						.expect("");
 					file.write_all(b"}\n").expect("");
 					file
-						.write_all(node.borrow().data.main.as_bytes())
+						.write_all(node.borrow().data().main.as_bytes())
 						.expect("");
 				}
 			}
@@ -367,35 +371,35 @@ pub fn write_to_tex(
 			_ => {
 				file.write_all(b"\n").expect("");
 				file
-					.write_all(node.borrow().data.main.as_bytes())
+					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 			}
 		}
 
 		// Write additional discussion/commentary after main text
 		if (options.crib == false)
-			& (node.borrow().data.post.is_empty() == false)
+			& (node.borrow().data().post.is_empty() == false)
 		{
 			file
-				.write_all(node.borrow().data.post.as_bytes())
+				.write_all(node.borrow().data().post.as_bytes())
 				.expect("");
 			file.write_all(b"\n").expect("");
 		}
 
 		// Question for author to answer in a future draft
 		if (options.crib == false) & (options.show_q == true) {
-			if node.borrow().data.q.len() > 0 {
+			if node.borrow().data().q.len() > 0 {
 				file
 					.write_all(b"\\begin{itemize}\n\\color{red}\n")
 					.expect("");
 			}
-			for it in node.borrow().data.q.clone() {
+			for it in node.borrow().data().q.clone() {
 				// file.write_all(b"\\item {\\red ").expect("");
 				file.write_all(b"\\item ").expect("");
 				file.write_all(it.as_bytes()).expect("");
 				// file.write_all(b"}\n").expect("");
 			}
-			if node.borrow().data.q.len() > 0 {
+			if node.borrow().data().q.len() > 0 {
 				file.write_all(b"\\end{itemize}").expect("");
 			}
 		}
@@ -403,20 +407,20 @@ pub fn write_to_tex(
 		// Link to Wikipedia
 		if (options.crib == false)
 			& (options.show_wiki == true)
-			& (node.borrow().data.nowiki == false)
+			& (node.borrow().data().nowiki == false)
 		{
 			file.write_all(b"\\noindent\n").expect("");
 			file.write_all(b"\\href{").expect("");
-			if node.borrow().data.wiki.is_empty() == true {
+			if node.borrow().data().wiki.is_empty() == true {
 				let mut wiki_search_url: String =
 					"https://en.wikipedia.org/w/index.php?search=".to_string();
-				let wiki_search_term = node.borrow().data.label.clone();
+				let wiki_search_term = node.borrow().data().label.clone();
 				wiki_search_url.push_str(wiki_search_term.as_str());
 
 				file.write_all(wiki_search_url.as_bytes()).expect("");
 			} else {
 				file
-					.write_all(node.borrow().data.wiki.as_bytes())
+					.write_all(node.borrow().data().wiki.as_bytes())
 					.expect("");
 			}
 			file.write_all(b"}{").expect("");
