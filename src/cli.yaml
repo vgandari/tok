@@ -1,0 +1,95 @@
+name: tok
+version: "1.0"
+author: Victor Gandarillas
+about: Tree of Knowledge -- textbook and to do list generator
+args:
+  - FILES:
+      required: true
+      multiple: true
+      help: Files to read
+  - config:
+      short: c
+      long: config
+      value_name: FILE
+      help: |
+        [INOP] read from config file specifying formatting
+        options (default is .tok-config in same directory)
+      takes_value: true
+  - crib:
+      short: C
+      long: crib
+      help: |
+        "Crib sheet" or "Cheat sheet" mode
+        (overrides -a or --all flag; default is "full text" mode)
+      takes_value: false
+  - draft:
+      short: d
+      long: draft
+      help: |
+        [INOP] include "DRAFT" watermark (default is no
+        watermark)
+      takes_value: false
+  - engine:
+      short: e
+      long: engine
+      help: |
+        [INOP] choose LaTeX engine (default is xetex)
+      takes_value: false
+  - examples:
+      short: g
+      long: examples
+      help: |
+        include examples in textbook (default is hidden)
+      takes_value: false
+  - output:
+      short: o
+      long: output
+      help: |
+        [INOP] choose output file name for .tex and .pdf
+        files (default is 'zzz')
+      takes_value: true
+  - preamble:
+      short: P
+      long: preamble
+      help: |
+        [INOP] choose preamble file
+      takes_value: false
+  - proofs:
+      short: p
+      long: proofs
+      help: |
+        hide proofs
+      takes_value: false
+  - questions:
+      short: q
+      long: questions
+      help: |
+        show questions for author to answer in a future draft (default
+        is hidden)
+      takes_value: false
+  - reverse:
+      short: r
+      long: reverse
+      help: |
+        Reverses branch sorting better suited for task lists
+      takes_value: false
+  - wiki:
+      short: w
+      long: wiki
+      help: |
+        show wikipedia links (does not show for nodes where
+        nowiki key takes on true value; default is hidden)
+      takes_value: false
+  - generalizations_before:
+      short: g
+      long: generalizations_before
+      help: |
+        treat paths in gen sequence as predecessors and paths in case
+        sequence as successors (default is opposite)
+      takes_value: false
+# - exercises:
+#   short: x
+#   long: exercises
+#   help: |
+#     show exercises
+#   takes_value: false

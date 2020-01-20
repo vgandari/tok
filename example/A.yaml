@@ -1,0 +1,5 @@
+label: A
+after:
+  - B.yaml
+  - I.yaml
+  - Q.yaml

@@ -1,0 +1,4 @@
+label: C
+after:
+  - D.yaml
+  - E.yaml

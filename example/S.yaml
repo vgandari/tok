@@ -1,0 +1,3 @@
+label: S
+before:
+  - T.yaml
