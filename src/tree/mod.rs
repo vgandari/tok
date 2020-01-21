@@ -3,7 +3,6 @@ use std::{
 };
 
 use crate::node::Node;
-use crate::options::Options;
 
 /// Add successor node to tree;
 /// root and node must not refer to the same object
@@ -42,7 +41,7 @@ pub fn load<T, Y>(
 	filename: &String,
 	read_into_node: fn(&String, Y) -> Rc<RefCell<Node<T>>>,
 	read_data: fn(&String) -> Y,
-	options: &Options,
+	// options: &Options,
 ) {
 	if map.contains_key(filename) == false {
 		println!("Reading {}", filename);
@@ -73,7 +72,7 @@ pub fn build_tree_root_to_leaf<T, Y>(
 	sbranch: &mut HashMap<String, ()>,
 	read_into_node: fn(&String, Y) -> Rc<RefCell<Node<T>>>,
 	read_data: fn(&String) -> Y,
-	options: &Options,
+	depth: i32,
 ) {
 	// Iterate over predecessor paths
 	let after_paths = current_node.borrow_mut().after.clone();
@@ -84,7 +83,7 @@ pub fn build_tree_root_to_leaf<T, Y>(
 			pbranch.insert(it.clone(), ());
 
 			// Load node only if not yet loaded
-			load(map, it, read_into_node, read_data, options);
+			load(map, it, read_into_node, read_data);
 
 			// Recursion
 			let predecessor_node = map.get(it).unwrap().clone();
@@ -95,7 +94,7 @@ pub fn build_tree_root_to_leaf<T, Y>(
 				sbranch,
 				read_into_node,
 				read_data,
-				options,
+				depth,
 			);
 			add_predecessor(current_node.clone(), predecessor_node.clone());
 
@@ -113,35 +112,44 @@ pub fn build_tree_leaf_to_root<T, Y>(
 	sbranch: &mut HashMap<String, ()>,
 	read_into_node: fn(&String, Y) -> Rc<RefCell<Node<T>>>,
 	read_data: fn(&String) -> Y,
-	options: &Options,
+	mut depth: i32,
 ) {
-	// Iterate over successor paths
-	let before_paths = current_node.borrow_mut().before.clone();
-	for it in before_paths.iter() {
-		// Do not add successors if they form a cycle
-		if sbranch.contains_key(it) == false {
-			// Add file name to list of paths on branch
-			sbranch.insert(it.clone(), ());
+	if depth != 0 {
+		// Iterate over successor paths
+		let before_paths = current_node.borrow_mut().before.clone();
+		for it in before_paths.iter() {
+			// Do not add successors if they form a cycle
+			if sbranch.contains_key(it) == false {
+				// Add file name to list of paths on branch
+				sbranch.insert(it.clone(), ());
 
-			// Load node only if not yet loaded
-			load(map, it, read_into_node, read_data, options);
+				// Load node only if not yet loaded
+				load(map, it, read_into_node, read_data);
 
-			// Recursion
-			let successor_node = map.get(it).unwrap().clone();
-			build_tree_leaf_to_root(
-				successor_node.clone(),
-				map,
-				pbranch,
-				sbranch,
-				read_into_node,
-				read_data,
-				options,
-			);
-			let root = map.get(&"//".to_string()).unwrap().clone();
-			add_successor(root, current_node.clone(), successor_node.clone());
+				// Recursion
+				let successor_node = map.get(it).unwrap().clone();
+				build_tree_leaf_to_root(
+					successor_node.clone(),
+					map,
+					pbranch,
+					sbranch,
+					read_into_node,
+					read_data,
+					depth,
+				);
+				if depth > 0 {
+					depth -= 1;
+				}
+				let root = map.get(&"//".to_string()).unwrap().clone();
+				add_successor(
+					root,
+					current_node.clone(),
+					successor_node.clone(),
+				);
 
-			// Exit branch
-			sbranch.remove(it);
+				// Exit branch
+				sbranch.remove(it);
+			}
 		}
 	}
 	build_tree_root_to_leaf(
@@ -151,7 +159,7 @@ pub fn build_tree_leaf_to_root<T, Y>(
 		sbranch,
 		read_into_node,
 		read_data,
-		options,
+		depth,
 	);
 }
 

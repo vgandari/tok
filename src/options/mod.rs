@@ -9,6 +9,7 @@ pub struct Options {
 	pub exercises: bool,
 	pub draft: bool,
 	pub generalizations_before: bool,
+	pub depth: i32,
 }
 
 impl Options {
@@ -25,6 +26,11 @@ impl Options {
 			draft: matches.is_present("draft"),
 			generalizations_before: matches
 				.is_present("generalizations_before"),
+			depth: matches
+				.value_of("depth")
+				.unwrap_or("-1")
+				.parse::<i32>()
+				.unwrap_or(-1),
 		}
 	}
 }

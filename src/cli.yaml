@@ -92,9 +92,19 @@ args:
       help: |
         [INOP] Show exercises
       takes_value: false
+  - depth:
+      long: depth
+      help: |
+        Depth of successor branch; default is to load all
+        successors, but placing a limit may reduce the size
+        of a document; setting --depth="0" guarantees that no
+        appendix is generated; a negative number leads to
+        default behavior
+      takes_value: true
   - generalizations_before:
       long: gen-before
       help: |
-        [INOP] Treat paths in gen sequence as predecessors and paths
-        in case sequence as successors (default is opposite)
+        [INOP] Treat paths in `gen` sequence as predecessors and
+        paths in case sequence as successors (default is
+        opposite)
       takes_value: false

@@ -65,7 +65,7 @@ fn main() {
 		&mut HashMap::new(),
 		update_fields,
 		read_from_yaml,
-		&options,
+		options.depth,
 	);
 	// Process tree branches
 	root.borrow_mut().sort_predecessor_branches(options.reverse);

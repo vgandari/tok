@@ -32,18 +32,20 @@
 - [x] define (default) LaTeX frontmatter
 - [x] sources (BibTeX)
 - [x] add --help command
-- [ ] add options
-  - [x] show wiki links
 - [x] add timers to console output
 - [x] automatically add label to Wikipedia search URL if `wiki` key is
       empty
 - [x] Code base organization is less than ideal.
-- [ ] ~~Support TOML?~~
 - [x] Do not print anything in tex file for node labeled "//".
-
-### Bugs
-
-- [ ] implement fwd search for adding successors
+- [ ] urls (as footnotes with hyperlinks)
+- [ ] add options
+  - [x] show wiki links
+  - [x] Reverse branch sorting
+  - [x] Include wiki links
+  - [x] Show questions
+  - [x] implement fwd search for adding successors
+  - [x] successor depth
+    - [ ] pass value instead of string from command line
 
 ### Functionality
 
@@ -95,10 +97,10 @@
   - [ ] algorithms https://www.overleaf.com/learn/latex/Algorithms
   - [ ] [best_practices, info, notes, cautions,
         warnings](https://tex.stackexchange.com/questions/21227/example-environment)
-  - [ ] urls (as footnotes with hyperlinks)
 
 ### Interface
 
+- [ ] Config file (`.tok` in document project root)
 - [ ] Option: Exclude successors that are not predecessors
 - [ ] Option: Put successors that are not predecessors in appendix
 - [ ] Add option to load only files listed in command line for testing
@@ -118,10 +120,11 @@
   - [ ] exclude exercises
   - [ ] include appendix (successors)
   - [ ] clean up generated files
-- [ ]
+- [ ] Electron app to visually create files and draw dependency
+      relationships
+
 ### Documentation
 
-- [ ] Available node types
 - [ ] Describe how references to equations work
 - [ ] Provide really good examples of acceptable YAML files
 - [ ] Write guidelines for writing a good YAML file
@@ -138,8 +141,10 @@
 - [Textbook Writing
   Tutorial](http://edutechwiki.unige.ch/en/Textbook_writing_tutorial)
 
-### Add Later
+### Keys to Add Later
 
+- [ ] sec: Section title if section is generated
+- [ ] an: analogies
 - [ ] nowiki boolean key suppresses wiki links in case you know there is
       no Wikipedia page available; wiki key has no effect; root node’s
       nowiki set to false
@@ -152,7 +157,7 @@
 - [ ] Change disc to post, pretext to pre
 - [ ] analogy key serves to separate analogies from the rest of text,
       suppressed by default
-- [ ] q is a sequence (Vec<String>) storing questions for author to
+- [x] q is a sequence (Vec<String>) storing questions for author to
       answer in future drafts
 - [ ] ex and eg are not types; they are keys
 - [ ] sol key for solutions
@@ -167,25 +172,9 @@
 - [ ] Keys for authors (given and surnames); sort alphabetically and
       remove duplicates after collecting nodes
 
-Options:
-
-- [ ] Include wiki links
-- [ ] Exclude pre and post
-- [ ] Show questions
-- [ ] Reverse branch sorting
-- [ ] Exclude examples
-- [ ] Exclude exercises
-- [ ] Exclude solutions
-- [ ] Successor depth
-- [ ] Exclude analogies
-- [ ] Exclude successors (include by default); expect missing references
-      in pdf
-
 Changes:
 
-- [ ] Show labels even if env not specified
 - [ ] Pass immutable reference to options struct between functions
-
 - [ ] Additions with no plan for implementation:
 - [ ] List of acronyms
 - [ ] How to suppress list of * when empty (LaTeX)?

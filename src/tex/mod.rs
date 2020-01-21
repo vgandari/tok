@@ -126,7 +126,10 @@ pub fn write_to_tex(
 		file.write_all(node.borrow().path.as_bytes()).expect("");
 		file.write_all(b"\n").expect("");
 		// Write label if env is unspecified
-		if node.borrow().data().env.is_empty() == true {
+		if node.borrow().data().env.is_empty() == true
+			|| node.borrow().data().env.as_str() == "checked"
+			|| node.borrow().data().env.as_str() == "unchecked"
+		{
 			file.write_all(b"\\noindent\n{\\bfseries ").expect("");
 			file
 				.write_all(node.borrow().data().label.as_bytes())
@@ -152,16 +155,13 @@ pub fn write_to_tex(
 					.write_all(b"\\noindent\n\\begin{verbatim}\n")
 					.expect("");
 				file.write_all(node.borrow().path.as_bytes()).expect("");
-				file.write_all(b"\n\\end{verbatim}\n").expect("");
-				file.write_all(b"\\noindent\n\\begin{Form}\n").expect("");
-				file.write_all(b"\\CheckBox[]{}\n").expect("");
-				file
-					.write_all(node.borrow().data().label.as_bytes())
-					.expect("");
-				file.write_all(b"\n\\end{Form}\n\n").expect("");
+				file.write_all(b"\n\\end{verbatim}\n\n").expect("");
+				file.write_all(b"\\noindent\\begin{Form}").expect("");
+				file.write_all(b"\\CheckBox[]{} ").expect("");
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
+				file.write_all(b"\n\\end{Form}\n").expect("");
 			}
 			// Completed Task
 			"checked" => {
@@ -170,16 +170,15 @@ pub fn write_to_tex(
 					.expect("");
 				file.write_all(node.borrow().path.as_bytes()).expect("");
 				file.write_all(b"\n\\end{verbatim}\n").expect("");
-				file.write_all(b"\\noindent\n\\begin{Form}\n").expect("");
-				file.write_all(b"\\CheckBox[checked]{}\n").expect("");
 				file
-					.write_all(node.borrow().data().label.as_bytes())
+					.write_all(node.borrow().data().pre.as_bytes())
 					.expect("");
-				file.write_all(b"\n\\end{Form}\n").expect("");
-				file.write_all(b"\n\\end{Form}\n\n").expect("");
+				file.write_all(b"\\noindent\n\\begin{Form}").expect("");
+				file.write_all(b"\\CheckBox[checked]{} ").expect("");
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
+				file.write_all(b"\n\\end{Form}\n").expect("");
 				if node.borrow().data().duration > 1 {
 					file.write_all(b"\n{\\bfseries Task Duration: ").expect("");
 					file
