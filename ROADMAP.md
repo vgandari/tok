@@ -37,7 +37,6 @@
       empty
 - [x] Code base organization is less than ideal.
 - [x] Do not print anything in tex file for node labeled "//".
-- [ ] urls (as footnotes with hyperlinks)
 - [ ] add options
   - [x] show wiki links
   - [x] Reverse branch sorting
@@ -46,6 +45,7 @@
   - [x] implement fwd search for adding successors
   - [x] successor depth
     - [ ] pass value instead of string from command line
+  - [x] urls ~~(as footnotes with hyperlinks)~~
 
 ### Functionality
 

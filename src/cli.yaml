@@ -77,7 +77,7 @@ args:
       short: u
       long: url
       help: |
-        [INOP] Show links to URLs
+        Show links to URLs
       takes_value: false
   - wiki:
       short: w

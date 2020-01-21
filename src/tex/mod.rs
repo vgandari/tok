@@ -403,6 +403,18 @@ pub fn write_to_tex(
 			}
 		}
 
+		// Links to URLs
+		if options.show_urls == true {
+			for url in node.borrow().data().urls.iter() {
+				file.write_all(b"\\noindent\n").expect("");
+				file.write_all(b"\\href{").expect("");
+				file.write_all(url.1.as_bytes()).expect("");
+				file.write_all(b"}{").expect("");
+				file.write_all(url.0.as_bytes()).expect("");
+				file.write_all(b"}\n\n").expect("");
+			}
+		}
+
 		// Link to Wikipedia
 		if (options.crib == false)
 			& (options.show_wiki == true)
