@@ -130,11 +130,13 @@ pub fn write_to_tex(
 			|| node.borrow().data().env.as_str() == "checked"
 			|| node.borrow().data().env.as_str() == "unchecked"
 		{
-			file.write_all(b"\\noindent\n{\\bfseries ").expect("");
-			file
-				.write_all(node.borrow().data().label.as_bytes())
-				.expect("");
-			file.write_all(b"}\n\n").expect("");
+			if node.borrow().data().label.is_empty() == false {
+				file.write_all(b"\n\\noindent\n{\\bfseries ").expect("");
+				file
+					.write_all(node.borrow().data().label.as_bytes())
+					.expect("");
+				file.write_all(b"}\n\n").expect("");
+			}
 		}
 
 		// Write pretext
@@ -288,6 +290,36 @@ pub fn write_to_tex(
 				file.write_all(b"\\end{corollary}\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
 			}
+			// Rule
+			"rule" => {
+				file.write_all(b"\\begin{rule}[").expect("");
+				file
+					.write_all(node.borrow().data().label.as_bytes())
+					.expect("");
+				file.write_all(b"]\\label{rule:").expect("");
+				file.write_all(node.borrow().path.as_bytes()).expect("");
+				file.write_all(b"}\n").expect("");
+				file
+					.write_all(node.borrow().data().main.as_bytes())
+					.expect("");
+				file.write_all(b"\\end{rule}\n").expect("");
+				write_proofs(&options, node.clone(), &mut file);
+			}
+			// Fact
+			"fact" => {
+				file.write_all(b"\\begin{fact}[").expect("");
+				file
+					.write_all(node.borrow().data().label.as_bytes())
+					.expect("");
+				file.write_all(b"]\\label{fact:").expect("");
+				file.write_all(node.borrow().path.as_bytes()).expect("");
+				file.write_all(b"}\n").expect("");
+				file
+					.write_all(node.borrow().data().main.as_bytes())
+					.expect("");
+				file.write_all(b"\\end{fact}\n").expect("");
+				write_proofs(&options, node.clone(), &mut file);
+			}
 			// Remark
 			"rem" => {
 				file.write_all(b"\\begin{remark}[").expect("");
@@ -368,7 +400,7 @@ pub fn write_to_tex(
 
 			// Plain text
 			_ => {
-				file.write_all(b"\n").expect("");
+				// file.write_all(b"\n").expect("");
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
@@ -393,13 +425,12 @@ pub fn write_to_tex(
 					.expect("");
 			}
 			for it in node.borrow().data().q.clone() {
-				// file.write_all(b"\\item {\\red ").expect("");
 				file.write_all(b"\\item ").expect("");
 				file.write_all(it.as_bytes()).expect("");
-				// file.write_all(b"}\n").expect("");
+				file.write_all(b"\\n").expect("");
 			}
 			if node.borrow().data().q.len() > 0 {
-				file.write_all(b"\\end{itemize}").expect("");
+				file.write_all(b"\\end{itemize}\n").expect("");
 			}
 		}
 
