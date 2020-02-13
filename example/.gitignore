@@ -1,4 +1,2 @@
-!preamble.tex
-!frontmatter.tex
-!backmatter.tex
+!texinput/
 output/
