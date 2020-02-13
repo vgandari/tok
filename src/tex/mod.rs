@@ -117,14 +117,20 @@ pub fn write_to_tex(
 	file.write_all(b"\n\n").expect("");
 	file.write_all(b"\\begin{document}").expect("");
 	file.write_all(b"\n\n").expect("");
-	file.write_all(frontmatter.as_bytes()).expect("");
-	file.write_all(b"\n\n").expect("");
+	if frontmatter.is_empty() == false {
+		file.write_all(frontmatter.as_bytes()).expect("");
+		file.write_all(b"\n\n").expect("");
+	}
 
+	// Write content in each node
 	for node in &mut sorted_nodes.iter().rev() {
-		// Write comment containing source YAML file name
-		file.write_all(b"% ").expect("");
-		file.write_all(node.borrow().path.as_bytes()).expect("");
-		file.write_all(b"\n").expect("");
+		// Write source YAML file name
+		if options.yaml == true {
+			file.write_all(b"\\begin{verbatim}\n").expect("");
+			file.write_all(node.borrow().path.as_bytes()).expect("");
+			file.write_all(b"\n\\end{verbatim}\n\n").expect("");
+		}
+
 		// Write label if env is unspecified
 		if node.borrow().data().env.is_empty() == true
 			|| node.borrow().data().env.as_str() == "checked"

@@ -1,5 +1,6 @@
 pub struct Options {
 	pub files: Vec<String>,
+	pub yaml: bool,
 	pub reverse: bool,
 	pub show_wiki: bool,
 	pub show_urls: bool,
@@ -18,6 +19,7 @@ impl Options {
 		Options {
 			files: matches.values_of_lossy("FILES").unwrap(),
 			reverse: matches.is_present("reverse"),
+			yaml: matches.is_present("yaml"),
 			show_wiki: matches.is_present("wiki"),
 			show_urls: matches.is_present("url"),
 			show_q: matches.is_present("questions"),

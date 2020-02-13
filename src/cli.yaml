@@ -92,6 +92,12 @@ args:
       help: |
         [INOP] Show exercises
       takes_value: false
+  - yaml:
+      short: y
+      long: yaml
+      help: |
+        Show YAML file name in PDF
+      takes_value: false
   - depth:
       long: depth
       help: |
