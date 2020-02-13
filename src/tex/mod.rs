@@ -9,18 +9,12 @@ use std::{
 };
 
 pub fn compile_pdf() {
+	let latex_args = ["-output-directory=output", "output/main.tex"];
 	let mut latex_cmd = Command::new("xelatex");
-	// let mut cd_cmd = Command::new("cd");
-	// let mut cd_ret_cmd = Command::new("cd");
-	latex_cmd.arg("-output-directory=output");
-	latex_cmd.arg("output/main.tex");
-	// bibtex_cmd;
-	// cd_cmd.arg("output");
-	// cd_ret_cmd.arg("..");
-	// let _ = cd_cmd.output().expect("error");
+	latex_cmd.args(&latex_args);
 	println!("Compiling PDF ...");
 	println!("Running XeLaTeX (1 of 3) ...");
-	let _ = latex_cmd.output().expect("error");
+	let _ = latex_cmd.output().expect("xelatex command failed to start");
 	println!("Running BibTeX ...");
 	let _ = Command::new("bibtex")
 		.arg("main.aux")
@@ -28,12 +22,11 @@ pub fn compile_pdf() {
 		.spawn()
 		.expect("bibtex failed to start");
 	println!("Running XeLaTeX (2 of 3) ...");
-	let _ = latex_cmd.output().expect("error");
+	let _ = latex_cmd.output().expect("xelatex command failed to start");
 	println!("Running XeLaTeX (3 of 3) ...");
-	let _ = latex_cmd.output().expect("error");
+	let _ = latex_cmd.output().expect("xelatex command failed to start");
 	println!("Finished compiling PDF.");
 	println!("Check logfiles for any errors.");
-	// let _ = cd_ret_cmd.output().expect("error");
 }
 
 /// Write proofs; meant for a node that contains text for a theorem
