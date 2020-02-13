@@ -19,7 +19,7 @@ pub fn compile_pdf() {
 	let _ = Command::new("bibtex")
 		.arg("main.aux")
 		.current_dir("./output")
-		.spawn()
+		.output()
 		.expect("bibtex failed to start");
 	println!("Running XeLaTeX (2 of 3) ...");
 	let _ = latex_cmd.output().expect("xelatex command failed to start");
