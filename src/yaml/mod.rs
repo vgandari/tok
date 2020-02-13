@@ -46,6 +46,7 @@ pub fn update_fields(
 			"de" => data.de = serde_yaml::from_value(v).expect(""),
 			"gen" => data.gen = serde_yaml::from_value(v).expect(""),
 			"case" => data.case = serde_yaml::from_value(v).expect(""),
+			"src" => data.src = serde_yaml::from_value(v).expect(""),
 			_ => (),
 		}
 	}
@@ -147,6 +148,8 @@ pub struct YamlData {
 	// so that we can talk about relationships between items
 	pub gen: Vec<String>,
 	pub case: Vec<String>,
+	/// List of references that will be added to .bib file for this node
+	pub src: Vec<String>,
 }
 
 impl YamlData {
@@ -177,6 +180,7 @@ impl YamlData {
 			duration: 0,
 			gen: vec![],
 			case: vec![],
+			src: vec![],
 		}
 	}
 }

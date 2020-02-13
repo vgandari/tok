@@ -10,22 +10,30 @@ use std::{
 
 pub fn compile_pdf() {
 	let mut latex_cmd = Command::new("xelatex");
-	let mut bibtex_cmd = Command::new("bibtex");
+	// let mut cd_cmd = Command::new("cd");
+	// let mut cd_ret_cmd = Command::new("cd");
 	latex_cmd.arg("-output-directory=output");
 	latex_cmd.arg("output/main.tex");
-	// latex_cmd.arg("output/main.tex");
-	bibtex_cmd.arg("output/main.aux");
+	// bibtex_cmd;
+	// cd_cmd.arg("output");
+	// cd_ret_cmd.arg("..");
+	// let _ = cd_cmd.output().expect("error");
 	println!("Compiling PDF ...");
 	println!("Running XeLaTeX (1 of 3) ...");
-	let _output1 = latex_cmd.output().expect("error");
+	let _ = latex_cmd.output().expect("error");
 	println!("Running BibTeX ...");
-	let _output3 = bibtex_cmd.output().expect("error");
+	let _ = Command::new("bibtex")
+		.arg("main.aux")
+		.current_dir("./output")
+		.spawn()
+		.expect("bibtex failed to start");
 	println!("Running XeLaTeX (2 of 3) ...");
-	let _output4 = latex_cmd.output().expect("error");
+	let _ = latex_cmd.output().expect("error");
 	println!("Running XeLaTeX (3 of 3) ...");
-	let _output5 = latex_cmd.output().expect("error");
+	let _ = latex_cmd.output().expect("error");
 	println!("Finished compiling PDF.");
 	println!("Check logfiles for any errors.");
+	// let _ = cd_ret_cmd.output().expect("error");
 }
 
 /// Write proofs; meant for a node that contains text for a theorem
@@ -49,7 +57,7 @@ fn write_proofs(
 /// Write text stored in nodes to tex file
 pub fn write_to_tex(
 	options: Options,
-	sorted_nodes: Vec<Rc<RefCell<Node<YamlData>>>>,
+	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>,
 ) {
 	// generate tex file
 	let mut mkdir_cmd = Command::new("mkdir");
@@ -112,7 +120,6 @@ pub fn write_to_tex(
 		};
 
 	// Write preamble to file, begin document, and write frontmatter
-	file.write_all(b"\n\n").expect("");
 	file.write_all(preamble.as_bytes()).expect("");
 	file.write_all(b"\n\n").expect("");
 	file.write_all(b"\\begin{document}").expect("");
@@ -407,51 +414,12 @@ pub fn write_to_tex(
 			}
 		}
 
-		// Write additional discussion/commentary after main text
-		if (options.crib == false)
-			& (node.borrow().data().post.is_empty() == false)
-		{
-			file
-				.write_all(node.borrow().data().post.as_bytes())
-				.expect("");
-			file.write_all(b"\n").expect("");
-		}
-
-		// Question for author to answer in a future draft
-		if (options.crib == false) & (options.show_q == true) {
-			if node.borrow().data().q.len() > 0 {
-				file
-					.write_all(b"\\begin{itemize}\n\\color{red}\n")
-					.expect("");
-			}
-			for it in node.borrow().data().q.clone() {
-				file.write_all(b"\\item ").expect("");
-				file.write_all(it.as_bytes()).expect("");
-				file.write_all(b"\\n").expect("");
-			}
-			if node.borrow().data().q.len() > 0 {
-				file.write_all(b"\\end{itemize}\n").expect("");
-			}
-		}
-
-		// Links to URLs
-		if options.show_urls == true {
-			for url in node.borrow().data().urls.iter() {
-				file.write_all(b"\\noindent\n").expect("");
-				file.write_all(b"\\href{").expect("");
-				file.write_all(url.1.as_bytes()).expect("");
-				file.write_all(b"}{").expect("");
-				file.write_all(url.0.as_bytes()).expect("");
-				file.write_all(b"}\n\n").expect("");
-			}
-		}
-
 		// Link to Wikipedia
 		if (options.crib == false)
 			& (options.show_wiki == true)
 			& (node.borrow().data().nowiki == false)
 		{
-			file.write_all(b"\\noindent\n").expect("");
+			file.write_all(b"\n\n\\noindent\n").expect("");
 			file.write_all(b"\\href{").expect("");
 			if node.borrow().data().wiki.is_empty() == true {
 				let mut wiki_search_url: String =
@@ -460,7 +428,6 @@ pub fn write_to_tex(
 					.borrow()
 					.data()
 					.label
-					.clone()
 					.chars()
 					.map(|x| match x {
 						' ' => '+',
@@ -478,17 +445,69 @@ pub fn write_to_tex(
 			file.write_all(b"}{").expect("");
 			file.write_all(b"Wikipedia}\n\n").expect("");
 		}
+
+		// Write additional discussion/commentary after main text
+		if (options.crib == false)
+			& (node.borrow().data().post.is_empty() == false)
+		{
+			file
+				.write_all(node.borrow().data().post.as_bytes())
+				.expect("");
+			file.write_all(b"\n").expect("");
+		}
+
+		// Links to URLs
+		if options.show_urls == true {
+			for url in node.borrow().data().urls.iter() {
+				file.write_all(b"\\noindent\n").expect("");
+				file.write_all(b"\\href{").expect("");
+				file.write_all(url.1.as_bytes()).expect("");
+				file.write_all(b"}{").expect("");
+				file.write_all(url.0.as_bytes()).expect("");
+				file.write_all(b"}\n\n").expect("");
+			}
+		}
+
+		// Questions for author to answer in a future draft
+		if (options.crib == false) & (options.show_q == true) {
+			if node.borrow().data().q.len() > 0 {
+				file
+					.write_all(b"\\begin{itemize}\n\\color{red}\n")
+					.expect("");
+			}
+			for it in node.borrow().data().q.clone() {
+				file.write_all(b"\\item ").expect("");
+				file.write_all(it.as_bytes()).expect("");
+				file.write_all(b"\\n").expect("");
+			}
+			if node.borrow().data().q.len() > 0 {
+				file.write_all(b"\\end{itemize}\n").expect("");
+			}
+		}
 	}
 
 	// Write backmatter
 	file.write_all(backmatter.as_bytes()).expect("");
-	file.write_all(b"\\end{document}").expect("");
+	file.write_all(b"\n\\end{document}").expect("");
 }
 
 /// Generate BibTeX file from sources
-pub fn collect_sources(
-	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>
-) -> String {
-	let mut references: String = String::from("");
-	references
+pub fn write_bib(sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>) {
+	let path = Path::new("output/main.bib");
+	let mut file = File::create(&path).expect("could not create file");
+	let mut references: Vec<String> = vec![];
+	for n in sorted_nodes {
+		for src in n.borrow().data().src.clone() {
+			references.push(src.clone());
+			references.sort();
+			references.dedup();
+		}
+	}
+	for r in references {
+		file.write_all(r.as_bytes()).expect("");
+		file.write_all(b"\n").expect("");
+	}
+	// This is to ensure that the file exists and LaTeX doesn't fail to
+	// compile
+	file.write_all(b"\n").expect("");
 }

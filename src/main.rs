@@ -11,7 +11,7 @@ pub mod tree;
 pub mod yaml;
 use node::Node;
 use options::Options;
-use tex::{compile_pdf, write_to_tex};
+use tex::{compile_pdf, write_bib, write_to_tex};
 use tree::{build_tree_root_to_leaf, topological_sort};
 use yaml::{read_from_yaml, update_fields, YamlData};
 extern crate serde;
@@ -79,7 +79,8 @@ fn main() {
 	println!("=====================================");
 
 	// Write text stored in nodes to tex file
-	write_to_tex(options, sorted_nodes);
+	write_to_tex(options, &sorted_nodes);
+	write_bib(&sorted_nodes);
 	println!(
 		"Time to generate tex file: {} ms.",
 		(start_time.to(PreciseTime::now())).num_milliseconds()
