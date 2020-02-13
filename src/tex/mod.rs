@@ -456,7 +456,17 @@ pub fn write_to_tex(
 			if node.borrow().data().wiki.is_empty() == true {
 				let mut wiki_search_url: String =
 					"https://en.wikipedia.org/w/index.php?search=".to_string();
-				let wiki_search_term = node.borrow().data().label.clone();
+				let wiki_search_term: String = node
+					.borrow()
+					.data()
+					.label
+					.clone()
+					.chars()
+					.map(|x| match x {
+						' ' => '+',
+						_ => x,
+					})
+					.collect();
 				wiki_search_url.push_str(wiki_search_term.as_str());
 
 				file.write_all(wiki_search_url.as_bytes()).expect("");
@@ -473,4 +483,12 @@ pub fn write_to_tex(
 	// Write backmatter
 	file.write_all(backmatter.as_bytes()).expect("");
 	file.write_all(b"\\end{document}").expect("");
+}
+
+/// Generate BibTeX file from sources
+pub fn collect_sources(
+	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>
+) -> String {
+	let mut references: String = String::from("");
+	references
 }
