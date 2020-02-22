@@ -46,14 +46,27 @@
   - [x] successor depth
     - [ ] pass value instead of string from command line
   - [x] urls ~~(as footnotes with hyperlinks)~~
+- [x] ~~add comments in tex file with yaml file names to mark item locations~~
+- [x] Pass immutable reference to options struct between functions
+      answer in future drafts
+- [x] q is a sequence (Vec<String>) storing questions for author to
+- [x] src is a sequence of sources in BibTeX format (need to
+      eliminate duplicates in .bib file)
+- [x] add option to print file names even if not generating a task list
+- [x] `src` key that appends bibtex format references to `.bib` file
+- [x] appendix (all successor nodes that are not added to tree)
 
 ### Functionality
 
+- [ ] generate chapters, sections, subsections, etc.
+- [ ] place references at end of each chapter
+- [ ] display which paths can be traversed in parallel
 - [ ] support unicode text
   - [ ] verify that tok writes unicode text
 - [ ] Add keys that can be set as predecessors or successors in option
       flags
       - keys
+        - [ ] "not to be confused with" key
         - [ ] `gen` generalization of
         - [ ] `case` special case of
         - [ ] `proc` procedure for computing a certain value
@@ -75,24 +88,18 @@
           - ignores examples, discussion
           - includes motivation
         - [ ] exclude proofs (independent of "crib sheet" mode)
-- [ ] `sources` key that appends bibtex format references to `.bib` file
 - [ ] "presentation" mode?
-- [ ] generate chapters, sections, subsections, etc.
-- [ ] place references at end of each chapter
-- [ ] appendix (all successor nodes that are not added to tree)
 
 ### LaTeX Formatting
 
 - [ ] Option to select with sans serif font for computer screens and
       option to choose light/dark theme
-- [x] add comments in tex file with yaml file names to mark item locations
-- [ ] add option to print file names even if not generating a task list
 - [ ] define LaTeX environment for types:
   - [ ] (what about proofs that require more advanced concepts?
         e.g. proof of Cramer's rule using Clifford Algebra)
   - [ ] history/intro
   - [ ] motivation
-  - [x] examples (to go after text)
+  - [ ] examples (as separate nodes; to go after text)
   - [ ] motivating_examples (to go before text)
   - [ ] algorithms https://www.overleaf.com/learn/latex/Algorithms
   - [ ] [best_practices, info, notes, cautions,
@@ -157,15 +164,10 @@
 - [ ] Change disc to post, pretext to pre
 - [ ] analogy key serves to separate analogies from the rest of text,
       suppressed by default
-- [x] q is a sequence (Vec<String>) storing questions for author to
-      answer in future drafts
 - [ ] ex and eg are not types; they are keys
 - [ ] sol key for solutions
 - [ ] alg, alg2e, and algx for different algorithms environments
-- [ ] mint for different listings environment
-- [ ] sources is a sequence of sources in BibTeX format (need to
-      eliminate duplicates in .bib file)
-- [ ] If wiki is blank, change display label to “Search Wikipedia”
+- [ ] ~~mint for different listings environment~~
 - [ ] cap is caption
 - [ ] sub is subset of
 - [ ] super is superset of
@@ -174,7 +176,6 @@
 
 Changes:
 
-- [ ] Pass immutable reference to options struct between functions
 - [ ] Additions with no plan for implementation:
 - [ ] List of acronyms
 - [ ] How to suppress list of * when empty (LaTeX)?
