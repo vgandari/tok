@@ -51,6 +51,7 @@ fn write_proofs(
 pub fn write_to_tex(
 	options: Options,
 	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>,
+	final_nodes: &mut Vec<String>,
 ) {
 	// generate tex file
 	let mut mkdir_cmd = Command::new("mkdir");
@@ -123,7 +124,27 @@ pub fn write_to_tex(
 	}
 
 	// Write content in each node
+	let mut write_appendix = false;
 	for node in &mut sorted_nodes.iter().rev() {
+		let node_path = node.borrow().path.clone();
+		if final_nodes.is_empty() == false
+			&& final_nodes.contains(&node_path)
+		{
+			// Remove nodes from final nodes list until exhausted;
+			// Do not insert appendix
+			write_appendix = false;
+			let index =
+				final_nodes.iter().position(|x| x == &node_path).unwrap();
+			final_nodes.remove(index);
+		} else if final_nodes.is_empty() && write_appendix == false {
+			// Insert appendix only first time final nodes list is exhausted;
+			// Do not insert appendix thereafter
+			write_appendix = true;
+			file
+				.write_all(b"\n\\appendix\n\\section{Appendix}\n\n")
+				.expect("");
+		}
+
 		// Write source YAML file name
 		if options.yaml == true {
 			file.write_all(b"\\begin{verbatim}\n").expect("");

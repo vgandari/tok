@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-/// Compile PDF from generated tex file "zzz.tex"
+/// Node info for constructing tree
 pub struct Node<T> {
 	/// Flag for topological sort
 	discovered: bool,

@@ -79,7 +79,8 @@ fn main() {
 	println!("=====================================");
 
 	// Write text stored in nodes to tex file
-	write_to_tex(options, &sorted_nodes);
+	let mut files = options.files.clone();
+	write_to_tex(options, &sorted_nodes, &mut files);
 	write_bib(&sorted_nodes);
 	println!(
 		"Time to generate tex file: {} ms.",
