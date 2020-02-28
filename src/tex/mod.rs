@@ -498,7 +498,7 @@ pub fn write_to_tex(
 			for it in node.borrow().data().q.clone() {
 				file.write_all(b"\\item ").expect("");
 				file.write_all(it.as_bytes()).expect("");
-				file.write_all(b"\\n").expect("");
+				file.write_all(b"\n").expect("");
 			}
 			if node.borrow().data().q.len() > 0 {
 				file.write_all(b"\\end{itemize}\n").expect("");
