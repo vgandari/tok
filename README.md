@@ -88,7 +88,8 @@ that directory is in your PATH.
 
 ## Usage
 
-If you would like to learn how `tok` works, see [How It Works]() below.
+If you would like to learn how `tok` works, see
+[How It Works](#how-tok-works) below.
 You can try out `tok` on an existing repository
 [here](https://github.com/vgandari/everything).
 
@@ -327,7 +328,7 @@ first is a better strategy to make/show progress early in a project's
 lifetime, as larger tasks are typically larger sources of delay.
 
 (For more information about supported YAML keys, see the section on
-[Writing YAML Files]().)
+[Writing YAML Files](#writing-yaml-files).)
 
 Finally, because, each topic is (ideally) written independent of
 context, `tok` allows a user (reader) to customize the organization of
@@ -336,7 +337,7 @@ without changing the dependency relationships defined in the YAML files'
 `after` and `before` keys.
 
 (For more information about supported command line options, see the
-section on [Usage](#Usage).)
+section on [Usage](#usage).)
 
 ## Contributing
 
