@@ -73,28 +73,28 @@ pub fn write_to_tex(
 		include_str!("defaults/default_backmatter.tex");
 
 	// choose preamble
-	let preamble: String = if Path::new("texinput/preamble.tex").is_file()
-	{
-		let mut file =
-			File::open("texinput/preamble.tex").expect("Can't open file!");
-		let mut contents = String::new();
-		file
-			.read_to_string(&mut contents)
-			.expect("Cannot read data");
-		contents
-	} else {
-		println!("Using default preamble");
-		DEFAULT_PREAMBLE.to_string()
-	};
-	// choose frontmatter
-	let frontmatter: String =
-		if Path::new("texinput/frontmatter.tex").is_file() {
-			let mut file = File::open("texinput/frontmatter.tex")
-				.expect("Can't open file!");
+	let preamble: String =
+		if Path::new("../texinput/preamble.tex").is_file() {
+			let mut file = File::open("../texinput/preamble.tex")
+				.expect("Cannot read preamble");
 			let mut contents = String::new();
 			file
 				.read_to_string(&mut contents)
-				.expect("Cannot read data");
+				.expect("Cannot read to string");
+			contents
+		} else {
+			println!("Using default preamble");
+			DEFAULT_PREAMBLE.to_string()
+		};
+	// choose frontmatter
+	let frontmatter: String =
+		if Path::new("../texinput/frontmatter.tex").is_file() {
+			let mut file = File::open("../texinput/frontmatter.tex")
+				.expect("Cannot read frontmatter");
+			let mut contents = String::new();
+			file
+				.read_to_string(&mut contents)
+				.expect("Cannot read to string");
 			contents
 		} else {
 			println!("Using default frontmatter");
@@ -102,13 +102,13 @@ pub fn write_to_tex(
 		};
 	// choose backmatter
 	let backmatter: String =
-		if Path::new("texinput/backmatter.tex").is_file() {
-			let mut file = File::open("texinput/backmatter.tex")
-				.expect("Can't open file!");
+		if Path::new("../texinput/backmatter.tex").is_file() {
+			let mut file = File::open("../texinput/backmatter.tex")
+				.expect("Cannot read backmatter");
 			let mut contents = String::new();
 			file
 				.read_to_string(&mut contents)
-				.expect("Cannot read data");
+				.expect("Cannot read to string");
 			contents
 		} else {
 			println!("Using default backmatter");
