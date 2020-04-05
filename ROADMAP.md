@@ -56,6 +56,11 @@
 - [x] `src` key that appends bibtex format references to `.bib` file
 - [x] appendix (all successor nodes that are not added to tree)
 
+### VSCode
+
+- [ ] Highlight YAML strings using LaTeX syntax highlighting
+      https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide
+
 ### Functionality
 
 - [ ] generate chapters, sections, subsections, etc.
@@ -107,6 +112,8 @@
 
 ### Interface
 
+- [ ] Infer `env`, `label`, `wiki` from file name; maybe `nowiki` as
+      well (add a 0 to the end of the file name?)
 - [ ] Config file (`.tok` in document project root)
 - [ ] Option: Exclude successors that are not predecessors
 - [ ] Option: Put successors that are not predecessors in appendix
@@ -150,6 +157,8 @@
 
 ### Keys to Add Later
 
+- [ ] why: include motivation for introducing current topic; keeps
+      motivation and discussion separate
 - [ ] sec: Section title if section is generated
 - [ ] an: analogies
 - [ ] nowiki boolean key suppresses wiki links in case you know there is
