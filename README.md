@@ -199,7 +199,6 @@ Name equations using `\label{eq:<path>__<name>}`, replacing `<path>`
 with the path to the current file, and `<name>` with the name you would
 like to use for this equation.
 
-
 ### Specific to `tok`
 
 - Don't put everything in one file.
@@ -327,33 +326,6 @@ manging a project, where completing tasks considered "low hanging fruit"
 first is a better strategy to make/show progress early in a project's
 lifetime, as larger tasks are typically larger sources of delay.
 
-
-## For Authors: Key Principles
-
-The same way LaTeX is designed to free the author from worrying about
-formatting a document and concentrate on content and organization, `tok`
-is designed with the intent to free the author from _organization_ and
-concentrate on content.
-
-This is achieved by forcing the author to write about topics in
-isolation, clearly, and independent of context.
-
-The author only needs to keep track of dependency relationships between
-topics.
-The author does this by writing about a single topic in a YAML file that
-holds information about the LaTeX environment in use (e.g. if the topic
-is a definition or a theorem, `tok` will select the appropriate LaTeX
-environment) with the `env` key.
-The `after` (for predecessor paths) and `before` (for successor paths)
-keys contain a sequence of other YAML files that must precede the
-durrent topic or come after the topic in the final textbook.
-
-By using `after` and `before`, there is no need to think about how to
-organize a document for readers.
-Also, depending on which file names `tok` receives as arguments, the
-question of what to include and what to leave out for a given set of
-topics is answered.
-
 (For more information about supported YAML keys, see the section on
 [Writing YAML Files]().)
 
@@ -364,11 +336,7 @@ without changing the dependency relationships defined in the YAML files'
 `after` and `before` keys.
 
 (For more information about supported command line options, see the
-section on [Usage]().)
-
-
-
-
+section on [Usage](#Usage).)
 
 ## Contributing
 
