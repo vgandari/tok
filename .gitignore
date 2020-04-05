@@ -12,6 +12,7 @@
 *.unc*
 cmake-build-debug/
 build/
+target/
 Debug/
 Release/
 CMakeCache.txt

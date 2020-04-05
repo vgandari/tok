@@ -9,16 +9,20 @@ use std::{
 };
 
 pub fn compile_pdf() {
-	let latex_args = ["-output-directory=output", "output/main.tex"];
+	// set output directory for tex file
+	let latex_args =
+		["-output-directory=../output", "../output/main.tex"];
 	let mut latex_cmd = Command::new("xelatex");
 	latex_cmd.args(&latex_args);
+
+	// compile
 	println!("Compiling PDF ...");
 	println!("Running XeLaTeX (1 of 3) ...");
 	let _ = latex_cmd.output().expect("xelatex command failed to start");
 	println!("Running BibTeX ...");
 	let _ = Command::new("bibtex")
-		.arg("main.aux")
-		.current_dir("./output")
+		.arg("../output/main.aux")
+		// .current_dir("../output")
 		.output()
 		.expect("bibtex failed to start");
 	println!("Running XeLaTeX (2 of 3) ...");
@@ -54,13 +58,11 @@ pub fn write_to_tex(
 	final_nodes: &mut Vec<String>,
 ) {
 	// generate tex file
-	let mut mkdir_cmd = Command::new("mkdir");
-	mkdir_cmd.arg("output");
-	let _output = mkdir_cmd.output().expect("error");
-	let path = Path::new("output/main.tex");
+	let path = Path::new("../output/main.tex");
 
 	// Open a file in write-only mode, returns `io::Result<File>`
-	let mut file = File::create(&path).expect("could not create file");
+	let mut file =
+		File::create(&path).expect("could not create tex file");
 
 	println!("Writing tex file ...");
 	const DEFAULT_PREAMBLE: &'static str =
@@ -504,6 +506,12 @@ pub fn write_to_tex(
 				file.write_all(b"\\end{itemize}\n").expect("");
 			}
 		}
+
+		// Write headings that follow node
+		let heading = node.borrow().data().heading();
+		if heading.is_empty() == false {
+			file.write_all(heading.as_bytes()).expect("");
+		}
 	}
 
 	// Write backmatter
@@ -513,13 +521,13 @@ pub fn write_to_tex(
 
 /// Generate BibTeX file from sources
 pub fn write_bib(sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>) {
-	let path = Path::new("output/main.bib");
+	let path = Path::new("../output/main.bib");
 	let mut file = File::create(&path).expect("could not create file");
 	let mut references: Vec<String> = vec![];
 	for n in sorted_nodes {
 		for src in n.borrow().data().src.clone() {
 			references.push(src.clone());
-			references.sort();
+			references.sort_unstable();
 			references.dedup();
 		}
 	}
@@ -530,4 +538,37 @@ pub fn write_bib(sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>) {
 	// This is to ensure that the file exists and LaTeX doesn't fail to
 	// compile
 	file.write_all(b"\n").expect("");
+}
+
+/// Add heading info to node
+pub fn add_heading<YamlData>(
+	node: Rc<RefCell<Node<YamlData>>>,
+	heading: String,
+	heading_depth: usize,
+) {
+	let mut s = (match heading_depth {
+		0 => "\\part{",
+		1 => "\\section{",
+		2 => "\\subsection{",
+		4 => "\\subsubsection{",
+		5 => "\\paragraph{",
+		6 => "\\chapter{",
+		_ => "",
+	})
+	.to_string();
+	s += &heading;
+	s += &"}\n".to_string();
+}
+
+/// Insert headings based on ____
+pub fn insert_headings<T>(
+	a: usize,
+	b: usize,
+	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>,
+	heading_counts: [usize; 5],
+	heading_depth: usize,
+) {
+	if heading_depth < 6 {
+		let heading = sorted_nodes[a].borrow().data().heading();
+	}
 }

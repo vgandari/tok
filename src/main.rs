@@ -1,4 +1,6 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{
+	cell::RefCell, collections::HashMap, fs, process::Command, rc::Rc,
+};
 #[macro_use]
 extern crate clap;
 use clap::App;
@@ -77,6 +79,31 @@ fn main() {
 		println!("{}", n.borrow().path);
 	}
 	println!("=====================================");
+	// make directories for output
+	fs::create_dir_all("../output")
+		.expect("could not create output directory");
+	let mut mkdir_cmd = Command::new("mkdir");
+	let mkdir_code_args = ["../output/code/"];
+	let mkdir_images_args = ["../output/images/"];
+	mkdir_cmd
+		.arg("../output")
+		.output()
+		.expect("Could not create output/ directory");
+	mkdir_cmd
+		.args(&mkdir_code_args)
+		.output()
+		.expect("Could not create output/code/ directory");
+	mkdir_cmd
+		.args(&mkdir_images_args)
+		.output()
+		.expect("Could not create output/images directory");
+
+	// copy directories for figures, snippets, etc.
+	let cp_code_args = ["-rf", "../code/", "output/code/"];
+	let cp_images_args = ["-rf", "../images/", "output/images/"];
+	let mut cp_cmd = Command::new("cp");
+	cp_cmd.args(&cp_code_args);
+	cp_cmd.args(&cp_images_args);
 
 	// Write text stored in nodes to tex file
 	let mut files = options.files.clone();

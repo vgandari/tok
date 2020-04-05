@@ -9,6 +9,8 @@ pub struct Node<T> {
 	/// Number of successors (used for breaking cycles in topological
 	/// sort)
 	num_successors: u64,
+	/// Number of predecessors (used for inserting headings)
+	// num_predecessors: u64,
 	/// Cost of this node; used for computing tree cost; uses length of
 	/// text string as heuristic for how long it takes to master the
 	/// content provided in this node
@@ -96,6 +98,10 @@ impl<T> Node<T> {
 		self.predecessors.len()
 	}
 
+	pub fn num_predecessors_fast(&self) -> usize {
+		self.predecessors.len()
+	}
+
 	pub fn dedup_predecessors(&mut self) {
 		self
 			.predecessors
@@ -136,12 +142,12 @@ impl<T> Node<T> {
 	}
 
 	pub fn dedup_after(&mut self) {
-		self.after.sort();
+		self.after.sort_unstable();
 		self.after.dedup();
 	}
 
 	pub fn dedup_before(&mut self) {
-		self.before.sort();
+		self.before.sort_unstable();
 		self.before.dedup();
 	}
 
