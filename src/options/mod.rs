@@ -1,5 +1,7 @@
 pub struct Options {
 	pub files: Vec<String>,
+	pub title: String,
+	pub author: String,
 	pub yaml: bool,
 	pub reverse: bool,
 	pub show_wiki: bool,
@@ -18,6 +20,8 @@ impl Options {
 	pub fn new(matches: clap::ArgMatches) -> Self {
 		Options {
 			files: matches.values_of_lossy("FILES").unwrap(),
+			title: matches.value_of("title").unwrap_or("").to_string(),
+			author: matches.value_of("author").unwrap_or("").to_string(),
 			reverse: matches.is_present("reverse"),
 			yaml: matches.is_present("yaml"),
 			show_wiki: matches.is_present("wiki"),

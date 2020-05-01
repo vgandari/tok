@@ -57,6 +57,7 @@
 - [x] appendix (all successor nodes that are not added to tree)
 - [x] Infer `env`, `label`, ~~`wiki`~~ from file name; ~~maybe `nowiki`
       as well (add a 0 to the end of the file name?)~~
+- [x] Set title, author from command line
 
 ### Functionality
 

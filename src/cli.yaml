@@ -7,6 +7,14 @@ args:
       required: true
       multiple: true
       help: Files to read
+  - title:
+      long: title
+      help: Title for document generated
+      takes_value: true
+  - author:
+      long: author
+      help: Author of document generated
+      takes_value: true
   - config:
       short: c
       long: config

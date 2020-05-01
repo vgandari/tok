@@ -115,6 +115,21 @@ pub fn write_to_tex(
 			DEFAULT_BACKMATTER.to_string()
 		};
 
+	// Write title
+	file.write_all(b"\\title{").expect("");
+	file.write_all(options.title.as_bytes()).expect("");
+	file.write_all(b"}\n").expect("");
+
+	// Write author
+	file.write_all(b"\\author{").expect("");
+	file.write_all(options.author.as_bytes()).expect("");
+	file.write_all(b"}\n").expect("");
+
+	// Write date
+	file.write_all(b"\\date{").expect("");
+	// file.write_all(options.title.as_bytes()).expect("");
+	file.write_all(b"}\n").expect("");
+
 	// Write preamble to file, begin document, and write frontmatter
 	file.write_all(preamble.as_bytes()).expect("");
 	file.write_all(b"\n\n").expect("");
