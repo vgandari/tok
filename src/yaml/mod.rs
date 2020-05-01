@@ -4,7 +4,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::node::Node;
 use serde_yaml::Value;
-
+extern crate inflector;
+use inflector::Inflector;
 pub fn read_from_yaml(contents: &String) -> YamlNode {
 	serde_yaml::from_str(contents).unwrap()
 }
@@ -17,6 +18,33 @@ pub fn update_fields(
 	// store content in node
 	let node = Node::new(filename, YamlData::new());
 	let mut data = YamlData::new();
+
+	// Extract environment from filename
+	let first_underscore = filename.find('_').unwrap_or(0);
+	data.env = if first_underscore > 0 {
+		filename[0..first_underscore].to_string()
+	} else {
+		"".to_string()
+	};
+
+	// Extract label from filename
+	data.label = {
+		// Exclude environment
+		let mut label: String = if first_underscore > 0 {
+			filename[first_underscore + 1..].to_string()
+		} else {
+			filename.to_string()
+		};
+		// Remove file extension
+		let file_extension_start = label.find('.').unwrap_or(0);
+		label = label[0..file_extension_start].to_string();
+		// Replace underscores with spaces
+		label = str::replace(label.as_str(), "_", " ");
+		// TODO: Change to title case
+		let title_case_label = label.to_title_case();
+		title_case_label
+	};
+
 	for (k, v) in yaml_content.pairs {
 		match k.as_ref() {
 			"after" => {
@@ -25,8 +53,16 @@ pub fn update_fields(
 			"before" => {
 				node.borrow_mut().before = serde_yaml::from_value(v).expect("")
 			}
-			"label" => data.label = serde_yaml::from_value(v).expect(""),
-			"env" => data.env = serde_yaml::from_value(v).expect(""),
+			"label" => {
+				// If user supplied label different from what is in filename,
+				// overwrite
+				let label_in_yaml_file: String =
+					serde_yaml::from_value(v.clone()).expect("");
+				if label_in_yaml_file.is_empty() == false {
+					data.label = serde_yaml::from_value(v).expect("");
+				}
+			}
+			// "env" => data.env = serde_yaml::from_value(v).expect(""),
 			"lang" => data.lang = serde_yaml::from_value(v).expect(""),
 			"pre" => data.pre = serde_yaml::from_value(v).expect(""),
 			"main" => data.main = serde_yaml::from_value(v).expect(""),

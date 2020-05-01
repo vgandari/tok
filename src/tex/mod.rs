@@ -155,7 +155,7 @@ pub fn write_to_tex(
 		}
 
 		// Write label if env is unspecified
-		if node.borrow().data().env.is_empty() == true
+		if node.borrow().data().env.as_str() == "plain"
 			|| node.borrow().data().env.as_str() == "checked"
 			|| node.borrow().data().env.as_str() == "unchecked"
 		{
@@ -235,7 +235,7 @@ pub fn write_to_tex(
 			// Motivation
 			"mot" => (),
 			// Abstract
-			"abstract" => {
+			"abs" => {
 				if options.crib == false {
 					file.write_all(b"\\begin{abstract}\n").expect("");
 					file
