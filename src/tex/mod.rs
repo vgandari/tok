@@ -115,6 +115,10 @@ pub fn write_to_tex(
 			DEFAULT_BACKMATTER.to_string()
 		};
 
+	// Write preamble to file
+	file.write_all(preamble.as_bytes()).expect("");
+	file.write_all(b"\n\n").expect("");
+
 	// Write title
 	file.write_all(b"\\title{").expect("");
 	file.write_all(options.title.as_bytes()).expect("");
@@ -127,12 +131,10 @@ pub fn write_to_tex(
 
 	// Write date
 	file.write_all(b"\\date{").expect("");
-	// file.write_all(options.title.as_bytes()).expect("");
 	file.write_all(b"}\n").expect("");
 
-	// Write preamble to file, begin document, and write frontmatter
-	file.write_all(preamble.as_bytes()).expect("");
-	file.write_all(b"\n\n").expect("");
+	// Write frontmatter to file
+	file.write_all(b"\n").expect("");
 	file.write_all(b"\\begin{document}").expect("");
 	file.write_all(b"\n\n").expect("");
 	if frontmatter.is_empty() == false {
