@@ -7,7 +7,9 @@ use serde_yaml::Value;
 extern crate inflector;
 use inflector::Inflector;
 pub fn read_from_yaml(contents: &String) -> YamlNode {
-	serde_yaml::from_str(contents).unwrap()
+	let empty_map: HashMap<String, Value> = HashMap::new();
+	let empty_node = YamlNode { pairs: empty_map };
+	serde_yaml::from_str(contents).unwrap_or(empty_node)
 }
 
 /// Update data members based on YAML key/value pairs
