@@ -59,6 +59,10 @@
       as well (add a 0 to the end of the file name?)~~
 - [x] Set title, author from command line
 
+### Bugs
+
+- [ ] If two nodes are listed as 'before' each other, they don't appear.
+
 ### Functionality
 
 - [ ] generate chapters, sections, subsections, etc.
@@ -135,6 +139,7 @@
 
 ### Documentation
 
+- [ ] Create GitHub page
 - [ ] Describe how references to equations work
 - [ ] Provide really good examples of acceptable YAML files
 - [ ] Write guidelines for writing a good YAML file
@@ -153,22 +158,20 @@
 
 ### Keys to Add Later
 
+- [ ] eli5: Explain Like I'm Five, for simple, informal explanations and
+      analogies; good for introductory texts
 - [ ] why: include motivation for introducing current topic; keeps
       motivation and discussion separate
-- [ ] sec: Section title if section is generated
-- [ ] an: analogies
+- [ ] sec: Section title if section is generated (different from label)
 - [ ] nowiki boolean key suppresses wiki links in case you know there is
-      no Wikipedia page available; wiki key has no effect; root node’s
+      no Wikipedia page available; wiki key has no effect; root node's
       nowiki set to false
-- [ ] urls is a HashMap where key is display label and value is URL
+- [ ] urls: HashMap where key is display label and value is URL
       (recommended to include website name and page title in display
       label)
 - [ ] sec key allows custom section/chapter heading title for a
       particular node if that node is determined to require a section
       heading
-- [ ] Change disc to post, pretext to pre
-- [ ] analogy key serves to separate analogies from the rest of text,
-      suppressed by default
 - [ ] ex and eg are not types; they are keys
 - [ ] sol key for solutions
 - [ ] alg, alg2e, and algx for different algorithms environments

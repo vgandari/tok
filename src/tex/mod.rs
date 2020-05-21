@@ -157,8 +157,9 @@ pub fn write_to_tex(
 			final_nodes.remove(index);
 		} else if final_nodes.is_empty() && write_appendix == false {
 			// Insert appendix only first time final nodes list is exhausted;
-			// Do not insert appendix thereafter
-			write_appendix = true;
+			// Do not insert appendix thereafter;
+			// If user suppresses appendix, don't print
+			write_appendix = options.write_appendix;
 			file
 				.write_all(b"\n\\appendix\n\\section{Appendix}\n\n")
 				.expect("");
@@ -172,17 +173,46 @@ pub fn write_to_tex(
 		}
 
 		// Write label if env is unspecified
-		if node.borrow().data().env.as_str() == "plain"
-			|| node.borrow().data().env.as_str() == "checked"
-			|| node.borrow().data().env.as_str() == "unchecked"
-		{
+		if node.borrow().data().env.as_str() == "plain" {
 			if node.borrow().data().label.is_empty() == false {
-				file.write_all(b"\n\\noindent\n{\\bfseries ").expect("");
+				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
 				file
 					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"}\n\n").expect("");
 			}
+		}
+
+		// If environment is a task, print status before "pre" text
+		match node.borrow().data().env.as_str() {
+			// Task
+			"task" => {
+				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
+				file
+					.write_all(node.borrow().data().label.as_bytes())
+					.expect("");
+				file.write_all(b"}").expect("");
+				file
+					.write_all(b"\\marginpar{$\\square$  \\textbf{TO DO}}\n")
+					.expect("");
+				file
+					.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
+					.expect("");
+			}
+			"done" => {
+				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
+				file
+					.write_all(node.borrow().data().label.as_bytes())
+					.expect("");
+				file.write_all(b"}").expect("");
+				file
+					.write_all(b"\\marginpar{\\ding{51} \\textbf{DONE}}\n")
+					.expect("");
+				file
+					.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
+					.expect("");
+			}
+			_ => (),
 		}
 
 		// Write pretext
@@ -198,35 +228,16 @@ pub fn write_to_tex(
 		// Write main text
 		match node.borrow().data().env.as_str() {
 			// Task
-			"unchecked" => {
-				file
-					.write_all(b"\\noindent\n\\begin{verbatim}\n")
-					.expect("");
-				file.write_all(node.borrow().path.as_bytes()).expect("");
-				file.write_all(b"\n\\end{verbatim}\n\n").expect("");
-				file.write_all(b"\\noindent\\begin{Form}").expect("");
-				file.write_all(b"\\CheckBox[]{} ").expect("");
+			"task" => {
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\n\\end{Form}\n").expect("");
 			}
 			// Completed Task
-			"checked" => {
-				file
-					.write_all(b"\\noindent\n\\begin{verbatim}\n")
-					.expect("");
-				file.write_all(node.borrow().path.as_bytes()).expect("");
-				file.write_all(b"\n\\end{verbatim}\n").expect("");
-				file
-					.write_all(node.borrow().data().pre.as_bytes())
-					.expect("");
-				file.write_all(b"\\noindent\n\\begin{Form}").expect("");
-				file.write_all(b"\\CheckBox[checked]{} ").expect("");
+			"done" => {
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\n\\end{Form}\n").expect("");
 				if node.borrow().data().duration > 1 {
 					file.write_all(b"\n{\\bfseries Task Duration: ").expect("");
 					file

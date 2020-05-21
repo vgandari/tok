@@ -42,7 +42,6 @@ pub fn update_fields(
 		label = label[0..file_extension_start].to_string();
 		// Replace underscores with spaces
 		label = str::replace(label.as_str(), "_", " ");
-		// TODO: Change to title case
 		let title_case_label = label.to_title_case();
 		title_case_label
 	};

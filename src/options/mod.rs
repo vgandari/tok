@@ -14,6 +14,7 @@ pub struct Options {
 	pub draft: bool,
 	pub generalizations_before: bool,
 	pub depth: i32,
+	pub write_appendix: bool,
 }
 
 impl Options {
@@ -39,6 +40,7 @@ impl Options {
 				.unwrap_or("-1")
 				.parse::<i32>()
 				.unwrap_or(-1),
+			write_appendix: true,
 		}
 	}
 }
