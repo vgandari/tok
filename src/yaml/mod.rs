@@ -4,8 +4,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::node::Node;
 use serde_yaml::Value;
-extern crate inflector;
-use inflector::Inflector;
+use titlecase::titlecase;
+
 pub fn read_from_yaml(contents: &String) -> YamlNode {
 	let empty_map: HashMap<String, Value> = HashMap::new();
 	let empty_node = YamlNode { pairs: empty_map };
@@ -17,8 +17,11 @@ pub fn update_fields(
 	filename: &String,
 	yaml_content: YamlNode,
 ) -> Rc<RefCell<Node<YamlData>>> {
+	// remove leading "./";
+	// used when VSCode ionutvmi.path-autocomplete is used for files
+	let clean_filename = filename.replace("./", "");
 	// store content in node
-	let node = Node::new(filename, YamlData::new());
+	let node = Node::new(&clean_filename, YamlData::new());
 	let mut data = YamlData::new();
 
 	// Extract environment from filename
@@ -40,10 +43,8 @@ pub fn update_fields(
 		// Remove file extension
 		let file_extension_start = label.find('.').unwrap_or(0);
 		label = label[0..file_extension_start].to_string();
-		// Replace underscores with spaces
-		label = str::replace(label.as_str(), "_", " ");
-		let title_case_label = label.to_title_case();
-		title_case_label
+		// Replace underscores with spaces, change to titlecase
+		titlecase(&label.replace("_", " ")[..])
 	};
 
 	for (k, v) in yaml_content.pairs {

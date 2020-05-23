@@ -18,7 +18,7 @@ pub fn compile_pdf() {
 	// compile
 	println!("Compiling PDF ...");
 	println!("Running XeLaTeX (1 of 3) ...");
-	let _ = latex_cmd.output().expect("xelatex command failed to start");
+	let _ = latex_cmd.output().expect("xelatex command failed to start; it may not be installed");
 	println!("Running BibTeX ...");
 	let _ = Command::new("bibtex")
 		.arg("../output/main.aux")
@@ -26,9 +26,9 @@ pub fn compile_pdf() {
 		.output()
 		.expect("bibtex failed to start");
 	println!("Running XeLaTeX (2 of 3) ...");
-	let _ = latex_cmd.output().expect("xelatex command failed to start");
+	let _ = latex_cmd.output().expect("xelatex command failed to start; it may not be installed");
 	println!("Running XeLaTeX (3 of 3) ...");
-	let _ = latex_cmd.output().expect("xelatex command failed to start");
+	let _ = latex_cmd.output().expect("xelatex command failed to start; it may not be installed");
 	println!("Finished compiling PDF.");
 	println!("Check logfiles for any errors.");
 }
