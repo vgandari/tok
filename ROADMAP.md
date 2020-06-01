@@ -50,24 +50,24 @@
 - [x] Pass immutable reference to options struct between functions
       answer in future drafts
 - [x] q is a sequence (Vec<String>) storing questions for author to
-- [x] src is a sequence of sources in BibTeX format (need to
+- [x] refs is a sequence of sources in BibTeX format (need to
       eliminate duplicates in .bib file)
 - [x] add option to print file names even if not generating a task list
-- [x] `src` key that appends bibtex format references to `.bib` file
+- [x] `refs` key that appends bibtex format references to `.bib` file
 - [x] appendix (all successor nodes that are not added to tree)
 - [x] Infer `env`, `label`, ~~`wiki`~~ from file name; ~~maybe `nowiki`
       as well (add a 0 to the end of the file name?)~~
 - [x] Set title, author from command line
 - [x] Set nowiki in filename
-- [x] Add --no-appendix
+- [x] Add --no-appendix option
+- [x] Add output option
 
 ### Bugs
 
 - [ ] If two nodes are listed as 'before' each other, they don't appear.
 - [ ] Questions list is duplicated
 - [ ] Whitespace for Wikipedia links and URLs is weird
-- [ ] Some environments ignored (e.g. abstract)
-  - [ ] Add environments structure for pattern matching?
+- [ ] Add environments structure for pattern matching?
 
 ### Functionality
 

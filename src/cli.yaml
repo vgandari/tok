@@ -15,10 +15,14 @@ args:
       long: author
       help: Set author of document generated
       takes_value: true
-  - title:
+  - write_appendix:
       long: no-appendix
       help: Do not include "Appendix" heading
       takes_value: false
+  - output:
+      long: output
+      help: Path to output PDF, default is ../output/main.pdf
+      takes_value: true
   - config:
       short: c
       long: config
@@ -53,13 +57,6 @@ args:
       help: |
         [INOP] Include examples in textbook (default is hidden)
       takes_value: false
-  - output:
-      short: o
-      long: output
-      help: |
-        [INOP] Choose output file name for .tex and .pdf
-        files (default is 'zzz')
-      takes_value: true
   - preamble:
       short: P
       long: preamble

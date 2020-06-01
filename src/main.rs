@@ -73,12 +73,12 @@ fn main() {
 	root.borrow_mut().sort_predecessor_branches(options.reverse);
 	// Sort nodes in order that their content will be printed to pdf
 	let sorted_nodes = topological_sort(root.clone());
-	println!("=====================================");
-	println!("Result of topological sort (reversed)");
-	for n in sorted_nodes.iter() {
+	println!("========================================");
+	println!("Sequence of files after topological sort");
+	for n in sorted_nodes.iter().rev() {
 		println!("{}", n.borrow().path);
 	}
-	println!("=====================================");
+	println!("========================================");
 	// make directories for output
 	fs::create_dir_all("../output")
 		.expect("could not create output directory");
@@ -107,14 +107,14 @@ fn main() {
 
 	// Write text stored in nodes to tex file
 	let mut files = options.files.clone();
-	write_to_tex(options, &sorted_nodes, &mut files);
+	write_to_tex(&options, &sorted_nodes, &mut files);
 	write_bib(&sorted_nodes);
 	println!(
 		"Time to generate tex file: {} ms.",
 		(start_time.to(PreciseTime::now())).num_milliseconds()
 	);
-	println!("=====================================");
+
 	// Compile PDF
-	compile_pdf();
+	compile_pdf(&options);
 	println!("Finished.");
 }
