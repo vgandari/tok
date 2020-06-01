@@ -64,7 +64,6 @@ pub fn update_fields(
 					data.label = serde_yaml::from_value(v).expect("");
 				}
 			}
-			// "env" => data.env = serde_yaml::from_value(v).expect(""),
 			"lang" => data.lang = serde_yaml::from_value(v).expect(""),
 			"pre" => data.pre = serde_yaml::from_value(v).expect(""),
 			"main" => data.main = serde_yaml::from_value(v).expect(""),
@@ -195,11 +194,6 @@ pub struct YamlData {
 	pub case: Vec<String>,
 	/// List of references that will be added to .bib file for this node
 	pub src: Vec<String>,
-	/// Headings and subheadings that follow this node in the document
-	heading: String,
-	/// Name to give section that culminates in this node; will default
-	/// to label if empty
-	sec: String,
 }
 
 impl YamlData {
@@ -231,19 +225,6 @@ impl YamlData {
 			gen: vec![],
 			case: vec![],
 			src: vec![],
-			sec: String::from(""),
-			heading: String::from(""),
 		}
-	}
-
-	pub fn heading(&self) -> String {
-		self.heading.clone()
-	}
-
-	pub fn append_heading(
-		&mut self,
-		s: &String,
-	) {
-		self.heading += s;
 	}
 }

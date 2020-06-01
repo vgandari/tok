@@ -8,7 +8,7 @@ use std::{
 	rc::Rc,
 };
 
-pub fn compile_pdf() {
+pub fn compile_pdf(options: &Options) {
 	// set output directory for tex file
 	let latex_args =
 		["-output-directory=../output", "../output/main.tex"];
@@ -43,6 +43,16 @@ pub fn compile_pdf() {
 		.expect("xelatex command failed to start; it may not be installed");
 	println!("Finished compiling PDF.");
 	println!("Check logfiles for any errors.");
+
+	if options.output.is_empty() == false {
+		println!("{}", &options.output);
+		let output_path: &str = &options.output[..];
+		let cp_args = ["../output/main.pdf", output_path];
+		let _ = Command::new("cp")
+			.args(&cp_args)
+			.output()
+			.expect("No PDF to copy to output path");
+	}
 }
 
 /// Write proofs; meant for a node that contains text for a theorem
@@ -65,7 +75,7 @@ fn write_proofs(
 
 /// Write text stored in nodes to tex file
 pub fn write_to_tex(
-	options: Options,
+	options: &Options,
 	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>,
 	final_nodes: &mut Vec<String>,
 ) {
@@ -546,12 +556,6 @@ pub fn write_to_tex(
 				file.write_all(b"\\end{itemize}\n").expect("");
 			}
 		}
-
-		// Write headings that follow node
-		let heading = node.borrow().data().heading();
-		if heading.is_empty() == false {
-			file.write_all(heading.as_bytes()).expect("");
-		}
 	}
 
 	// Write backmatter
@@ -579,37 +583,4 @@ pub fn write_bib(sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>) {
 	// This is to ensure that the file exists and LaTeX doesn't fail to
 	// compile
 	file.write_all(b"\n").expect("");
-}
-
-/// Add heading info to node
-pub fn add_heading<YamlData>(
-	node: Rc<RefCell<Node<YamlData>>>,
-	heading: String,
-	heading_depth: usize,
-) {
-	let mut s = (match heading_depth {
-		0 => "\\part{",
-		1 => "\\section{",
-		2 => "\\subsection{",
-		4 => "\\subsubsection{",
-		5 => "\\paragraph{",
-		6 => "\\chapter{",
-		_ => "",
-	})
-	.to_string();
-	s += &heading;
-	s += &"}\n".to_string();
-}
-
-/// Insert headings based on ____
-pub fn insert_headings<T>(
-	a: usize,
-	b: usize,
-	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>,
-	heading_counts: [usize; 5],
-	heading_depth: usize,
-) {
-	if heading_depth < 6 {
-		let heading = sorted_nodes[a].borrow().data().heading();
-	}
 }
