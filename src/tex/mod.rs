@@ -17,18 +17,30 @@ pub fn compile_pdf() {
 
 	// compile
 	println!("Compiling PDF ...");
+
+	// Run XeLaTeX
 	println!("Running XeLaTeX (1 of 3) ...");
-	let _ = latex_cmd.output().expect("xelatex command failed to start; it may not be installed");
+	let _ = latex_cmd
+		.output()
+		.expect("xelatex command failed to start; it may not be installed");
+
+	// BibTeX
 	println!("Running BibTeX ...");
 	let _ = Command::new("bibtex")
-		.arg("../output/main.aux")
-		// .current_dir("../output")
+		.current_dir("../output")
+		.arg("main")
 		.output()
 		.expect("bibtex failed to start");
+
+	// Rerun XeLaTeX
 	println!("Running XeLaTeX (2 of 3) ...");
-	let _ = latex_cmd.output().expect("xelatex command failed to start; it may not be installed");
+	let _ = latex_cmd
+		.output()
+		.expect("xelatex command failed to start; it may not be installed");
 	println!("Running XeLaTeX (3 of 3) ...");
-	let _ = latex_cmd.output().expect("xelatex command failed to start; it may not be installed");
+	let _ = latex_cmd
+		.output()
+		.expect("xelatex command failed to start; it may not be installed");
 	println!("Finished compiling PDF.");
 	println!("Check logfiles for any errors.");
 }
@@ -550,7 +562,8 @@ pub fn write_to_tex(
 /// Generate BibTeX file from sources
 pub fn write_bib(sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>) {
 	let path = Path::new("../output/main.bib");
-	let mut file = File::create(&path).expect("could not create file");
+	let mut file =
+		File::create(&path).expect("could not create .bib file");
 	let mut references: Vec<String> = vec![];
 	for n in sorted_nodes {
 		for src in n.borrow().data().src.clone() {
