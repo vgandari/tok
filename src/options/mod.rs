@@ -40,7 +40,7 @@ impl Options {
 				.unwrap_or("-1")
 				.parse::<i32>()
 				.unwrap_or(-1),
-			write_appendix: true,
+			write_appendix: matches.is_present("no-appendix") == false,
 		}
 	}
 }

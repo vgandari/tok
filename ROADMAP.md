@@ -58,10 +58,16 @@
 - [x] Infer `env`, `label`, ~~`wiki`~~ from file name; ~~maybe `nowiki`
       as well (add a 0 to the end of the file name?)~~
 - [x] Set title, author from command line
+- [x] Set nowiki in filename
+- [x] Add --no-appendix
 
 ### Bugs
 
 - [ ] If two nodes are listed as 'before' each other, they don't appear.
+- [ ] Questions list is duplicated
+- [ ] Whitespace for Wikipedia links and URLs is weird
+- [ ] Some environments ignored (e.g. abstract)
+  - [ ] Add environments structure for pattern matching?
 
 ### Functionality
 
