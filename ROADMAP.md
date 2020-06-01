@@ -61,6 +61,8 @@
 - [x] Set nowiki in filename
 - [x] Add --no-appendix option
 - [x] Add output option
+- [x] eli5: Explain Like I'm Five, for simple, informal explanations and
+      analogies; good for introductory texts
 
 ### Bugs
 
@@ -164,8 +166,6 @@
 
 ### Keys to Add Later
 
-- [ ] eli5: Explain Like I'm Five, for simple, informal explanations and
-      analogies; good for introductory texts
 - [ ] why: include motivation for introducing current topic; keeps
       motivation and discussion separate
 - [ ] sec: Section title if section is generated (different from label)

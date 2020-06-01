@@ -1,8 +1,4 @@
 pub struct Options {
-	pub files: Vec<String>,
-	pub title: String,
-	pub author: String,
-	pub output: String,
 	pub yaml: bool,
 	pub reverse: bool,
 	pub show_wiki: bool,
@@ -14,17 +10,18 @@ pub struct Options {
 	pub exercises: bool,
 	pub draft: bool,
 	pub generalizations_before: bool,
-	pub depth: i32,
 	pub write_appendix: bool,
+	pub eli5: bool,
+	pub depth: i32,
+	pub title: String,
+	pub author: String,
+	pub output: String,
+	pub files: Vec<String>,
 }
 
 impl Options {
 	pub fn new(matches: clap::ArgMatches) -> Self {
 		Options {
-			files: matches.values_of_lossy("FILES").unwrap(),
-			title: matches.value_of("title").unwrap_or("").to_string(),
-			author: matches.value_of("author").unwrap_or("").to_string(),
-			output: matches.value_of("output").unwrap_or("").to_string(),
 			reverse: matches.is_present("reverse"),
 			yaml: matches.is_present("yaml"),
 			show_wiki: matches.is_present("wiki"),
@@ -37,12 +34,17 @@ impl Options {
 			draft: matches.is_present("draft"),
 			generalizations_before: matches
 				.is_present("generalizations_before"),
+			write_appendix: !matches.is_present("no-appendix"),
+			eli5: matches.is_present("eli5"),
 			depth: matches
 				.value_of("depth")
 				.unwrap_or("-1")
 				.parse::<i32>()
 				.unwrap_or(-1),
-			write_appendix: matches.is_present("no-appendix") == false,
+			title: matches.value_of("title").unwrap_or("").to_string(),
+			author: matches.value_of("author").unwrap_or("").to_string(),
+			output: matches.value_of("output").unwrap_or("").to_string(),
+			files: matches.values_of_lossy("FILES").unwrap(),
 		}
 	}
 }

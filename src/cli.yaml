@@ -23,6 +23,10 @@ args:
       long: output
       help: Path to output PDF, default is ../output/main.pdf
       takes_value: true
+  - eli5:
+      long: eli5
+      help: Include simple explanations/"Explain Like I'm Five"; OFF by default
+      takes_value: false
   - config:
       short: c
       long: config

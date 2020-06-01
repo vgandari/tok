@@ -65,6 +65,7 @@ pub fn update_fields(
 				}
 			}
 			"lang" => data.lang = serde_yaml::from_value(v).expect(""),
+			"eli5" => data.eli5 = serde_yaml::from_value(v).expect(""),
 			"pre" => data.pre = serde_yaml::from_value(v).expect(""),
 			"main" => data.main = serde_yaml::from_value(v).expect(""),
 			"post" => data.post = serde_yaml::from_value(v).expect(""),
@@ -128,8 +129,10 @@ pub struct YamlNode {
 pub struct YamlData {
 	/// Name as it should appear in textbook
 	pub label: String,
-	/// LaTeX environment (if defined)
+	/// LaTeX environment
 	pub env: String,
+	/// "Explain Like I'm Five" explanation; separate from all other text
+	pub eli5: String,
 	/// Text to add to LaTeX file before main content;
 	/// remains outside any environment;
 	/// useful for providing brief introduction to the topic
@@ -201,6 +204,7 @@ impl YamlData {
 		YamlData {
 			label: String::from(""),
 			env: String::from(""),
+			eli5: String::from(""),
 			pre: String::from(""),
 			main: String::from(""),
 			listtext: String::from(""),

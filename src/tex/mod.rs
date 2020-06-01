@@ -237,9 +237,19 @@ pub fn write_to_tex(
 			_ => (),
 		}
 
+		// Write ELI5 text
+		if options.eli5 == true
+			&& node.borrow().data().eli5.is_empty() == false
+		{
+			file
+				.write_all(node.borrow().data().eli5.as_bytes())
+				.expect("");
+			file.write_all(b"\n").expect("");
+		}
+
 		// Write pretext
-		if (options.crib == false)
-			& (node.borrow().data().pre.is_empty() == false)
+		if options.crib == false
+			&& node.borrow().data().pre.is_empty() == false
 		{
 			file
 				.write_all(node.borrow().data().pre.as_bytes())
