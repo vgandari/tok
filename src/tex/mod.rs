@@ -13,7 +13,7 @@ pub fn compile_pdf(options: &Options) {
 	let latex_args =
 		["-output-directory=../output", "../output/main.tex"];
 	let mut latex_cmd = Command::new("xelatex");
-	latex_cmd.args(&latex_args);
+	latex_cmd.current_dir("../output").args(&latex_args);
 
 	// compile
 	println!("Compiling PDF ...");
@@ -142,18 +142,22 @@ pub fn write_to_tex(
 	file.write_all(b"\n\n").expect("");
 
 	// Write title
-	file.write_all(b"\\title{").expect("");
-	file.write_all(options.title.as_bytes()).expect("");
-	file.write_all(b"}\n").expect("");
+	if options.title.is_empty() == false {
+		file.write_all(b"\\title{").expect("");
+		file.write_all(options.title.as_bytes()).expect("");
+		file.write_all(b"}\n").expect("");
+	}
 
 	// Write author
-	file.write_all(b"\\author{").expect("");
-	file.write_all(options.author.as_bytes()).expect("");
-	file.write_all(b"}\n").expect("");
+	if options.author.is_empty() == false {
+		file.write_all(b"\\author{").expect("");
+		file.write_all(options.author.as_bytes()).expect("");
+		file.write_all(b"}\n").expect("");
+	}
 
 	// Write date
-	file.write_all(b"\\date{").expect("");
-	file.write_all(b"}\n").expect("");
+	// file.write_all(b"\\date{").expect("");
+	// file.write_all(b"}\n").expect("");
 
 	// Write frontmatter to file
 	file.write_all(b"\n").expect("");
@@ -301,7 +305,7 @@ pub fn write_to_tex(
 					file
 						.write_all(node.borrow().data().main.as_bytes())
 						.expect("");
-					file.write_all(b"\\end{abstract}\n").expect("");
+					file.write_all(b"\\end{abstract}\n\n").expect("");
 				}
 			}
 			// Definition

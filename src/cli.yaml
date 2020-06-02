@@ -53,7 +53,7 @@ args:
       short: e
       long: engine
       help: |
-        [INOP] Choose LaTeX engine (default is xetex)
+        [INOP] Choose LaTeX engine (default is xelatex)
       takes_value: false
   - examples:
       short: g

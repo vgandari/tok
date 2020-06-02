@@ -147,6 +147,9 @@ You can customize the preamble, frontmatter, and backmatter in
 `./texinput/preamble.tex`, `./texinput/frontmatter.tex`, and
 `./texinput/backmatter.tex`, respectively.
 
+You can also include any `.cls` and `.bst` files in the `texinput`
+directory and `tok` will automatically copy these files into `output`.
+
 You can also modify `./output/main.tex` directly and reprocess it using
 the LaTeX engine of your choosing to generate a PDF if `xelatex` does
 not produce the desired output.

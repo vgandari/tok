@@ -21,7 +21,7 @@ extern crate serde_yaml;
 #[macro_use]
 extern crate serde_derive;
 
-fn main() {
+fn main() -> std::io::Result<()> {
 	// Measure duration to output to user
 	let start_time: PreciseTime = PreciseTime::now();
 
@@ -96,14 +96,36 @@ fn main() {
 	mkdir_cmd
 		.args(&mkdir_images_args)
 		.output()
-		.expect("Could not create output/images directory");
+		.expect("Could not create output/images/ directory");
+
+	// #[cfg(target_os = "macos")]
+	// std::os::unix::fs::symlink("../code/", "../output/code/")?;
+	// std::os::unix::fs::symlink("../code/", "../output/images/")?;
+	// #[cfg(target_os = "windows")]
+	// std::os::windows::fs::symlink_dir("../code/", "../output/code/")?;
+	// std::os::windows::fs::symlink_dir("../code/", "../output/images/")?;
 
 	// copy directories for figures, snippets, etc.
-	let cp_code_args = ["-rf", "../code/", "output/code/"];
-	let cp_images_args = ["-rf", "../images/", "output/images/"];
-	let mut cp_cmd = Command::new("cp");
-	cp_cmd.args(&cp_code_args);
-	cp_cmd.args(&cp_images_args);
+	let _cp_cls_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../texinput/*.cls ../output/")
+		.status()
+		.unwrap();
+	let _cp_bst_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../texinput/*.bst ../output/")
+		.status()
+		.unwrap();
+	let _cp_images_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../images/* ../output/images")
+		.status()
+		.unwrap();
+	let _cp_code_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../code/* ../output/code")
+		.status()
+		.unwrap();
 
 	// Write text stored in nodes to tex file
 	let mut files = options.files.clone();
@@ -117,4 +139,5 @@ fn main() {
 	// Compile PDF
 	compile_pdf(&options);
 	println!("Finished.");
+	Ok(())
 }
