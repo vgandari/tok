@@ -1,5 +1,6 @@
 use std::{
-	cell::RefCell, collections::HashMap, fs::File, io::prelude::*, rc::Rc,
+	cell::RefCell, collections::HashMap, env::current_dir, fs::File,
+	io::prelude::*, rc::Rc,
 };
 
 use crate::node::Node;
@@ -44,8 +45,17 @@ pub fn load<T, Y>(
 	// options: &Options,
 ) {
 	if map.contains_key(filename) == false {
-		println!("Reading {}", filename);
-		let mut file = File::open(&filename).expect("Can't open file!");
+		// Removing parent directory path allows user to specify path
+		// relative to YAML file, but tok to search relative to root directory
+		let clean_filename = filename.replace("../", "").replace("./", "");
+
+		println!(
+			"The current directory is {}",
+			current_dir().unwrap().display()
+		);
+		println!("Reading {}", clean_filename);
+		let mut file =
+			File::open(&clean_filename).expect("Can't open file!");
 		let mut contents = String::new();
 		file
 			.read_to_string(&mut contents)

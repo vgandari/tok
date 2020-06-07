@@ -63,9 +63,11 @@
 - [x] Add output option
 - [x] eli5: Explain Like I'm Five, for simple, informal explanations and
       analogies; good for introductory texts
+- [x] Enable organizing nodes in sub directories
 
 ### Bugs
 
+- [ ] `before` nodes are borrowed twice, resulting in panic
 - [ ] If two nodes are listed as 'before' each other, they don't appear.
 - [ ] Questions list is duplicated
 - [ ] Whitespace for Wikipedia links and URLs is weird
@@ -122,6 +124,7 @@
 
 ### Interface
 
+- [ ] Add `--no-pdf` option
 - [ ] Config file (`.tok` in document project root)
 - [ ] Option: Exclude successors that are not predecessors
 - [ ] Option: Put successors that are not predecessors in appendix

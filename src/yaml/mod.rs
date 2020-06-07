@@ -19,15 +19,17 @@ pub fn update_fields(
 ) -> Rc<RefCell<Node<YamlData>>> {
 	// remove leading "./";
 	// used when VSCode ionutvmi.path-autocomplete is used for files
-	let clean_filename = filename.replace("./", "");
+	// Removing parent directory path allows user to specify path
+	// relative to YAML file, but tok to search relative to root directory
+	let clean_filename = filename.replace("../", "").replace("./", "");
 	// store content in node
 	let node = Node::new(&clean_filename, YamlData::new());
 	let mut data = YamlData::new();
 
 	// Extract environment from filename
-	let first_underscore = filename.find('_').unwrap_or(0);
+	let first_underscore = clean_filename.find('_').unwrap_or(0);
 	data.env = if first_underscore > 0 {
-		filename[0..first_underscore].to_string()
+		clean_filename[0..first_underscore].to_string()
 	} else {
 		"".to_string()
 	};
@@ -36,9 +38,9 @@ pub fn update_fields(
 	data.label = {
 		// Exclude environment
 		let mut label: String = if first_underscore > 0 {
-			filename[first_underscore + 1..].to_string()
+			clean_filename[first_underscore + 1..].to_string()
 		} else {
-			filename.to_string()
+			clean_filename.to_string()
 		};
 		// Remove file extension
 		let file_extension_start = label.find('.').unwrap_or(0);

@@ -67,7 +67,7 @@ fn write_proofs(
 			for proof in &node.borrow().data().pfs {
 				file.write_all(b"\n\\begin{proof}\n").expect("");
 				file.write_all(proof.as_bytes()).expect("");
-				file.write_all(b"\\end{proof}\n").expect("");
+				file.write_all(b"\\end{proof}\n\n").expect("");
 			}
 		}
 	}
@@ -155,7 +155,7 @@ pub fn write_to_tex(
 		file.write_all(b"}\n").expect("");
 	}
 
-	// Write date
+	// Write empty date
 	// file.write_all(b"\\date{").expect("");
 	// file.write_all(b"}\n").expect("");
 
@@ -261,6 +261,11 @@ pub fn write_to_tex(
 			file.write_all(b"\n").expect("");
 		}
 
+		// file
+		// 	.write_all(node.borrow().data().label.as_bytes())
+		// 	.expect("");
+		// file.write_all(b"\n\n").expect("");
+
 		// Write main text
 		match node.borrow().data().env.as_str() {
 			// Task
@@ -320,7 +325,7 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\\end{definition}\n").expect("");
+				file.write_all(b"\\end{definition}\n\n").expect("");
 			}
 			// Example
 			"eg" => {
@@ -335,7 +340,7 @@ pub fn write_to_tex(
 					file
 						.write_all(node.borrow().data().main.as_bytes())
 						.expect("");
-					file.write_all(b"\\end{example}\n").expect("");
+					file.write_all(b"\\end{example}\n\n").expect("");
 				}
 			}
 			// Lemma
@@ -350,7 +355,7 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\\end{lemma}\n").expect("");
+				file.write_all(b"\\end{lemma}\n\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
 			}
 			// Theorem
@@ -365,7 +370,7 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\\end{theorem}\n").expect("");
+				file.write_all(b"\\end{theorem}\n\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
 			}
 			// Corollary
@@ -380,7 +385,7 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\\end{corollary}\n").expect("");
+				file.write_all(b"\\end{corollary}\n\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
 			}
 			// Rule
@@ -395,7 +400,7 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\\end{rule}\n").expect("");
+				file.write_all(b"\\end{rule}\n\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
 			}
 			// Fact
@@ -410,7 +415,7 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\\end{fact}\n").expect("");
+				file.write_all(b"\\end{fact}\n\n").expect("");
 				write_proofs(&options, node.clone(), &mut file);
 			}
 			// Remark
@@ -423,7 +428,7 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				file.write_all(b"\\end{remark}").expect("");
+				file.write_all(b"\\end{remark}\n\n").expect("");
 			}
 			// Algorithm
 			"alg" => (),
@@ -446,7 +451,7 @@ pub fn write_to_tex(
 						.write_all(node.borrow().data().listtext.as_bytes())
 						.expect("");
 					file.write_all(b"\n").expect("");
-					file.write_all(b"\\end{lstlisting}\n").expect("");
+					file.write_all(b"\\end{lstlisting}\n\n").expect("");
 				}
 			}
 
