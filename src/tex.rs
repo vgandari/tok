@@ -1,4 +1,4 @@
-use crate::{node::Node, options::Options, yaml::YamlData};
+use crate::{node::Node, options::Options, topic::Topic};
 use std::{
 	cell::RefCell,
 	fs::File,
@@ -59,7 +59,7 @@ pub fn compile_pdf(options: &Options) {
 /// environment
 fn write_proofs(
 	options: &Options,
-	node: Rc<RefCell<Node<YamlData>>>,
+	node: Rc<RefCell<Node<Topic>>>,
 	file: &mut File,
 ) {
 	if options.show_proofs == true {
@@ -76,8 +76,8 @@ fn write_proofs(
 /// Write text stored in nodes to tex file
 pub fn write_to_tex(
 	options: &Options,
-	sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>,
-	final_nodes: &mut Vec<String>,
+	sorted_nodes: &Vec<Rc<RefCell<Node<Topic>>>>,
+	mut final_nodes: Vec<String>,
 ) {
 	// generate tex file
 	let path = Path::new("../output/main.tex");
@@ -583,7 +583,7 @@ pub fn write_to_tex(
 }
 
 /// Generate BibTeX file from sources
-pub fn write_bib(sorted_nodes: &Vec<Rc<RefCell<Node<YamlData>>>>) {
+pub fn write_bib(sorted_nodes: &Vec<Rc<RefCell<Node<Topic>>>>) {
 	let path = Path::new("../output/main.bib");
 	let mut file =
 		File::create(&path).expect("could not create .bib file");

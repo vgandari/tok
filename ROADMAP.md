@@ -64,10 +64,12 @@
 - [x] eli5: Explain Like I'm Five, for simple, informal explanations and
       analogies; good for introductory texts
 - [x] Enable organizing nodes in sub directories
+- [x] Add `no-pdf` option
+- [x] Ensure tree is generated, as opposed to DAG
 
 ### Bugs
 
-- [ ] `before` nodes are borrowed twice, resulting in panic
+- [x] `before` nodes are borrowed twice, resulting in panic
 - [ ] If two nodes are listed as 'before' each other, they don't appear.
 - [ ] Questions list is duplicated
 - [ ] Whitespace for Wikipedia links and URLs is weird

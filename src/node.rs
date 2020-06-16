@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 /// Node info for constructing tree
 pub struct Node<T> {
@@ -26,6 +26,9 @@ pub struct Node<T> {
 	/// Vector of pointers to predecessor nodes; necessary for
 	/// constructing tree; not a YAML key
 	predecessors: Vec<Rc<RefCell<Node<T>>>>,
+	/// Vector of pointers to predecessor nodes; necessary for
+	/// constructing tree; not a YAML key
+	successors: Vec<Rc<RefCell<Node<T>>>>,
 	/// Data contained in this node
 	data: T,
 }
@@ -48,6 +51,7 @@ impl<T> Node<T> {
 		Rc::new(RefCell::new(Node::<T> {
 			path: String::from(filename.clone()),
 			predecessors: vec![],
+			successors: vec![],
 			after: vec![],
 			before: vec![],
 			num_successors: 0,
@@ -102,11 +106,30 @@ impl<T> Node<T> {
 		self.predecessors.len()
 	}
 
+	pub fn num_successors(&mut self) -> usize {
+		self.dedup_successors();
+		self.successors.len()
+	}
+
 	pub fn dedup_predecessors(&mut self) {
 		self
 			.predecessors
 			.sort_by(|a, b| a.borrow().path.cmp(&b.borrow().path));
 		self.predecessors.dedup();
+	}
+
+	pub fn dedup_successors(&mut self) {
+		self
+			.successors
+			.sort_by(|a, b| a.borrow().path.cmp(&b.borrow().path));
+		self.successors.dedup();
+	}
+
+	pub fn push_successor(
+		&mut self,
+		succ: Rc<RefCell<Node<T>>>,
+	) {
+		self.successors.push(succ);
 	}
 
 	pub fn push_predecessor(
@@ -115,6 +138,7 @@ impl<T> Node<T> {
 	) {
 		self.predecessors.push(pred_ref);
 	}
+
 	pub fn predecessors(&self) -> Vec<Rc<RefCell<Node<T>>>> {
 		self.predecessors.clone()
 	}
@@ -151,14 +175,85 @@ impl<T> Node<T> {
 		self.before.dedup();
 	}
 
+	pub fn check_for_predecessor(
+		&self,
+		pred: Rc<RefCell<Node<T>>>,
+	) -> usize {
+		for i in 0..self.predecessors.len() {
+			if self.predecessors[i] == pred {
+				return i;
+			}
+		}
+		self.predecessors.len()
+	}
+
+	pub fn check_for_successor(
+		&self,
+		succ: Rc<RefCell<Node<T>>>,
+	) -> usize {
+		println!("Checking for successors");
+		for i in 0..self.successors.len() {
+			if self.successors[i] == succ {
+				println!("Found {}", succ.borrow().path);
+				return i;
+			}
+		}
+		self.successors.len()
+	}
+
+	pub fn has_predecessor(
+		&self,
+		pred: Rc<RefCell<Node<T>>>,
+	) -> bool {
+		let index = self.check_for_predecessor(pred.clone());
+		if index < self.predecessors.len() {
+			true
+		} else {
+			false
+		}
+	}
+
+	pub fn has_successor(
+		&self,
+		succ: Rc<RefCell<Node<T>>>,
+	) -> bool {
+		let index = self.check_for_predecessor(succ.clone());
+		if index < self.successors.len() {
+			true
+		} else {
+			false
+		}
+	}
+
+	/// Remove predecessor node; does nothing if `pred` is not a predecessor
+	pub fn remove_predecessor(
+		&mut self,
+		pred: Rc<RefCell<Node<T>>>,
+	) {
+		let index = self.check_for_predecessor(pred.clone());
+		if index < self.predecessors.len() {
+			self.predecessors.remove(index);
+		}
+	}
+
+	pub fn remove_successor(
+		&mut self,
+		succ: Rc<RefCell<Node<T>>>,
+	) {
+		let index = self.check_for_successor(succ.clone());
+		if index < self.successors.len() {
+			self.successors.remove(index);
+		}
+	}
+
 	/// Compute cost of tree with this node as root; required for sorting
 	/// branches
 	pub fn compute_tree_cost(&mut self) -> u64 {
-		// Remove duplicates before computing costs
-		self.dedup_predecessors();
-		// Compute tree costs to sort branches
 		for it in self.predecessors.iter() {
-			self.tree_cost += it.borrow_mut().compute_tree_cost();
+			let valid_borrow = { it.try_borrow_mut().is_ok() };
+			if valid_borrow == true {
+				self.tree_cost += it.borrow_mut().compute_tree_cost();
+			}
 		}
 		self.tree_cost
 	}
@@ -169,9 +264,13 @@ impl<T> Node<T> {
 		&mut self,
 		reverse: bool,
 	) {
-		for it in self.predecessors.iter() {
-			it.borrow_mut().sort_predecessor_branches(reverse);
-		}
+		// for it in self.predecessors.iter() {
+		//   println!("{}", it.borrow().path);
+		//   let valid_borrow = { it.try_borrow_mut().is_ok() };
+		//   if valid_borrow == true {
+		//     it.borrow_mut().sort_predecessor_branches(reverse);
+		//   }
+		// }
 		match reverse {
 			true => {
 				self.predecessors.sort_by(|a, b| {
@@ -185,4 +284,50 @@ impl<T> Node<T> {
 			}
 		}
 	}
+}
+
+pub fn load<T, U>(
+	nodes: &mut HashMap<String, Rc<RefCell<Node<T>>>>,
+	path: &String,
+	read_from_file: fn(&String) -> U,
+	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
+) {
+	let clean_path = path.replace("../", "").replace("./", "");
+	if nodes.contains_key(&clean_path) == false {
+		let dm = read_from_file(&clean_path);
+		let new_node = create_node(&clean_path, dm);
+		nodes.insert(clean_path, new_node.clone());
+	}
+}
+
+pub fn add_predecessor_node<T>(
+	node: Rc<RefCell<Node<T>>>,
+	predecessor: Rc<RefCell<Node<T>>>,
+) {
+	// Add predecessor
+	node.borrow_mut().push_predecessor(predecessor.clone());
+
+	// Get number of predecessors
+	let num_predecessors = node.borrow_mut().num_predecessors();
+
+	// Add predecessor
+	node.borrow_mut().push_predecessor(predecessor.clone());
+
+	// Ensure additional predecessor is not a duplicate
+	if num_predecessors < node.borrow_mut().num_predecessors() {
+		predecessor.borrow_mut().incr_num_successors();
+		let update = predecessor.borrow().tree_cost();
+		node.borrow_mut().add_to_tree_cost(update);
+	}
+}
+
+/// Add successor node to tree;
+/// root and node must not refer to the same object
+pub fn add_successor_node<T>(
+	root: Rc<RefCell<Node<T>>>,
+	node: Rc<RefCell<Node<T>>>,
+	successor: Rc<RefCell<Node<T>>>,
+) {
+	add_predecessor_node(root.clone(), successor.clone());
+	add_predecessor_node(successor.clone(), node.clone());
 }

@@ -3,38 +3,6 @@ version: "1.0"
 author: Victor Gandarillas
 about: Tree of Knowledge -- textbook and to do list generator
 args:
-  - FILES:
-      required: true
-      multiple: true
-      help: Files to read
-  - title:
-      long: title
-      help: Set title for document generated
-      takes_value: true
-  - author:
-      long: author
-      help: Set author of document generated
-      takes_value: true
-  - write_appendix:
-      long: no-appendix
-      help: Do not include "Appendix" heading
-      takes_value: false
-  - output:
-      long: output
-      help: Path to output PDF, default is ../output/main.pdf
-      takes_value: true
-  - eli5:
-      long: eli5
-      help: Include simple explanations/"Explain Like I'm Five"; OFF by default
-      takes_value: false
-  - config:
-      short: c
-      long: config
-      value_name: FILE
-      help: |
-        [INOP] read from config file specifying formatting
-        options (default is .tok-config in same directory)
-      takes_value: true
   - crib:
       short: C
       long: crib
@@ -111,6 +79,46 @@ args:
       help: |
         Show YAML file name in PDF
       takes_value: false
+  - write_appendix:
+      long: no-appendix
+      help: Do not include "Appendix" heading
+      takes_value: false
+  - eli5:
+      long: eli5
+      help: Include simple explanations/"Explain Like I'm Five"; OFF by default
+      takes_value: false
+  - make_pdf:
+      short: n
+      long: no-pdf
+      help: Do not generate PDF
+      takes_value: false
+  - generalizations_before:
+      long: gen-before
+      help: |
+        [INOP] Treat paths in `gen` sequence as predecessors and
+        paths in case sequence as successors (default is
+        opposite)
+      takes_value: false
+  - config:
+      short: c
+      long: config
+      value_name: FILE
+      help: |
+        [INOP] read from config file specifying formatting
+        options (default is .tok-config in same directory)
+      takes_value: true
+  - title:
+      long: title
+      help: Set title for document generated
+      takes_value: true
+  - author:
+      long: author
+      help: Set author of document generated
+      takes_value: true
+  - output:
+      long: output
+      help: Path to output PDF, default is ../output/main.pdf
+      takes_value: true
   - depth:
       long: depth
       help: |
@@ -120,10 +128,7 @@ args:
         appendix is generated; a negative number leads to
         default behavior
       takes_value: true
-  - generalizations_before:
-      long: gen-before
-      help: |
-        [INOP] Treat paths in `gen` sequence as predecessors and
-        paths in case sequence as successors (default is
-        opposite)
-      takes_value: false
+  - FILES:
+      required: true
+      multiple: true
+      help: Files to read

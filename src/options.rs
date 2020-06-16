@@ -12,6 +12,7 @@ pub struct Options {
 	pub generalizations_before: bool,
 	pub write_appendix: bool,
 	pub eli5: bool,
+	pub make_pdf: bool,
 	pub depth: i32,
 	pub title: String,
 	pub author: String,
@@ -34,8 +35,9 @@ impl Options {
 			draft: matches.is_present("draft"),
 			generalizations_before: matches
 				.is_present("generalizations_before"),
-			write_appendix: !matches.is_present("no-appendix"),
+			write_appendix: !matches.is_present("write_appendix"),
 			eli5: matches.is_present("eli5"),
+			make_pdf: !matches.is_present("make_pdf"),
 			depth: matches
 				.value_of("depth")
 				.unwrap_or("-1")

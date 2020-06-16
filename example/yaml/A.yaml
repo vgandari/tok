@@ -1,8 +1,0 @@
-label: A
-env: rule
-main: |
-  A rule
-after:
-  - B.yaml
-  - I.yaml
-  - Q.yaml
