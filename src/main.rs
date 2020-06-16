@@ -65,7 +65,6 @@ fn main() -> std::io::Result<()> {
 	}
 
 	// Convert DAG to tree (remove indirect predecessors)
-	println!("DAG built");
 	println!("Extracting tree from DAG...");
 	for (_, a) in nodes.clone() {
 		for (_, b) in nodes.clone() {
@@ -76,19 +75,16 @@ fn main() -> std::io::Result<()> {
 	}
 
 	// Compute tree costs
-	println!("Tree built");
 	println!("Computing tree costs...");
 	root.borrow_mut().compute_tree_cost();
 
 	// Sort branches for topological sort
-	println!("Tree costs computed");
 	println!("Sorting branches for topological sort...");
 	for (_, n) in nodes.clone() {
 		n.borrow_mut().sort_predecessor_branches(options.reverse);
 	}
 
 	// Topological sort
-	println!("Branches sorted");
 	println!("Topological Sort...");
 	let sorted_nodes = topological_sort(root.clone());
 	println!("Order of files in document:");
