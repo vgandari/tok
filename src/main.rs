@@ -94,7 +94,7 @@ fn main() -> std::io::Result<()> {
 	println!("Order of files in document:");
 	println!("");
 	for n in sorted_nodes.iter().rev() {
-		println!("{}", n.borrow().path);
+		println!("{}, {}", n.borrow().tree_cost(), n.borrow().path);
 	}
 
 	// Create document source file (TeX/MD) and compile document (TeX->PDF, MD->HTML)
