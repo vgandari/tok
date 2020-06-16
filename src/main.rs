@@ -68,7 +68,7 @@ fn main() -> std::io::Result<()> {
 	println!("Extracting tree from DAG...");
 	for (_, a) in nodes.clone() {
 		for (_, b) in nodes.clone() {
-			if a != b {
+			if !Rc::ptr_eq(&a, &b) {
 				remove_indirect_predecessors(a.clone(), b.clone());
 			}
 		}
