@@ -66,11 +66,10 @@
 - [x] Enable organizing nodes in sub directories
 - [x] Add `no-pdf` option
 - [x] Ensure tree is generated, as opposed to DAG
+- [x] Add `--no-pdf` option
 
 ### Bugs
 
-- [x] `before` nodes are borrowed twice, resulting in panic
-- [ ] If two nodes are listed as 'before' each other, they don't appear.
 - [ ] Questions list is duplicated
 - [ ] Whitespace for Wikipedia links and URLs is weird
 - [ ] Add environments structure for pattern matching?
@@ -126,7 +125,7 @@
 
 ### Interface
 
-- [ ] Add `--no-pdf` option
+- [ ] Generate TEX file, but not PDF when `--no-pdf` is used
 - [ ] Config file (`.tok` in document project root)
 - [ ] Option: Exclude successors that are not predecessors
 - [ ] Option: Put successors that are not predecessors in appendix
@@ -158,11 +157,6 @@
 - [ ] Write guidelines for writing a good YAML file
 - [ ] exercises (gather exercises from a section, and put them at the end)
 
-> If there is a cycle, there will be a difference in costs if the cycle
-> is formed by a node that would be loaded later than if a cycle were
-> not present.
-> This also affects the order of the nodes after a topological sort.
-
 ### Markdown/Web
 
 - [ ] generate md file
@@ -182,9 +176,6 @@
 - [ ] nowiki boolean key suppresses wiki links in case you know there is
       no Wikipedia page available; wiki key has no effect; root node's
       nowiki set to false
-- [ ] urls: HashMap where key is display label and value is URL
-      (recommended to include website name and page title in display
-      label)
 - [ ] sec key allows custom section/chapter heading title for a
       particular node if that node is determined to require a section
       heading
