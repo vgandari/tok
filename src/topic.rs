@@ -208,9 +208,9 @@ pub fn create_topic(
 			+ data.post.len() as u64;
 	}
 
-	let tree_cost = node.borrow().cost;
+	let dag_cost = node.borrow().cost;
 	{
-		node.borrow_mut().set_tree_cost(tree_cost);
+		node.borrow_mut().set_dag_cost(dag_cost);
 	}
 	{
 		node.borrow_mut().set_data(data);

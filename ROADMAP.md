@@ -158,6 +158,11 @@
 - [ ] Write guidelines for writing a good YAML file
 - [ ] exercises (gather exercises from a section, and put them at the end)
 
+> If there is a cycle, there will be a difference in costs if the cycle
+> is formed by a node that would be loaded later than if a cycle were
+> not present.
+> This also affects the order of the nodes after a topological sort.
+
 ### Markdown/Web
 
 - [ ] generate md file

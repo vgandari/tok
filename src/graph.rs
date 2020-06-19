@@ -1,56 +1,24 @@
-use crate::node::{
-	add_predecessor_node, add_successor_node, load, Node,
-};
+use crate::node::Node;
 use std::{
 	cell::RefCell, collections::HashMap, collections::HashSet, rc::Rc,
 };
 
-/// Build directed acyclic graph from nodes
-pub fn build_dag_from_nodes() {}
-
-/// Given a root node, remove indirect predecessors
-pub fn dag_to_tree() {}
-
-/// Load nodes declared in after and before, starting with after
-pub fn build_dag_backward<T, U>(
-	node: Rc<RefCell<Node<T>>>,
+pub fn load_node<T, U>(
 	nodes: &mut HashMap<String, Rc<RefCell<Node<T>>>>,
-	pbranch: &mut HashSet<String>,
-	sbranch: &mut HashSet<String>,
+	path: &String,
 	read_from_file: fn(&String) -> U,
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
 ) {
-	// Iterate over predecessor paths
-	let after_paths = node.borrow().after.clone();
-	for it_dirty in after_paths.iter() {
-		let it = &it_dirty.replace("../", "").replace("./", "");
-		// Do not add predecessors if they form a cycle
-		if pbranch.contains(it) == false {
-			// Add file name to list of paths on branch
-			pbranch.insert(it.clone());
-
-			// Load node from file
-			load(nodes, it, read_from_file, create_node);
-
-			// Recursion
-			let predecessor_node = nodes.get(it).unwrap().clone();
-			build_dag_forward(
-				predecessor_node.clone(),
-				nodes,
-				pbranch,
-				sbranch,
-				read_from_file,
-				create_node,
-			);
-			add_predecessor_node(node.clone(), predecessor_node.clone());
-
-			// Exit branch
-			pbranch.remove(it);
-		}
+	if nodes.contains_key(path) == false {
+		println!("Reading {}", path);
+		let dm = read_from_file(&path);
+		let new_node = create_node(&path, dm);
+		nodes.insert(path.clone(), new_node.clone());
 	}
 }
 
-pub fn build_dag_forward<T, U>(
+/// Build directed acyclic graph from nodes
+pub fn build_dag_from_nodes<T, U>(
 	node: Rc<RefCell<Node<T>>>,
 	nodes: &mut HashMap<String, Rc<RefCell<Node<T>>>>,
 	pbranch: &mut HashSet<String>,
@@ -58,38 +26,6 @@ pub fn build_dag_forward<T, U>(
 	read_from_file: fn(&String) -> U,
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
 ) {
-	// Iterate over successor paths
-	let before_paths = node.borrow_mut().before.clone();
-	for it_dirty in before_paths.iter() {
-		let it = &it_dirty.replace("../", "").replace("./", "");
-		// Do not add successors if they form a cycle
-		if sbranch.contains(it) == false {
-			// Add file name to list of paths on branch
-			sbranch.insert(it.clone());
-
-			// Load node from file
-			load(nodes, it, read_from_file, create_node);
-
-			// Recursion
-			let successor_node = nodes.get(it).unwrap().clone();
-			build_dag_forward(
-				successor_node.clone(),
-				nodes,
-				pbranch,
-				sbranch,
-				read_from_file,
-				create_node,
-			);
-			// if depth > 0 {
-			// depth -= 1;
-			// }
-			let root = nodes.get(&"//".to_string()).unwrap().clone();
-			add_successor_node(root, node.clone(), successor_node.clone());
-
-			// Exit branch
-			sbranch.remove(it);
-		}
-	}
 	build_dag_backward(
 		node.clone(),
 		nodes,
@@ -100,16 +36,72 @@ pub fn build_dag_forward<T, U>(
 	);
 }
 
-pub fn remove_indirect_predecessors<T>(
-	root: Rc<RefCell<Node<T>>>,
+/// Build directed acyclic graph from nodes, starting at root; `nodes`
+/// must contain a node with "//" as a value
+fn build_dag_backward<T, U>(
 	node: Rc<RefCell<Node<T>>>,
+	nodes: &mut HashMap<String, Rc<RefCell<Node<T>>>>,
+	pbranch: &mut HashSet<String>,
+	sbranch: &mut HashSet<String>,
+	read_from_file: fn(&String) -> U,
+	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
 ) {
-	for pred in node.borrow().predecessors() {
-		if !Rc::ptr_eq(&pred, &root) {
-			let valid_borrow = { root.try_borrow_mut().is_ok() };
-			if valid_borrow == true {
-				root.borrow_mut().remove_predecessor(pred.clone());
+	let node_path = { node.borrow().path.clone() };
+	pbranch.insert(node_path.clone());
+
+	let paths = node.borrow().after.clone();
+	for dirty_path in paths {
+		let path = dirty_path.replace("../", "").replace("./", "");
+		let cycle = pbranch.contains(&path);
+		if cycle == false {
+			load_node(nodes, &path, read_from_file, create_node);
+			let predecessor = nodes[&path].clone();
+			let num_predecessors = node.borrow().predecessors().len();
+			{
+				if predecessor.borrow().has_predecessor(node.clone()) == false {
+					node.borrow_mut().add_predecessor_node(predecessor.clone());
+				}
 			}
+			let new_predecessor_is_duplicate =
+				!(num_predecessors < node.borrow().predecessors().len());
+			if new_predecessor_is_duplicate == false {
+				predecessor.borrow_mut().incr_num_successors();
+			}
+			build_dag_forward(
+				predecessor.clone(),
+				nodes,
+				pbranch,
+				sbranch,
+				read_from_file,
+				create_node,
+			);
+		}
+	}
+	pbranch.remove(&node_path);
+}
+
+pub fn remove_indirect_predecessors<T>(node: Rc<RefCell<Node<T>>>) {
+	let mut remove = vec![];
+	for child in node.borrow().predecessors().iter() {
+		for grandchild in child.borrow().predecessors().iter() {
+			let index =
+				node.borrow().get_predecessor_index(grandchild.clone());
+			if index.is_ok() {
+				let i = index.unwrap();
+				remove.push(i);
+			}
+		}
+	}
+	remove.sort();
+	remove.dedup();
+	let children_form_cycle =
+		{ remove.len() == node.borrow().predecessors().len() };
+	let terminal_index = if children_form_cycle { 1 } else { 0 };
+	for &i in remove.iter().rev() {
+		if i >= terminal_index {
+			let child = node.borrow().predecessors()[i].clone();
+			child.borrow_mut().decr_num_successors();
+			node.borrow_mut().remove_predecessor_by_index(i);
 		}
 	}
 }
@@ -126,19 +118,17 @@ pub fn topological_sort<T>(
 		if v.borrow().is_discovered() == false {
 			// This condition prevents nodes from being marked discovered
 			// prematurely
-			v.borrow_mut().mark_discovered();
-
-			// if v.borrow().has_single_successor() {
-			//   v.borrow_mut().mark_discovered();
-			// }
+			if v.borrow().has_single_successor() {
+				v.borrow_mut().mark_discovered();
+			}
 
 			// This is part of the normal DFS
 			for w in v.borrow().predecessors().iter() {
-				// if w.borrow().has_multiple_successors() {
-				//   w.borrow_mut().decr_num_successors();
-				// } else {
-				stack.push(w.clone());
-				// }
+				if w.borrow().has_multiple_successors() {
+					w.borrow_mut().decr_num_successors();
+				} else {
+					stack.push(w.clone());
+				}
 			}
 
 			if v.borrow().is_discovered() == true {
@@ -147,4 +137,58 @@ pub fn topological_sort<T>(
 		}
 	}
 	sorted_nodes
+}
+
+/// Build directed acyclic graph from nodes, starting at leaf; `nodes`
+/// must contain a node with "//" as a value
+fn build_dag_forward<T, U>(
+	leaf: Rc<RefCell<Node<T>>>,
+	nodes: &mut HashMap<String, Rc<RefCell<Node<T>>>>,
+	pbranch: &mut HashSet<String>,
+	sbranch: &mut HashSet<String>,
+	read_from_file: fn(&String) -> U,
+	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
+) {
+	let leaf_path = { leaf.borrow().path.clone() };
+	sbranch.insert(leaf_path.clone());
+	let root = nodes[&"//".to_string()].clone();
+	let paths = leaf.borrow().before.clone();
+
+	for dirty_path in paths {
+		let path = dirty_path.replace("../", "").replace("./", "");
+		let cycle = sbranch.contains(&path);
+		if cycle == false {
+			load_node(nodes, &path, read_from_file, create_node);
+			let successor = nodes[&path].clone();
+			let num_predecessors = successor.borrow().predecessors().len();
+			{
+				if leaf.borrow().has_predecessor(successor.clone()) == false {
+					root.borrow_mut().add_predecessor_node(successor.clone());
+					successor.borrow_mut().add_predecessor_node(leaf.clone());
+				}
+			}
+			let new_predecessor_is_duplicate =
+				!(num_predecessors < successor.borrow().predecessors().len());
+			if new_predecessor_is_duplicate == false {
+				successor.borrow_mut().incr_num_successors();
+			}
+			build_dag_forward(
+				successor.clone(),
+				nodes,
+				pbranch,
+				sbranch,
+				read_from_file,
+				create_node,
+			);
+		}
+	}
+	build_dag_backward(
+		leaf.clone(),
+		nodes,
+		pbranch,
+		sbranch,
+		read_from_file,
+		create_node,
+	);
+	sbranch.remove(&leaf_path);
 }

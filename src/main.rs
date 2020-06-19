@@ -5,7 +5,7 @@ pub mod tex;
 pub mod topic;
 pub mod yaml;
 use crate::graph::{
-	build_dag_backward, remove_indirect_predecessors, topological_sort,
+	build_dag_from_nodes, remove_indirect_predecessors, topological_sort,
 };
 use crate::node::Node;
 use crate::options::Options;
@@ -23,8 +23,6 @@ use time::PreciseTime;
 
 /// The main function that executes when tok is called from the command line
 fn main() -> std::io::Result<()> {
-	println!("========================================");
-	println!("Tree of Knowledge Start");
 	// Measure duration to output to user
 	let start_time = PreciseTime::now();
 
@@ -38,8 +36,6 @@ fn main() -> std::io::Result<()> {
 	let root = Node::new(&root_path, Topic::new());
 
 	// Construct directed acyclic graph
-	println!("========================================");
-	println!("Building Directed Acyclic Graph (DAG)...");
 	let mut nodes: HashMap<String, Rc<RefCell<Node<Topic>>>> =
 		HashMap::new();
 	nodes.insert(root_path, root.clone());
@@ -47,10 +43,14 @@ fn main() -> std::io::Result<()> {
 		let clean_filename = filename.replace("../", "").replace("./", "");
 		root.borrow_mut().after.push(clean_filename.to_string());
 	}
+	println!("Building Directed Acyclic Graph");
+	println!("from files (ignoring cycles)...");
+	println!("");
+
 	{
 		let mut pbranch: HashSet<String> = HashSet::new();
 		let mut sbranch: HashSet<String> = HashSet::new();
-		build_dag_backward(
+		build_dag_from_nodes(
 			root.clone(),
 			&mut nodes,
 			&mut pbranch,
@@ -59,38 +59,47 @@ fn main() -> std::io::Result<()> {
 			create_topic,
 		);
 	}
+	println!("");
 
-	for (_, n) in &nodes {
-		n.borrow_mut().dedup_predecessors();
+	// Remove indirect predecessors to compute costs accurately
+	for (_, n) in nodes.clone() {
+		remove_indirect_predecessors(n.clone());
 	}
+	// println!("Last topics should be:");
+	// for p in root.borrow().predecessors() {
+	// 	println!("{}", p.borrow().path);
+	// }
+	// for (_, node) in nodes.clone() {
+	// 	// remove_indirect_predecessors(node.clone());
+	// 	println!("Predecessors of {}:", node.borrow().path);
+	// 	for p in node.borrow().predecessors() {
+	// 		println!("  {}", p.borrow().path);
+	// 	}
+	// }
 
-	// Convert DAG to tree (remove indirect predecessors)
-	println!("Extracting tree from DAG...");
-	for (_, a) in nodes.clone() {
-		for (_, b) in nodes.clone() {
-			if !Rc::ptr_eq(&a, &b) {
-				remove_indirect_predecessors(a.clone(), b.clone());
-			}
-		}
-	}
+	// Compute DAG costs
+	root.borrow_mut().compute_dag_cost();
 
-	// Compute tree costs
-	println!("Computing tree costs...");
-	root.borrow_mut().compute_tree_cost();
-
-	// Sort branches for topological sort
-	println!("Sorting branches for topological sort...");
+	// Sort branches for topological sort (default is critical path; user
+	// may select lowest hanging fruit)
 	for (_, n) in nodes.clone() {
 		n.borrow_mut().sort_predecessor_branches(options.reverse);
 	}
 
 	// Topological sort
-	println!("Topological Sort...");
 	let sorted_nodes = topological_sort(root.clone());
+	// TODO: also print labels
 	println!("Order of files in document:");
 	println!("");
 	for n in sorted_nodes.iter().rev() {
-		println!("{}, {}", n.borrow().tree_cost(), n.borrow().path);
+		println!(
+			// "{}, {}, {}",
+			// "{}, {}",
+			"{}",
+			// n.borrow().dag_cost(),
+			n.borrow().path,
+			// n.borrow().num_successors()
+		);
 	}
 
 	// Create document source file (TeX/MD) and compile document (TeX->PDF, MD->HTML)
