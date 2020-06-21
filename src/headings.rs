@@ -45,7 +45,6 @@ pub fn set_heading_depth<T>(
 		if possible_end_of_section {
 			p.borrow_mut().heading_depth = node.borrow().heading_depth + 1;
 		}
-		println!("  {}, {}", p.borrow().heading_depth, p.borrow().path);
 		set_heading_depth(p.clone(), min_cost);
 	}
 }
