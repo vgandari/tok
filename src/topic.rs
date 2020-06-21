@@ -29,7 +29,7 @@ pub struct Topic {
 	/// Specify language for syntax highlighting in listings
 	pub lang: String,
 	/// Lines to include from a listing from a file
-	pub lines: Vec<u64>,
+	pub lines: Vec<usize>,
 	/// List of proofs to place immediately after `main` text (intended
 	/// for `env=thm` only);
 	/// input as sequence of multiline strings in YAML file
@@ -203,9 +203,9 @@ pub fn create_topic(
 		}
 	} else {
 		node.borrow_mut().cost = 1
-			+ data.main.len() as u64
-			+ data.pre.len() as u64
-			+ data.post.len() as u64;
+			+ data.main.len() as usize
+			+ data.pre.len() as usize
+			+ data.post.len() as usize;
 	}
 
 	let dag_cost = node.borrow().cost;

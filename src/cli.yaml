@@ -92,6 +92,12 @@ args:
       long: no-pdf
       help: Do not generate PDF
       takes_value: false
+  - generate_headings:
+      long: headings
+      help: |
+        Automatically generate chapter, section, subsection, etc.
+        headings
+      takes_value: false
   - generalizations_before:
       long: gen-before
       help: |

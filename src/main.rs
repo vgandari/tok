@@ -1,4 +1,5 @@
 pub mod graph;
+pub mod headings;
 pub mod node;
 pub mod options;
 pub mod tex;
@@ -7,6 +8,7 @@ pub mod yaml;
 use crate::graph::{
 	build_dag_from_nodes, remove_indirect_predecessors, topological_sort,
 };
+use crate::headings::{compute_min_dag_costs, set_heading_depth};
 use crate::node::Node;
 use crate::options::Options;
 use crate::tex::{compile_pdf, write_bib, write_to_tex};
@@ -88,17 +90,32 @@ fn main() -> std::io::Result<()> {
 
 	// Topological sort
 	let sorted_nodes = topological_sort(root.clone());
-	// TODO: also print labels
+
+	// Generate headings
+	if options.generate_headings == true {
+		// Rank costs
+		let mut ranked_costs: Vec<usize> = sorted_nodes
+			.clone()
+			.into_iter()
+			.map(|node| node.borrow().dag_cost())
+			.collect();
+		ranked_costs.sort();
+
+		let min_cost = compute_min_dag_costs(ranked_costs);
+		set_heading_depth(root.clone(), &min_cost);
+	}
+
+	// TODO: get max length of cost and file names
 	println!("Order of files in document:");
+	println!("COST | FILE | LABEL");
 	println!("");
 	for n in sorted_nodes.iter().rev() {
 		println!(
-			// "{}, {}, {}",
-			// "{}, {}",
-			"{}",
-			// n.borrow().dag_cost(),
+			"{} | {} | {} | {}",
+			n.borrow().dag_cost(),
 			n.borrow().path,
-			// n.borrow().num_successors()
+			n.borrow().data().label,
+			n.borrow().heading_depth,
 		);
 	}
 

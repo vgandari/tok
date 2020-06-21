@@ -5,16 +5,17 @@ pub struct Node<T> {
 	/// Flag for topological sort
 	discovered: bool,
 	/// Cost of tree rooted at this node; used for sorting branches
-	dag_cost: u64,
+	dag_cost: usize,
 	/// Number of successors (used for breaking cycles in topological
 	/// sort)
-	num_successors: u64,
+	num_successors: usize,
+	pub heading_depth: usize,
 	/// Number of predecessors (used for inserting headings)
-	// num_predecessors: u64,
+	// num_predecessors: usize,
 	/// Cost of this node; used for computing tree cost; uses length of
 	/// text string as heuristic for how long it takes to master the
 	/// content provided in this node
-	pub cost: u64,
+	pub cost: usize,
 	/// YAML key; Path to corresponding YAML file; also used as reflabel in LaTeX
 	pub path: String,
 	/// Sequence of file paths with node data that this node must come
@@ -55,6 +56,7 @@ impl<T> Node<T> {
 			after: vec![],
 			before: vec![],
 			num_successors: 0,
+			heading_depth: 0,
 			discovered: false,
 			data: data,
 			dag_cost: 1,
@@ -103,7 +105,7 @@ impl<T> Node<T> {
 		self.discovered = true;
 	}
 
-	pub fn num_successors(&self) -> u64 {
+	pub fn num_successors(&self) -> usize {
 		self.num_successors
 	}
 
@@ -144,13 +146,13 @@ impl<T> Node<T> {
 		self.successors.clone()
 	}
 
-	pub fn dag_cost(&self) -> u64 {
+	pub fn dag_cost(&self) -> usize {
 		self.dag_cost
 	}
 
 	pub fn set_dag_cost(
 		&mut self,
-		dag_cost: u64,
+		dag_cost: usize,
 	) {
 		self.dag_cost = dag_cost;
 	}
@@ -218,7 +220,7 @@ impl<T> Node<T> {
 
 	/// Compute cost of graph with this node as root; ignores cycles;
 	/// required for sorting branches;
-	pub fn compute_dag_cost(&mut self) -> u64 {
+	pub fn compute_dag_cost(&mut self) -> usize {
 		for it in self.predecessors.iter() {
 			// There are still cycles that we need to ignore
 			let cycle = { it.try_borrow_mut().is_err() };
