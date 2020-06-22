@@ -120,67 +120,67 @@ fn main() -> std::io::Result<()> {
 	}
 
 	// Create document source file (TeX/MD) and compile document (TeX->PDF, MD->HTML)
+	println!("========================================");
+	// make directories for output
+	// TODO: Use symlinks instead
+	let mut mkdir_cmd = Command::new("mkdir");
+	let mkdir_code_args = ["../output/code/"];
+	let mkdir_images_args = ["../output/images/"];
+	mkdir_cmd
+		.arg("../output")
+		.output()
+		.expect("Could not create output/ directory");
+	mkdir_cmd
+		.args(&mkdir_code_args)
+		.output()
+		.expect("Could not create output/code/ directory");
+	mkdir_cmd
+		.args(&mkdir_images_args)
+		.output()
+		.expect("Could not create output/images/ directory");
+
+	// #[cfg(target_os = "macos")]
+	// std::os::unix::fs::symlink("../code/", "../output/code/")?;
+	// std::os::unix::fs::symlink("../code/", "../output/images/")?;
+	// #[cfg(target_os = "windows")]
+	// std::os::windows::fs::symlink_dir("../code/", "../output/code/")?;
+	// std::os::windows::fs::symlink_dir("../code/", "../output/images/")?;
+
+	// copy directories for figures, snippets, etc.
+	let _cp_cls_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../texinput/*.cls ../output/")
+		.status()
+		.unwrap();
+	let _cp_bst_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../texinput/*.bst ../output/")
+		.status()
+		.unwrap();
+	let _cp_images_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../images/* ../output/images")
+		.status()
+		.unwrap();
+	let _cp_code_status = Command::new("sh")
+		.arg("-c")
+		.arg("cp -r ../code/* ../output/code")
+		.status()
+		.unwrap();
+
+	// Write text stored in nodes to tex file
+	write_to_tex(&options, &sorted_nodes, options.files.clone());
+	write_bib(&sorted_nodes);
+
+	// Report time
+	println!("========================================");
+	println!(
+		"Time to generate tex file: {} ms.",
+		(start_time.to(PreciseTime::now())).num_milliseconds()
+	);
+
+	// Compile PDF
 	if options.make_pdf == true {
-		println!("========================================");
-		// make directories for output
-		// TODO: Use symlinks instead
-		let mut mkdir_cmd = Command::new("mkdir");
-		let mkdir_code_args = ["../output/code/"];
-		let mkdir_images_args = ["../output/images/"];
-		mkdir_cmd
-			.arg("../output")
-			.output()
-			.expect("Could not create output/ directory");
-		mkdir_cmd
-			.args(&mkdir_code_args)
-			.output()
-			.expect("Could not create output/code/ directory");
-		mkdir_cmd
-			.args(&mkdir_images_args)
-			.output()
-			.expect("Could not create output/images/ directory");
-
-		// #[cfg(target_os = "macos")]
-		// std::os::unix::fs::symlink("../code/", "../output/code/")?;
-		// std::os::unix::fs::symlink("../code/", "../output/images/")?;
-		// #[cfg(target_os = "windows")]
-		// std::os::windows::fs::symlink_dir("../code/", "../output/code/")?;
-		// std::os::windows::fs::symlink_dir("../code/", "../output/images/")?;
-
-		// copy directories for figures, snippets, etc.
-		let _cp_cls_status = Command::new("sh")
-			.arg("-c")
-			.arg("cp -r ../texinput/*.cls ../output/")
-			.status()
-			.unwrap();
-		let _cp_bst_status = Command::new("sh")
-			.arg("-c")
-			.arg("cp -r ../texinput/*.bst ../output/")
-			.status()
-			.unwrap();
-		let _cp_images_status = Command::new("sh")
-			.arg("-c")
-			.arg("cp -r ../images/* ../output/images")
-			.status()
-			.unwrap();
-		let _cp_code_status = Command::new("sh")
-			.arg("-c")
-			.arg("cp -r ../code/* ../output/code")
-			.status()
-			.unwrap();
-
-		// Write text stored in nodes to tex file
-		write_to_tex(&options, &sorted_nodes, options.files.clone());
-		write_bib(&sorted_nodes);
-
-		// Report time
-		println!("========================================");
-		println!(
-			"Time to generate tex file: {} ms.",
-			(start_time.to(PreciseTime::now())).num_milliseconds()
-		);
-
-		// Compile PDF
 		compile_pdf(&options);
 	}
 	println!("Finished.");

@@ -159,13 +159,16 @@ pub fn write_to_tex(
 	// file.write_all(b"\\date{").expect("");
 	// file.write_all(b"}\n").expect("");
 
-	// Write frontmatter to file
+	// Write title and frontmatter to file
 	file.write_all(b"\n").expect("");
 	file.write_all(b"\\begin{document}").expect("");
-	file.write_all(b"\n\n").expect("");
+	file
+		.write_all(b"\n\n\\maketitle\n\\frontmatter\n")
+		.expect("");
+
 	if frontmatter.is_empty() == false {
 		file.write_all(frontmatter.as_bytes()).expect("");
-		file.write_all(b"\n\n").expect("");
+		file.write_all(b"\n\\mainmatter\n\n").expect("");
 	}
 
 	// Write content in each node
@@ -578,6 +581,7 @@ pub fn write_to_tex(
 	}
 
 	// Write backmatter
+	file.write_all(b"\n\\backmatter\n").expect("");
 	file.write_all(backmatter.as_bytes()).expect("");
 	file.write_all(b"\n\\end{document}").expect("");
 }

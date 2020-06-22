@@ -1,4 +1,5 @@
-\documentclass[letterpaper]{article}
+\documentclass[oneside, openany]{memoir}
+\usepackage[inner=2cm, outer=2cm, top=2cm, bottom=2cm]{geometry}
 
 %% Language and font encodings
 \usepackage[english]{babel}
@@ -13,15 +14,6 @@
 \usetikzlibrary{shapes,arrows}
 \usepackage[english]{babel}
 \usepackage{pifont}
-
-% include references
-% \usepackage{biblatex}
-% \addbibresource{references.bib}
-
-%% Sets page size and margins
-\usepackage[letterpaper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
-
-%% Useful packages
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
 \usepackage[colorlinks=true, allcolors=blue]{hyperref}
@@ -105,3 +97,9 @@
 % \setlength{\voffset}{-3cm}
 % prevent issues with the appearance of inserted todonotes
 \setlength{\marginparwidth}{2cm}
+
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{main.bib}
+
+\title{}
+\author{}
