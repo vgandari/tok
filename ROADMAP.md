@@ -1,8 +1,6 @@
 # ROADMAP
 
-## To Do
-
-### Complete
+## Complete
 
 - [x] change to yaml format (JSON doesn't allow comments or multiline strings)
 - [x] generate tex file
@@ -67,17 +65,38 @@
 - [x] Add `no-pdf` option
 - [x] Ensure tree is generated, as opposed to DAG
 - [x] Add `--no-pdf` option
+- [x] Generate TEX file, but not PDF when `--no-pdf` is used
+- [x] Change Wikipedia links to "Search for ``<label>'' on Wikipedia"
+- [ ] ~~Config file (`.tok` in document project root)~~
+- [ ] ~~Option: Exclude successors that are not predecessors~~
+- [x] Read all YAML files in a directory (loop, match)
+- [x] Finalize YAML format
+- [ ] ~~Ignore nonexistent predecessors, notify user~~
+- [ ] ~~Add key for using `minted` package for listings~~
 
-### Bugs
-
-- [ ] Questions list is duplicated
-- [ ] Whitespace for Wikipedia links and URLs is weird
-- [ ] Add environments structure for pattern matching?
-
-### Functionality
+## Next Steps
 
 - [ ] generate chapters, sections, subsections, etc.
-- [ ] place references at end of each chapter
+
+### Paper/Article Output
+
+- [ ] Force section to be made using `sec`/`ch` value for `env`
+- [ ] Flag to limit heading generation to sections (no chapters, parts,
+      etc.), for generating headings for conference papers and journal
+      articles
+- [ ] Flag to suppress heading generation to only generate subsections
+      within sections defined using `sec` values
+
+### Optimization
+
+- [ ] Create symlinks instead of copying images and code directories
+  - [ ] Mac/UNIX
+  - [ ] Linux
+  - [ ] Windows
+
+## Functionality
+
+- [ ] place references at end of each chapter, if any chapters are generated
 - [ ] display which paths can be traversed in parallel
 - [ ] support unicode text
   - [ ] verify that tok writes unicode text
@@ -108,8 +127,12 @@
         - [ ] exclude proofs (independent of "crib sheet" mode)
 - [ ] "presentation" mode?
 
-### LaTeX Formatting
+## LaTeX Formatting
 
+- [ ] Default frontmatter/preamble: Hide lists of figures and tables if empty
+- [ ] Default preamble: choose book or article based on sections generated
+- [ ] Hide appendix if there are no nodes in appendix
+- [ ] Generate section headings within appendix
 - [ ] Option to select with sans serif font for computer screens and
       option to choose light/dark theme
 - [ ] define LaTeX environment for types:
@@ -122,57 +145,37 @@
   - [ ] algorithms https://www.overleaf.com/learn/latex/Algorithms
   - [ ] [best_practices, info, notes, cautions,
         warnings](https://tex.stackexchange.com/questions/21227/example-environment)
+- [ ] Nomenclature and list of acronyms
 
-### Interface
+## Interface
 
-- [ ] Generate TEX file, but not PDF when `--no-pdf` is used
-- [ ] Config file (`.tok` in document project root)
-- [ ] Option: Exclude successors that are not predecessors
-- [ ] Option: Put successors that are not predecessors in appendix
 - [ ] Add option to load only files listed in command line for testing
       formatting of newly committed files.
-- [ ] Add key for using `minted` package for listings
-- [ ] Read all YAML files in a directory (loop, match)
-- [ ] Finalize YAML format
-- [ ] Ignore nonexistent predecessors, notify user
 - [ ] Test with JSON files (as YAML is a superset of JSON)
-- [ ] Declare Nested Nodes in YAML files
 - [ ] add options
   - [ ] Select LaTeX engine
   - [ ] output file directory
   - [ ] output file name
-  - [ ] user provided LaTeX preamble
-  - [ ] exclude proofs
   - [ ] exclude exercises
-  - [ ] include appendix (successors)
   - [ ] clean up generated files
 - [ ] Electron app to visually create files and draw dependency
       relationships
 
-### Documentation
+## Documentation
 
 - [ ] Create GitHub page
-- [ ] Describe how references to equations work
 - [ ] Provide really good examples of acceptable YAML files
 - [ ] Write guidelines for writing a good YAML file
 - [ ] exercises (gather exercises from a section, and put them at the end)
 
-### Markdown/Web
+## Markdown/Web
 
 - [ ] generate md file
-- [ ] compile md->tex->pdf using pandoc with raw_latex enabled
-- [ ] bibliography
 
-### Reference
-
-- [Textbook Writing
-  Tutorial](http://edutechwiki.unige.ch/en/Textbook_writing_tutorial)
-
-### Keys to Add Later
+## Keys to Add Later
 
 - [ ] why: include motivation for introducing current topic; keeps
       motivation and discussion separate
-- [ ] sec: Section title if section is generated (different from label)
 - [ ] nowiki boolean key suppresses wiki links in case you know there is
       no Wikipedia page available; wiki key has no effect; root node's
       nowiki set to false
@@ -182,19 +185,5 @@
 - [ ] ex and eg are not types; they are keys
 - [ ] sol key for solutions
 - [ ] alg, alg2e, and algx for different algorithms environments
-- [ ] ~~mint for different listings environment~~
-- [ ] cap is caption
-- [ ] sub is subset of
-- [ ] super is superset of
 - [ ] Keys for authors (given and surnames); sort alphabetically and
       remove duplicates after collecting nodes
-
-Changes:
-
-- [ ] Additions with no plan for implementation:
-- [ ] List of acronyms
-- [ ] How to suppress list of * when empty (LaTeX)?
-- [ ] How to make sure a figure/listing appears (immediately) after it
-      is referenced (so that listings can be declared as predecessors
-      and they don’t end up at the end of the book or missing completely
-      because they’re declared as successors)?

@@ -536,8 +536,11 @@ pub fn write_to_tex(
 					.write_all(node.borrow().data().wiki.as_bytes())
 					.expect("");
 			}
-			file.write_all(b"}{").expect("");
-			file.write_all(b"Wikipedia}\n\n").expect("");
+			file.write_all(b"}{Search for ``").expect("");
+			file
+				.write_all(node.borrow().data().label.as_bytes())
+				.expect("");
+			file.write_all(b"'' on Wikipedia}\n\n").expect("");
 		}
 
 		// Write additional discussion/commentary after main text
