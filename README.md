@@ -1,20 +1,34 @@
-# tok
+# `tok`
 
 ## Introduction
 
-`tok` (stands for Tree of Knowledge) is a command line tool that
-**optimally sorts topics** to and **generates a document** with those
-topics in order in PDF format.
-Each topic is stored in its own YAML file, which also contains
-dependency information and metadata (e.g. formatting).
+`tok` is a command line tool that takes your notes and organizes them so
+that they are easy to follow.
+Think of `tok` as a texbook generator that lifts the burden of figuring
+out where to put each paragraph.
 
-`tok` reads each YAML file, constructing a graph where each node
-corresponds to a YAML file, and uses the graph to sort the nodes in a
-way that **does not violate dependency relationships**.
-`tok` then generates a TEX file with text from all nodes sorted and
-formatted as specified, and by default calls a LaTeX engine to generate
-a PDF (use `--no-pdf` to see the sorted topics in the terminal without
-generating a PDF).
+Let's say you have a bunch of files, each containing notes covering a
+particular topic.
+
+- How should you arrange these topics so that they are easy to follow?
+- Which topics should you include?
+
+The answers to both of these questions depend on how the topics depend
+on each other.
+`tok` reads files in YAML format.
+Each file contains text for a topic, some formatting metadata, and
+dependency relationships.
+`tok` uses dependency relationships to determine the "best" order to place
+your notes.
+Once `tok` computes the "best" order to sort the topics, it writes your
+notes in a TEX file and generates a PDF.
+
+`tok` generates a document based on the input files and whatever other
+files they depend on.
+This means that `tok` may generate a document that contains a subset of
+your notes.
+That is, `tok` leaves out the irrelevant topics and sticks to the focus of
+the document you are generating.
 
 ### Goals
 
@@ -86,8 +100,8 @@ project/
 |  |-backmatter.tex   <-- optional
 |  |-frontmatter.tex  <-- optional
 |  |-preamble.tex     <-- optional
-|-yaml/               <-- location of yaml files; can be any name;
-                          also where the tok command is run
+|-<any_other_name>/   <-- location of yaml files; can be any name;
+                          also where the `tok` command is run
 ```
 
 If using Git as your SCM, include the following in your `.gitignore`:
