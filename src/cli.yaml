@@ -121,6 +121,10 @@ args:
       long: author
       help: Set author of document generated
       takes_value: true
+  - date:
+      long: date
+      help: Set date, e.g. for lecture notes
+      takes_value: true
   - output:
       long: output
       help: Path to output PDF, default is ../output/main.pdf

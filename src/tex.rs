@@ -156,8 +156,11 @@ pub fn write_to_tex(
 	}
 
 	// Write empty date
-	// file.write_all(b"\\date{").expect("");
-	// file.write_all(b"}\n").expect("");
+	if options.date.is_empty() == false {
+		file.write_all(b"\\date{").expect("");
+		file.write_all(options.date.as_bytes()).expect("");
+		file.write_all(b"}\n").expect("");
+	}
 
 	// Write title and frontmatter to file
 	file.write_all(b"\n").expect("");
@@ -168,8 +171,8 @@ pub fn write_to_tex(
 
 	if frontmatter.is_empty() == false {
 		file.write_all(frontmatter.as_bytes()).expect("");
-		file.write_all(b"\n\\mainmatter\n\n").expect("");
 	}
+	file.write_all(b"\n\\mainmatter\n\n").expect("");
 
 	// Write content in each node
 	let mut write_appendix = false;

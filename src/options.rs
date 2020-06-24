@@ -17,6 +17,7 @@ pub struct Options {
 	pub depth: i32,
 	pub title: String,
 	pub author: String,
+	pub date: String,
 	pub output: String,
 	pub files: Vec<String>,
 }
@@ -47,6 +48,7 @@ impl Options {
 				.unwrap_or(-1),
 			title: matches.value_of("title").unwrap_or("").to_string(),
 			author: matches.value_of("author").unwrap_or("").to_string(),
+			date: matches.value_of("date").unwrap_or("").to_string(),
 			output: matches.value_of("output").unwrap_or("").to_string(),
 			files: matches.values_of_lossy("FILES").unwrap(),
 		}
