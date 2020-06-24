@@ -18,6 +18,9 @@ pub struct Node<T> {
 	pub cost: usize,
 	/// YAML key; Path to corresponding YAML file; also used as reflabel in LaTeX
 	pub path: String,
+	/// Heading title if this topic forms the start of a chapter, section,
+	/// subsection, etc.
+	pub heading_titles: Vec<String>,
 	/// Sequence of file paths with node data that this node must come
 	/// after; relationship may be broken if tok detects cycles
 	pub after: Vec<String>,
@@ -51,6 +54,7 @@ impl<T> Node<T> {
 	) -> Rc<RefCell<Node<T>>> {
 		Rc::new(RefCell::new(Node::<T> {
 			path: String::from(filename.clone()),
+			heading_titles: vec![],
 			predecessors: vec![],
 			successors: vec![],
 			after: vec![],

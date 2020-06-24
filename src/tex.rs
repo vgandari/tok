@@ -78,6 +78,7 @@ pub fn write_to_tex(
 	options: &Options,
 	sorted_nodes: &Vec<Rc<RefCell<Node<Topic>>>>,
 	mut final_nodes: Vec<String>,
+	max_heading_depth: usize,
 ) {
 	// generate tex file
 	let path = Path::new("../output/main.tex");
@@ -195,6 +196,54 @@ pub fn write_to_tex(
 			file
 				.write_all(b"\n\\appendix\n\\section{Appendix}\n\n")
 				.expect("");
+		}
+
+		// Write heading title
+		let headings = match max_heading_depth {
+			0 => vec!["", "", "", "", "", ""],
+			1 => vec!["section", "", "", "", "", ""],
+			2 => vec!["section", "subsection", "", "", "", ""],
+			3 => vec!["chapter", "section", "subsection", "", "", ""],
+			4 => vec![
+				"chapter",
+				"section",
+				"subsection",
+				"subsubsection",
+				"",
+				"",
+			],
+			5 => vec![
+				"part",
+				"chapter",
+				"section",
+				"subsection",
+				"subsubsection",
+				"",
+			],
+			// ignore anything deeper than 6 levels
+			_ => vec![
+				"book",
+				"part",
+				"chapter",
+				"section",
+				"subsection",
+				"subsubsection",
+			],
+		};
+
+		// TODO: add reflabels to sections
+		let mut i = 0;
+		for ht in node.borrow().heading_titles.clone() {
+			if i < max_heading_depth {
+				if ht.is_empty() == false {
+					file.write_all(b"\\").expect("");
+					file.write_all(headings[i].as_bytes()).expect("");
+					file.write_all(b"{").expect("");
+					file.write_all(ht.as_bytes()).expect("");
+					file.write_all(b"}\n\n").expect("");
+				}
+			}
+			i += 1;
 		}
 
 		// Write source YAML file name

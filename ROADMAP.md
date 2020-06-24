@@ -73,31 +73,33 @@
 - [x] Finalize YAML format
 - [ ] ~~Ignore nonexistent predecessors, notify user~~
 - [ ] ~~Add key for using `minted` package for listings~~
+- [ ] ~~display which paths can be traversed in parallel~~
+- [x] generate chapters, sections, subsections, etc.
 
 ## Next Steps
 
-- [ ] generate chapters, sections, subsections, etc.
+- [ ] Create symlinks instead of copying images and code directories
+  - [ ] Mac/UNIX
+  - [ ] Linux
+  - [ ] Windows
+- [ ] Use directory name where tok is run as name of TEX and PDF output
+      file names
 
 ### Paper/Article Output
 
 - [ ] Force section to be made using `sec`/`ch` value for `env`
 - [ ] Flag to limit heading generation to sections (no chapters, parts,
       etc.), for generating headings for conference papers and journal
-      articles
+      articles within sections defined using `sec` values
 - [ ] Flag to suppress heading generation to only generate subsections
-      within sections defined using `sec` values
-
-### Optimization
-
-- [ ] Create symlinks instead of copying images and code directories
-  - [ ] Mac/UNIX
-  - [ ] Linux
-  - [ ] Windows
+- [ ] place references at end of each chapter, if any chapters are generated
+  - if max heading depth <= 3 (no chapters), then print
+    `\begin{refsection}`, `\end{refsection}` at begining and end of
+    document.
+  - default backmatter is empty.
 
 ## Functionality
 
-- [ ] place references at end of each chapter, if any chapters are generated
-- [ ] display which paths can be traversed in parallel
 - [ ] support unicode text
   - [ ] verify that tok writes unicode text
 - [ ] Add keys that can be set as predecessors or successors in option

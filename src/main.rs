@@ -8,14 +8,16 @@ pub mod yaml;
 use crate::graph::{
 	build_dag_from_nodes, remove_indirect_predecessors, topological_sort,
 };
-use crate::headings::{compute_min_dag_costs, set_heading_depth};
+use crate::headings::{
+	add_heading_titles_to_nodes, compute_min_dag_costs, set_heading_depth,
+};
 use crate::node::Node;
 use crate::options::Options;
 use crate::tex::{compile_pdf, write_bib, write_to_tex};
 use crate::topic::{create_topic, Topic};
 use crate::yaml::read_from_yaml;
 use std::{
-	cell::RefCell, collections::HashMap, collections::HashSet,
+	cell::RefCell, cmp::max, collections::HashMap, collections::HashSet,
 	process::Command, rc::Rc,
 };
 #[macro_use]
@@ -105,17 +107,35 @@ fn main() -> std::io::Result<()> {
 		set_heading_depth(root.clone(), &min_cost);
 	}
 
+	// Add headings, included manually added headings
+	// TODO: provide filename prefixes for focing section headings
+	add_heading_titles_to_nodes(&sorted_nodes);
+
+	let max_heading_depth = {
+		let mut max_heading_depth: usize = 0;
+		for node in sorted_nodes.clone() {
+			max_heading_depth =
+				max(max_heading_depth, node.borrow().heading_depth);
+		}
+		max_heading_depth
+	};
+
 	// TODO: get max length of cost and file names
 	println!("Order of files in document:");
-	println!("COST | FILE | LABEL");
+	println!("COST | HEADING DEPTH | FILE | LABEL");
 	println!("");
 	for n in sorted_nodes.iter().rev() {
+		for ht in n.borrow().heading_titles.clone() {
+			if ht.is_empty() == false {
+				println!(" ---- {}", ht);
+			}
+		}
 		println!(
 			"{} | {} | {} | {}",
 			n.borrow().dag_cost(),
+			n.borrow().heading_depth,
 			n.borrow().path,
 			n.borrow().data().label,
-			n.borrow().heading_depth,
 		);
 	}
 
@@ -169,7 +189,12 @@ fn main() -> std::io::Result<()> {
 		.unwrap();
 
 	// Write text stored in nodes to tex file
-	write_to_tex(&options, &sorted_nodes, options.files.clone());
+	write_to_tex(
+		&options,
+		&sorted_nodes,
+		options.files.clone(),
+		max_heading_depth,
+	);
 	write_bib(&sorted_nodes);
 
 	// Report time
