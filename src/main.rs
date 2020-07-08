@@ -69,17 +69,6 @@ fn main() -> std::io::Result<()> {
 	for (_, n) in nodes.clone() {
 		remove_indirect_predecessors(n.clone());
 	}
-	// println!("Last topics should be:");
-	// for p in root.borrow().predecessors() {
-	// 	println!("{}", p.borrow().path);
-	// }
-	// for (_, node) in nodes.clone() {
-	// 	// remove_indirect_predecessors(node.clone());
-	// 	println!("Predecessors of {}:", node.borrow().path);
-	// 	for p in node.borrow().predecessors() {
-	// 		println!("  {}", p.borrow().path);
-	// 	}
-	// }
 
 	// Compute DAG costs
 	root.borrow_mut().compute_dag_cost();
@@ -108,19 +97,17 @@ fn main() -> std::io::Result<()> {
 	}
 
 	// Add headings, included manually added headings
-	// TODO: provide filename prefixes for focing section headings
-	add_heading_titles_to_nodes(&sorted_nodes);
-
 	let max_heading_depth = {
-		let mut max_heading_depth: usize = 0;
-		for node in sorted_nodes.clone() {
-			max_heading_depth =
-				max(max_heading_depth, node.borrow().heading_depth);
+		let mut mhd: usize = 0;
+		if options.generate_headings == true {
+			add_heading_titles_to_nodes(&sorted_nodes);
+			for node in sorted_nodes.clone() {
+				mhd = max(mhd, node.borrow().heading_depth);
+			}
 		}
-		max_heading_depth
+		mhd
 	};
 
-	// TODO: get max length of cost and file names
 	println!("Order of files in document:");
 	println!("COST | HEADING DEPTH | FILE | LABEL");
 	println!("");
@@ -138,6 +125,7 @@ fn main() -> std::io::Result<()> {
 			n.borrow().data().label,
 		);
 	}
+	println!("{} total nodes", sorted_nodes.len());
 
 	// Create document source file (TeX/MD) and compile document (TeX->PDF, MD->HTML)
 	println!("========================================");
