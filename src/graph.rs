@@ -99,15 +99,16 @@ pub fn remove_indirect_predecessors<T>(node: Rc<RefCell<Node<T>>>) {
 	let terminal_index = if children_form_cycle { 1 } else { 0 };
 	for &i in remove.iter().rev() {
 		if i >= terminal_index {
-			let child = node.borrow().predecessors()[i].clone();
-			child.borrow_mut().decr_num_successors();
 			node.borrow_mut().remove_predecessor_by_index(i);
 		}
 	}
 }
 
-/// Modified Depth First Search to add predecessors to tree; requires
-/// branches to be sorted
+/// Modified Depth First Search; does not "discover" a node until all
+/// branches leading to that node have been traversed; sorting branches
+/// in the DAG will affect the output; recommended to use
+/// `Node::sort_predecessor_branches()` method on root node before
+/// sorting
 pub fn topological_sort<T>(
 	node: Rc<RefCell<Node<T>>>
 ) -> Vec<Rc<RefCell<Node<T>>>> {
@@ -115,22 +116,24 @@ pub fn topological_sort<T>(
 	let mut sorted_nodes = vec![];
 	while stack.is_empty() == false {
 		let v = stack.pop().unwrap();
-		if v.borrow().is_discovered() == false {
-			// This condition prevents nodes from being marked discovered
-			// prematurely
-			if v.borrow().has_single_successor() {
-				v.borrow_mut().mark_discovered();
-			}
+		// Use <= instead of < to ensure that the root node (with zero
+		// successors) is visited; otherwise, 0 nodes will be added to the
+		// list of sorted nodes
+		if v.borrow().times_visited <= v.borrow().num_successors() {
+			// Delay discovery until node has been visited as many times as it
+			// has successors; this is so that the ordering of predecessors
+			// affects the final list of sorted nodes
+			v.borrow_mut().times_visited += 1;
 
-			// This is part of the normal DFS
+			// Iterative DFS
 			for w in v.borrow().predecessors().iter() {
-				if w.borrow().has_multiple_successors() {
-					w.borrow_mut().decr_num_successors();
-				} else {
-					stack.push(w.clone());
-				}
+				stack.push(w.clone());
 			}
 
+			// Node will only be marked discovered if `times_visited ==
+			// num_successors`; For the root node, this will be `1 == 0`,
+			// which is false, so the root node does not appear in the list of
+			// sorted nodes
 			if v.borrow().is_discovered() == true {
 				sorted_nodes.push(v.clone());
 			}

@@ -2,8 +2,6 @@ use std::{cell::RefCell, rc::Rc};
 
 /// Node info for constructing tree
 pub struct Node<T> {
-	/// Flag for topological sort
-	discovered: bool,
 	/// Cost of tree rooted at this node; used for sorting branches
 	dag_cost: usize,
 	/// Number of successors (used for breaking cycles in topological
@@ -35,6 +33,7 @@ pub struct Node<T> {
 	successors: Vec<Rc<RefCell<Node<T>>>>,
 	/// Data contained in this node
 	data: T,
+	pub times_visited: usize,
 }
 
 impl<T> PartialEq for Node<T> {
@@ -61,10 +60,10 @@ impl<T> Node<T> {
 			before: vec![],
 			num_successors: 0,
 			heading_depth: 0,
-			discovered: false,
 			data: data,
 			dag_cost: 1,
 			cost: 1,
+			times_visited: 0,
 		}))
 	}
 
@@ -101,12 +100,7 @@ impl<T> Node<T> {
 
 	/// Check if node is discovered; used in topological sort
 	pub fn is_discovered(&self) -> bool {
-		self.discovered
-	}
-
-	/// Mark node as discovered; used in topological sort
-	pub fn mark_discovered(&mut self) {
-		self.discovered = true;
+		self.times_visited == self.num_successors
 	}
 
 	pub fn num_successors(&self) -> usize {
@@ -119,10 +113,8 @@ impl<T> Node<T> {
 	}
 
 	/// Decrement number of successors
-	pub fn decr_num_successors(&mut self) {
-		if self.has_multiple_successors() {
-			self.num_successors -= 1;
-		}
+	fn decr_num_successors(&mut self) {
+		self.num_successors -= 1;
 	}
 
 	/// Check if node has single successor
@@ -205,19 +197,18 @@ impl<T> Node<T> {
 	) {
 		let index = self.get_predecessor_index(pred.clone());
 		if index.is_ok() {
-			self.predecessors.remove(index.unwrap());
+			self.remove_predecessor_by_index(index.unwrap());
 		}
 	}
 
-	/// Remove predecessor node, given its index; paniccs if `index` is
-	/// out of bounds
+	/// Remove predecessor node, given its index; does nothing if `index`
+	/// does not correspond to a predecessor node
 	pub fn remove_predecessor_by_index(
 		&mut self,
 		index: usize,
 	) {
-		if index < self.predecessors().len()
-			|| self.predecessors().len() == 0
-		{
+		if index < self.predecessors().len() {
+			self.predecessors[index].borrow_mut().decr_num_successors();
 			self.predecessors.remove(index);
 		}
 	}
