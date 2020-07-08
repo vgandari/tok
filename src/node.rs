@@ -74,20 +74,18 @@ impl<T> Node<T> {
 		predecessor: Rc<RefCell<Node<T>>>,
 	) {
 		// Get number of predecessors
-		// let num_predecessors = self.predecessors.len();
+		let num_predecessors = self.predecessors.len();
 
 		// Add predecessor
 		self.predecessors.push(predecessor.clone());
 		self.dedup_predecessors();
-		// let new_predecessor_is_duplicate =
-		// 	!(num_predecessors < self.predecessors.len());
+		let new_predecessor_is_duplicate =
+			!(num_predecessors < self.predecessors.len());
 
 		// Ensure additional predecessor is not a duplicate
-		// if new_predecessor_is_duplicate == false {
-		// predecessor.borrow_mut().incr_num_successors();
-		// 	let update = predecessor.borrow().dag_cost();
-		// 	self.add_to_dag_cost(update);
-		// }
+		if new_predecessor_is_duplicate == false {
+			predecessor.borrow_mut().incr_num_successors();
+		}
 	}
 
 	/// Store data in node
@@ -108,7 +106,7 @@ impl<T> Node<T> {
 	}
 
 	/// Increment number of successors
-	pub fn incr_num_successors(&mut self) {
+	fn incr_num_successors(&mut self) {
 		self.num_successors += 1;
 	}
 

@@ -56,16 +56,10 @@ fn build_dag_backward<T, U>(
 		if cycle == false {
 			load_node(nodes, &path, read_from_file, create_node);
 			let predecessor = nodes[&path].clone();
-			let num_predecessors = node.borrow().predecessors().len();
 			{
 				if predecessor.borrow().has_predecessor(node.clone()) == false {
 					node.borrow_mut().add_predecessor_node(predecessor.clone());
 				}
-			}
-			let new_predecessor_is_duplicate =
-				!(num_predecessors < node.borrow().predecessors().len());
-			if new_predecessor_is_duplicate == false {
-				predecessor.borrow_mut().incr_num_successors();
 			}
 			build_dag_forward(
 				predecessor.clone(),
@@ -163,17 +157,11 @@ fn build_dag_forward<T, U>(
 		if cycle == false {
 			load_node(nodes, &path, read_from_file, create_node);
 			let successor = nodes[&path].clone();
-			let num_predecessors = successor.borrow().predecessors().len();
 			{
 				if leaf.borrow().has_predecessor(successor.clone()) == false {
 					root.borrow_mut().add_predecessor_node(successor.clone());
 					successor.borrow_mut().add_predecessor_node(leaf.clone());
 				}
-			}
-			let new_predecessor_is_duplicate =
-				!(num_predecessors < successor.borrow().predecessors().len());
-			if new_predecessor_is_duplicate == false {
-				successor.borrow_mut().incr_num_successors();
 			}
 			build_dag_forward(
 				successor.clone(),
