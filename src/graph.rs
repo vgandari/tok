@@ -112,15 +112,14 @@ pub fn topological_sort<T>(
 		// Use <= instead of < to ensure that the root node (with zero
 		// successors) is visited; otherwise, 0 nodes will be added to the
 		// list of sorted nodes
-		if v.borrow().times_visited <= v.borrow().num_successors() {
-			// println!("Enter {}:", v.borrow().path);
+		if v.borrow().times_visited() <= v.borrow().num_successors() {
 			// Delay discovery until node has been visited as many times as it
 			// has successors; this is so that the ordering of predecessors
 			// affects the final list of sorted nodes
-			v.borrow_mut().times_visited += 1;
+			v.borrow_mut().incr_times_visited();
 
 			// Iterative DFS
-			if v.borrow().times_visited >= v.borrow().num_successors() {
+			if v.borrow().times_visited() >= v.borrow().num_successors() {
 				for w in v.borrow().predecessors().iter() {
 					println!("{}::{}", v.borrow().path, w.borrow().path);
 					stack.push(w.clone());
@@ -132,15 +131,7 @@ pub fn topological_sort<T>(
 			// which is false, so the root node does not appear in the list of
 			// sorted nodes
 			if v.borrow().is_discovered() == true {
-				println!("ADD: {}", v.borrow().path);
 				sorted_nodes.push(v.clone());
-			} else {
-				println!(
-					"{},{}: {}",
-					v.borrow().num_successors(),
-					v.borrow().times_visited,
-					v.borrow().path
-				);
 			}
 		}
 	}

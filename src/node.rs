@@ -33,7 +33,7 @@ pub struct Node<T> {
 	successors: Vec<Rc<RefCell<Node<T>>>>,
 	/// Data contained in this node
 	data: T,
-	pub times_visited: usize,
+	times_visited: usize,
 }
 
 impl<T> PartialEq for Node<T> {
@@ -108,6 +108,16 @@ impl<T> Node<T> {
 	/// Increment number of successors
 	fn incr_num_successors(&mut self) {
 		self.num_successors += 1;
+	}
+
+	/// Increment number of times visited (used in topological sort)
+	pub fn incr_times_visited(&mut self) {
+		self.times_visited += 1;
+	}
+
+	/// Increment number of times visited (used in topological sort)
+	pub fn times_visited(&self) -> usize {
+		self.times_visited
 	}
 
 	/// Decrement number of successors
