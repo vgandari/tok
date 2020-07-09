@@ -202,11 +202,10 @@ pub fn create_topic(
 			}
 		}
 	} else {
-		// TODO: change back
-		node.borrow_mut().cost = 1;
-		// + data.main.len() as usize
-		// + data.pre.len() as usize
-		// + data.post.len() as usize;
+		node.borrow_mut().cost = 1
+			+ data.main.len() as usize
+			+ data.pre.len() as usize
+			+ data.post.len() as usize;
 	}
 
 	let dag_cost = node.borrow().cost;
