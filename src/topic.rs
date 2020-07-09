@@ -76,6 +76,7 @@ pub struct Topic {
 	/// List of references that will be added to .bib file for this node
 	pub src: Vec<String>,
 	pub heading_depth: usize,
+	pub heading_depth_start: usize,
 	/// Heading title if this topic forms the start of a chapter, section,
 	/// subsection, etc.
 	pub heading_titles: Vec<String>,
@@ -112,6 +113,7 @@ impl Topic {
 			case: vec![],
 			src: vec![],
 			heading_depth: 0,
+			heading_depth_start: 0,
 			heading_titles: vec![],
 		}
 	}

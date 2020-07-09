@@ -112,9 +112,9 @@ fn main() -> std::io::Result<()> {
 	println!("COST | HEADING DEPTH | FILE | LABEL");
 	println!("");
 	for n in sorted_nodes.iter().rev() {
-		for ht in n.borrow().data().heading_titles.clone() {
-			if ht.is_empty() == false {
-				println!(" ---- {}", ht);
+		for heading_title in n.borrow().data().heading_titles.clone() {
+			if heading_title.is_empty() == false {
+				println!(" ---- {}", heading_title);
 			}
 		}
 		println!(

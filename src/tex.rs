@@ -199,12 +199,13 @@ pub fn write_to_tex(
 		}
 
 		// Write heading title
-		let headings = match max_heading_depth {
+		let heading_cmds = match max_heading_depth {
 			0 => vec!["", "", "", "", "", ""],
-			1 => vec!["section", "", "", "", "", ""],
-			2 => vec!["section", "subsection", "", "", "", ""],
-			3 => vec!["chapter", "section", "subsection", "", "", ""],
+			1 => vec!["", "section", "", "", "", "", ""],
+			2 => vec!["", "section", "subsection", "", "", "", ""],
+			3 => vec!["", "chapter", "section", "subsection", "", "", ""],
 			4 => vec![
+				"",
 				"chapter",
 				"section",
 				"subsection",
@@ -213,6 +214,7 @@ pub fn write_to_tex(
 				"",
 			],
 			5 => vec![
+				"",
 				"part",
 				"chapter",
 				"section",
@@ -222,6 +224,7 @@ pub fn write_to_tex(
 			],
 			// ignore anything deeper than 6 levels
 			_ => vec![
+				"",
 				"book",
 				"part",
 				"chapter",
@@ -232,12 +235,12 @@ pub fn write_to_tex(
 		};
 
 		// TODO: add reflabels to sections
-		let mut i = 0;
+		let mut i = node.borrow().data().heading_depth_start;
 		for ht in node.borrow().data().heading_titles.clone() {
-			if i < max_heading_depth {
+			if i <= max_heading_depth {
 				if ht.is_empty() == false {
 					file.write_all(b"\\").expect("");
-					file.write_all(headings[i].as_bytes()).expect("");
+					file.write_all(heading_cmds[i].as_bytes()).expect("");
 					file.write_all(b"{").expect("");
 					file.write_all(ht.as_bytes()).expect("");
 					file.write_all(b"}\n\n").expect("");

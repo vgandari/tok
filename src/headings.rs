@@ -25,6 +25,7 @@ pub fn compute_min_dag_costs(sorted_costs: Vec<usize>) -> usize {
 		sorted_costs.len() - 1
 	};
 	for i in 0..rank.len() {
+		// TODO: change back
 		rank[i] += sorted_costs[min_cost_index];
 	}
 
@@ -131,31 +132,63 @@ pub fn set_heading_depth(
 pub fn add_heading_titles_to_nodes(
 	sorted_nodes: &Vec<Rc<RefCell<Node<Topic>>>>
 ) {
-	for chd in 1..6 {
-		let mut ht = "".to_string();
+	for search_heading_depth in 1..7 {
+		let mut heading_title = "".to_string();
 		let mut prev_node: Option<Rc<RefCell<Node<Topic>>>> = None;
 		for current_node in sorted_nodes {
-			let hd = current_node.borrow().data().heading_depth;
+			let current_heading_depth =
+				current_node.borrow().data().heading_depth;
 
-			// TODO: make a data_mut method for topic
-			if prev_node.is_some() && hd <= chd && hd > 0 {
+			// Criteria for ending a section with the current heading depth
+			let current_node_is_not_first_node = prev_node.is_some();
+			let search_heading_depth_is_deep_enough =
+				current_heading_depth <= search_heading_depth;
+			let current_node_ends_section = current_heading_depth > 0;
+
+			// Append heading title to previous node; the document starts at
+			// the back of the sorted list and ends at the front, so the
+			// previous node appears later in the generated document; the
+			// previous node starts a new section and the title for that
+			// section is inserted into that node; the current node ends a
+			// different section
+			if current_node_is_not_first_node
+				&& search_heading_depth_is_deep_enough
+				&& current_node_ends_section
+			{
 				let p = prev_node.unwrap().clone();
-				p.borrow_mut().data_mut().heading_titles.push(ht.clone());
+				p.borrow_mut()
+					.data_mut()
+					.heading_titles
+					.push(heading_title.clone());
+				p.borrow_mut().data_mut().heading_depth_start =
+					current_heading_depth;
 			}
 
-			if hd == chd {
-				ht = current_node.borrow().data().label.clone();
-			} else if hd < chd && hd > 0 {
-				ht = "".to_string();
+			// Criteria for starting a section with the current heading depth
+			let section_with_same_depth_found =
+				current_heading_depth == search_heading_depth;
+
+			// Get title for previous section from node with same heading
+			// depth
+			if section_with_same_depth_found {
+				heading_title = current_node.borrow().data().label.clone();
+			} else if current_heading_depth < search_heading_depth
+				&& current_heading_depth > 0
+			{
+				heading_title = "".to_string();
 			}
 
 			prev_node = Some(current_node.clone());
 		}
-		prev_node
-			.unwrap()
-			.borrow_mut()
+
+		// Append heading title to node at back of sorted nodes list; This
+		// will be the title of the first chapter/section/etc. (depending on
+		// maximum heading depth) of the document
+		let p = prev_node.unwrap().clone();
+		p.borrow_mut()
 			.data_mut()
 			.heading_titles
-			.push(ht.clone());
+			.push(heading_title.clone());
+		p.borrow_mut().data_mut().heading_depth_start = 1;
 	}
 }
