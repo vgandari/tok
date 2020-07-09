@@ -81,8 +81,7 @@ pub fn remove_indirect_predecessors<T>(node: Rc<RefCell<Node<T>>>) {
 			let index =
 				node.borrow().get_predecessor_index(grandchild.clone());
 			if index.is_ok() {
-				let i = index.unwrap();
-				remove.push(i);
+				remove.push(index.unwrap());
 			}
 		}
 	}
@@ -114,14 +113,18 @@ pub fn topological_sort<T>(
 		// successors) is visited; otherwise, 0 nodes will be added to the
 		// list of sorted nodes
 		if v.borrow().times_visited <= v.borrow().num_successors() {
+			// println!("Enter {}:", v.borrow().path);
 			// Delay discovery until node has been visited as many times as it
 			// has successors; this is so that the ordering of predecessors
 			// affects the final list of sorted nodes
 			v.borrow_mut().times_visited += 1;
 
 			// Iterative DFS
-			for w in v.borrow().predecessors().iter() {
-				stack.push(w.clone());
+			if v.borrow().times_visited >= v.borrow().num_successors() {
+				for w in v.borrow().predecessors().iter() {
+					println!("{}::{}", v.borrow().path, w.borrow().path);
+					stack.push(w.clone());
+				}
 			}
 
 			// Node will only be marked discovered if `times_visited ==
@@ -129,7 +132,15 @@ pub fn topological_sort<T>(
 			// which is false, so the root node does not appear in the list of
 			// sorted nodes
 			if v.borrow().is_discovered() == true {
+				println!("ADD: {}", v.borrow().path);
 				sorted_nodes.push(v.clone());
+			} else {
+				println!(
+					"{},{}: {}",
+					v.borrow().num_successors(),
+					v.borrow().times_visited,
+					v.borrow().path
+				);
 			}
 		}
 	}
