@@ -4,7 +4,10 @@ use std::{cell::RefCell, rc::Rc};
 
 /// Compute minimum cost for a node to be considered the end of a
 /// section with deepest heading level
-pub fn compute_min_dag_costs(sorted_costs: Vec<usize>) -> usize {
+pub fn compute_min_dag_costs(
+	extra_headings: bool,
+	sorted_costs: Vec<usize>,
+) -> usize {
 	let mut rank = vec![0; sorted_costs.len()];
 	let mut j = 0;
 
@@ -24,9 +27,10 @@ pub fn compute_min_dag_costs(sorted_costs: Vec<usize>) -> usize {
 	} else {
 		sorted_costs.len() - 1
 	};
-	for i in 0..rank.len() {
-		// TODO: change back
-		rank[i] += sorted_costs[min_cost_index];
+	if extra_headings == false {
+		for i in 0..rank.len() {
+			rank[i] += sorted_costs[min_cost_index];
+		}
 	}
 
 	// Get cost corresponding to h-index

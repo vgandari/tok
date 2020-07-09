@@ -14,6 +14,7 @@ pub struct Options {
 	pub eli5: bool,
 	pub make_pdf: bool,
 	pub generate_headings: bool,
+	pub extra_headings: bool,
 	pub depth: i32,
 	pub title: String,
 	pub author: String,
@@ -41,6 +42,7 @@ impl Options {
 			eli5: matches.is_present("eli5"),
 			make_pdf: !matches.is_present("make_pdf"),
 			generate_headings: matches.is_present("generate_headings"),
+			extra_headings: matches.is_present("extra_headings"),
 			depth: matches
 				.value_of("depth")
 				.unwrap_or("-1")

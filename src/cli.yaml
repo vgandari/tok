@@ -96,7 +96,13 @@ args:
       long: headings
       help: |
         Automatically generate chapter, section, subsection, etc.
-        headings
+        headings; OFF by default
+      takes_value: false
+  - extra_headings:
+      long: extra-headings
+      help: |
+        Automatically generate chapter, section, subsection, etc.
+        headings; OFF by default
       takes_value: false
   - generalizations_before:
       long: gen-before

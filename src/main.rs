@@ -83,7 +83,8 @@ fn main() -> std::io::Result<()> {
 	let sorted_nodes = topological_sort(root.clone());
 
 	// Generate headings
-	if options.generate_headings == true {
+	if options.generate_headings == true || options.extra_headings == true
+	{
 		// Rank costs
 		let mut ranked_costs: Vec<usize> = sorted_nodes
 			.clone()
@@ -92,7 +93,8 @@ fn main() -> std::io::Result<()> {
 			.collect();
 		ranked_costs.sort();
 
-		let min_cost = compute_min_dag_costs(ranked_costs);
+		let min_cost =
+			compute_min_dag_costs(options.extra_headings, ranked_costs);
 		set_heading_depth(root.clone(), &min_cost);
 	}
 
