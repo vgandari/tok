@@ -236,8 +236,18 @@ pub fn write_to_tex(
 				"subsubsection",
 			],
 		};
+		// Write heading title
+		let heading_label_pfx = match max_heading_depth {
+			0 => vec!["", "", "", "", "", ""],
+			1 => vec!["", "sec", "", "", "", "", ""],
+			2 => vec!["", "sec", "ssec", "", "", "", ""],
+			3 => vec!["", "ch", "sec", "ssec", "", "", ""],
+			4 => vec!["", "ch", "sec", "ssec", "sssec", "", ""],
+			5 => vec!["", "pt", "ch", "sec", "ssec", "sssec", ""],
+			// ignore anything deeper than 6 levels
+			_ => vec!["", "bk", "pt", "ch", "sec", "ssec", "sssec"],
+		};
 
-		// TODO: add reflabels to sections
 		let mut i = node.borrow().data().heading_depth_start;
 		for ht in node.borrow().data().heading_titles.clone() {
 			if i <= max_heading_depth {
@@ -246,6 +256,10 @@ pub fn write_to_tex(
 					file.write_all(heading_cmds[i].as_bytes()).expect("");
 					file.write_all(b"{").expect("");
 					file.write_all(ht.as_bytes()).expect("");
+					file.write_all(b"}\\label{").expect("");
+					file.write_all(heading_label_pfx[i].as_bytes()).expect("");
+					file.write_all(b":").expect("");
+					file.write_all(node.borrow().path.as_bytes()).expect("");
 					file.write_all(b"}\n\n").expect("");
 				}
 			}
