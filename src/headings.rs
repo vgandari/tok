@@ -43,8 +43,8 @@ pub fn compute_min_dag_costs(sorted_costs: Vec<usize>) -> usize {
 
 /// Set heading depth for node and all its predecessors if generating
 /// headings
-pub fn set_heading_depth<T>(
-	node: Rc<RefCell<Node<T>>>,
+pub fn set_heading_depth(
+	node: Rc<RefCell<Node<Topic>>>,
 	min_cost: &usize,
 ) {
 	for p in node.borrow().predecessors() {
@@ -53,7 +53,8 @@ pub fn set_heading_depth<T>(
 				&& node.borrow().predecessors().len() > 1
 		};
 		if possibly_parallel {
-			p.borrow_mut().heading_depth = node.borrow().heading_depth + 1;
+			p.borrow_mut().data_mut().heading_depth =
+				node.borrow().data().heading_depth + 1;
 		}
 		set_heading_depth(p.clone(), min_cost);
 	}
@@ -134,12 +135,12 @@ pub fn add_heading_titles_to_nodes(
 		let mut ht = "".to_string();
 		let mut prev_node: Option<Rc<RefCell<Node<Topic>>>> = None;
 		for current_node in sorted_nodes {
-			let hd = current_node.borrow().heading_depth;
+			let hd = current_node.borrow().data().heading_depth;
 
 			// TODO: make a data_mut method for topic
 			if prev_node.is_some() && hd <= chd && hd > 0 {
 				let p = prev_node.unwrap().clone();
-				p.borrow_mut().heading_titles.push(ht.clone());
+				p.borrow_mut().data_mut().heading_titles.push(ht.clone());
 			}
 
 			if hd == chd {
@@ -153,6 +154,7 @@ pub fn add_heading_titles_to_nodes(
 		prev_node
 			.unwrap()
 			.borrow_mut()
+			.data_mut()
 			.heading_titles
 			.push(ht.clone());
 	}

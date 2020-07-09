@@ -7,18 +7,12 @@ pub struct Node<T> {
 	/// Number of successors (used for breaking cycles in topological
 	/// sort)
 	num_successors: usize,
-	pub heading_depth: usize,
-	/// Number of predecessors (used for inserting headings)
-	// num_predecessors: usize,
 	/// Cost of this node; used for computing tree cost; uses length of
 	/// text string as heuristic for how long it takes to master the
 	/// content provided in this node
 	pub cost: usize,
 	/// YAML key; Path to corresponding YAML file; also used as reflabel in LaTeX
 	pub path: String,
-	/// Heading title if this topic forms the start of a chapter, section,
-	/// subsection, etc.
-	pub heading_titles: Vec<String>,
 	/// Sequence of file paths with node data that this node must come
 	/// after; relationship may be broken if tok detects cycles
 	pub after: Vec<String>,
@@ -53,13 +47,11 @@ impl<T> Node<T> {
 	) -> Rc<RefCell<Node<T>>> {
 		Rc::new(RefCell::new(Node::<T> {
 			path: String::from(filename.clone()),
-			heading_titles: vec![],
 			predecessors: vec![],
 			successors: vec![],
 			after: vec![],
 			before: vec![],
 			num_successors: 0,
-			heading_depth: 0,
 			data: data,
 			dag_cost: 1,
 			cost: 1,
@@ -163,6 +155,10 @@ impl<T> Node<T> {
 
 	pub fn data(&self) -> &T {
 		&self.data
+	}
+
+	pub fn data_mut(&mut self) -> &mut T {
+		&mut self.data
 	}
 
 	pub fn dedup_after(&mut self) {

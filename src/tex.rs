@@ -233,7 +233,7 @@ pub fn write_to_tex(
 
 		// TODO: add reflabels to sections
 		let mut i = 0;
-		for ht in node.borrow().heading_titles.clone() {
+		for ht in node.borrow().data().heading_titles.clone() {
 			if i < max_heading_depth {
 				if ht.is_empty() == false {
 					file.write_all(b"\\").expect("");

@@ -102,7 +102,7 @@ fn main() -> std::io::Result<()> {
 		if options.generate_headings == true {
 			add_heading_titles_to_nodes(&sorted_nodes);
 			for node in sorted_nodes.clone() {
-				mhd = max(mhd, node.borrow().heading_depth);
+				mhd = max(mhd, node.borrow().data().heading_depth);
 			}
 		}
 		mhd
@@ -112,7 +112,7 @@ fn main() -> std::io::Result<()> {
 	println!("COST | HEADING DEPTH | FILE | LABEL");
 	println!("");
 	for n in sorted_nodes.iter().rev() {
-		for ht in n.borrow().heading_titles.clone() {
+		for ht in n.borrow().data().heading_titles.clone() {
 			if ht.is_empty() == false {
 				println!(" ---- {}", ht);
 			}
@@ -120,7 +120,7 @@ fn main() -> std::io::Result<()> {
 		println!(
 			"{} | {} | {} | {}",
 			n.borrow().dag_cost(),
-			n.borrow().heading_depth,
+			n.borrow().data().heading_depth,
 			n.borrow().path,
 			n.borrow().data().label,
 		);
