@@ -18,14 +18,15 @@ use crate::topic::{create_topic, Topic};
 use crate::yaml::read_from_yaml;
 use std::{
 	cell::RefCell, cmp::max, collections::HashMap, collections::HashSet,
-	process::Command, rc::Rc,
+	env, path::Path, process::Command, rc::Rc,
 };
 #[macro_use]
 extern crate clap;
 use clap::App;
 use time::PreciseTime;
 
-/// The main function that executes when tok is called from the command line
+/// The main function that executes when tok is called from the command
+/// line
 fn main() -> std::io::Result<()> {
 	// Measure duration to output to user
 	let start_time = PreciseTime::now();
@@ -47,10 +48,7 @@ fn main() -> std::io::Result<()> {
 		let clean_filename = filename.replace("../", "").replace("./", "");
 		root.borrow_mut().req.push(clean_filename.to_string());
 	}
-	println!("Building Directed Acyclic Graph");
-	println!("from files (ignoring cycles)...");
-	println!("");
-
+	println!("Building Directed Acyclic Graph (ignoring cycles)...");
 	{
 		let mut pbranch: HashSet<String> = HashSet::new();
 		let mut sbranch: HashSet<String> = HashSet::new();
@@ -63,9 +61,9 @@ fn main() -> std::io::Result<()> {
 			create_topic,
 		);
 	}
-	println!("");
 
-	// Remove indirect predecessors to compute costs accurately
+	// Remove indirect predecessors to generate unique DAG and compute
+	// costs accurately
 	for (_, n) in nodes.clone() {
 		remove_indirect_predecessors(n.clone());
 	}
@@ -73,8 +71,10 @@ fn main() -> std::io::Result<()> {
 	// Compute DAG costs
 	root.borrow_mut().compute_dag_cost();
 
-	// Sort branches for topological sort (default is critical path; user
-	// may select lowest hanging fruit)
+	// Sort branches for topological sort (default is to sort branches so
+	// that generted document presents topics in an order that traverses
+	// critical path first; user may select "lowest hanging fruit"
+	// ordering)
 	for (_, n) in nodes.clone() {
 		n.borrow_mut().sort_predecessor_branches(options.reverse);
 	}
@@ -93,6 +93,7 @@ fn main() -> std::io::Result<()> {
 			.collect();
 		ranked_costs.sort();
 
+		// Minimum cost for a node to qualify to have a heading of any depth
 		let min_cost =
 			compute_min_dag_costs(options.extra_headings, ranked_costs);
 		set_heading_depth(root.clone(), &min_cost);
@@ -101,15 +102,21 @@ fn main() -> std::io::Result<()> {
 	// Add headings, included manually added headings
 	let max_heading_depth = {
 		let mut mhd: usize = 0;
-		if options.generate_headings == true {
+		if options.generate_headings == true
+			|| options.extra_headings == true
+		{
 			add_heading_titles_to_nodes(&sorted_nodes);
 			for node in sorted_nodes.clone() {
 				mhd = max(mhd, node.borrow().data().heading_depth);
 			}
 		}
+		// Even if we don't generate headings, we still need to provide this
+		// argument to `tex::write_tex`
 		mhd
 	};
 
+	// Terminal output to view organization of topics without
+	// generating/viewing PDF
 	println!("Order of files in document:");
 	println!("COST | HEADING DEPTH | FILE | LABEL");
 	println!("");
@@ -129,54 +136,46 @@ fn main() -> std::io::Result<()> {
 	}
 	println!("{} total nodes", sorted_nodes.len());
 
-	// Create document source file (TeX/MD) and compile document (TeX->PDF, MD->HTML)
+	// Create document source file (TeX/MD) and compile document
+	// (TeX->PDF, MD->HTML)
 	println!("========================================");
 	// make directories for output
-	// TODO: Use symlinks instead
-	let mut mkdir_cmd = Command::new("mkdir");
-	let mkdir_code_args = ["../output/code/"];
-	let mkdir_images_args = ["../output/images/"];
-	mkdir_cmd
+	Command::new("mkdir")
 		.arg("../output")
 		.output()
 		.expect("Could not create output/ directory");
-	mkdir_cmd
-		.args(&mkdir_code_args)
-		.output()
-		.expect("Could not create output/code/ directory");
-	mkdir_cmd
-		.args(&mkdir_images_args)
-		.output()
-		.expect("Could not create output/images/ directory");
 
-	// #[cfg(target_os = "macos")]
-	// std::os::unix::fs::symlink("../code/", "../output/code/")?;
-	// std::os::unix::fs::symlink("../code/", "../output/images/")?;
-	// #[cfg(target_os = "windows")]
-	// std::os::windows::fs::symlink_dir("../code/", "../output/code/")?;
-	// std::os::windows::fs::symlink_dir("../code/", "../output/images/")?;
+	// Symlink directories for media (e.g. code listings, images, etc.)
+	if cfg!(target_os = "macos") || cfg!(target_os = "linux") {
+		// Get parent path (project root)
+		let a = env::current_dir()?;
+		let b = a.to_path_buf();
+		let c = b.parent();
+		let parent_path = c.unwrap();
 
-	// copy directories for figures, snippets, etc.
-	let _cp_cls_status = Command::new("sh")
-		.arg("-c")
-		.arg("cp -r ../texinput/*.cls ../output/")
-		.status()
-		.unwrap();
-	let _cp_bst_status = Command::new("sh")
-		.arg("-c")
-		.arg("cp -r ../texinput/*.bst ../output/")
-		.status()
-		.unwrap();
-	let _cp_images_status = Command::new("sh")
-		.arg("-c")
-		.arg("cp -r ../images/* ../output/images")
-		.status()
-		.unwrap();
-	let _cp_code_status = Command::new("sh")
-		.arg("-c")
-		.arg("cp -r ../code/* ../output/code")
-		.status()
-		.unwrap();
+		// Symlink code
+		let code_path = parent_path.display().to_string() + "/code";
+		let code_link = parent_path.display().to_string() + "/output/code";
+		if Path::new(&code_path).exists() && !Path::new(&code_link).exists()
+		{
+			std::os::unix::fs::symlink(code_path, code_link)?;
+		}
+
+		// Symlink images
+		let images_path = parent_path.display().to_string() + "/images";
+		let images_link =
+			parent_path.display().to_string() + "/output/images";
+		if Path::new(&images_path).exists()
+			&& !Path::new(&images_link).exists()
+		{
+			std::os::unix::fs::symlink(images_path, images_link)?;
+		}
+	}
+
+	// FIXME: std::os::windows not detected by compiler
+	// else if cfg!(target_os = "windows") {
+	// 	std::os::windows::fs::symlink_dir("../code/", "../output/images/")?;
+	// }
 
 	// Write text stored in nodes to tex file
 	write_to_tex(
