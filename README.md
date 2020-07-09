@@ -127,27 +127,30 @@ dependency relationships between the nodes.
 Dependency relationships between nodes are declared within YAML files.
 The following keys are for expressing dependency relationships:
 
- - `after`: Text stored in this node must appear "after" all text
-   contained in the files in this list.
- - `before`: Text stored in this node must appear "before" all text
-   contained in the files in this list.
+ - `req`: Text stored in this node must appear "after" all text
+   contained in the files in this list. All nodes listed under "req" are
+   required for understanding material in this node's text.
+ - `incl`: Text stored in this node must appear "before" all text
+   contained in the files in this list. Nodes listed under "incl" are
+   not required for understanding material in this node's text, but are
+   nodes the author has decided to include anyway.
 
 For example, if node A depends on node B (i.e. text stored in A must
 appear later in the document than text stroed in B), then you may write
 
 ```yaml
-after:
+req:
   - B.yaml
 ```
 
-inside of `A.yaml`, or
+inside of `A.yaml`, and/or
 
 ```yaml
-before:
+incl:
   - A.yaml
 ```
 
-inside of `B.yaml`, or _both_.
+inside of `B.yaml`.
 
 Note that if a cycle happens to form within the graph you define (for
 larger projects, it's hard not to end up with any cycles!), then a

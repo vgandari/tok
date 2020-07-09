@@ -153,11 +153,11 @@ pub fn create_topic(
 
 	for (k, v) in yaml_content.pairs {
 		match k.as_ref() {
-			"after" => {
-				node.borrow_mut().after = serde_yaml::from_value(v).expect("")
+			"req" => {
+				node.borrow_mut().req = serde_yaml::from_value(v).expect("")
 			}
-			"before" => {
-				node.borrow_mut().before = serde_yaml::from_value(v).expect("")
+			"incl" => {
+				node.borrow_mut().incl = serde_yaml::from_value(v).expect("")
 			}
 			"label" => {
 				// If user supplied label different from what is in filename,

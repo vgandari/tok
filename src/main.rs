@@ -45,7 +45,7 @@ fn main() -> std::io::Result<()> {
 	nodes.insert(root_path, root.clone());
 	for filename in options.files.clone() {
 		let clean_filename = filename.replace("../", "").replace("./", "");
-		root.borrow_mut().after.push(clean_filename.to_string());
+		root.borrow_mut().req.push(clean_filename.to_string());
 	}
 	println!("Building Directed Acyclic Graph");
 	println!("from files (ignoring cycles)...");

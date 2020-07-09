@@ -49,7 +49,7 @@ fn build_dag_backward<T, U>(
 	let node_path = { node.borrow().path.clone() };
 	pbranch.insert(node_path.clone());
 
-	let paths = node.borrow().after.clone();
+	let paths = node.borrow().req.clone();
 	for dirty_path in paths {
 		let path = dirty_path.replace("../", "").replace("./", "");
 		let cycle = pbranch.contains(&path);
@@ -151,7 +151,7 @@ fn build_dag_forward<T, U>(
 	let leaf_path = { leaf.borrow().path.clone() };
 	sbranch.insert(leaf_path.clone());
 	let root = nodes[&"//".to_string()].clone();
-	let paths = leaf.borrow().before.clone();
+	let paths = leaf.borrow().incl.clone();
 
 	for dirty_path in paths {
 		let path = dirty_path.replace("../", "").replace("./", "");

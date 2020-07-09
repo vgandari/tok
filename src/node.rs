@@ -15,10 +15,10 @@ pub struct Node<T> {
 	pub path: String,
 	/// Sequence of file paths with node data that this node must come
 	/// after; relationship may be broken if tok detects cycles
-	pub after: Vec<String>,
+	pub req: Vec<String>,
 	/// Sequence of file paths with node data that this node must come
 	/// before; relationship may be broken if tok detects cycles
-	pub before: Vec<String>,
+	pub incl: Vec<String>,
 	/// Vector of pointers to predecessor nodes; necessary for
 	/// constructing tree; not a YAML key
 	predecessors: Vec<Rc<RefCell<Node<T>>>>,
@@ -49,8 +49,8 @@ impl<T> Node<T> {
 			path: String::from(filename.clone()),
 			predecessors: vec![],
 			successors: vec![],
-			after: vec![],
-			before: vec![],
+			req: vec![],
+			incl: vec![],
 			num_successors: 0,
 			data: data,
 			dag_cost: 1,
@@ -162,13 +162,13 @@ impl<T> Node<T> {
 	}
 
 	pub fn dedup_after(&mut self) {
-		self.after.sort_unstable();
-		self.after.dedup();
+		self.req.sort_unstable();
+		self.req.dedup();
 	}
 
 	pub fn dedup_before(&mut self) {
-		self.before.sort_unstable();
-		self.before.dedup();
+		self.incl.sort_unstable();
+		self.incl.dedup();
 	}
 
 	/// Find index of predecessor node; returns zero if there are no
