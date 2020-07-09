@@ -9,13 +9,6 @@ args:
       help: |
         "Crib sheet" or "Cheat sheet" mode; default is "full text" mode
       takes_value: false
-  - draft:
-      short: d
-      long: draft
-      help: |
-        [INOP] Include "DRAFT" watermark (default is no
-        watermark)
-      takes_value: false
   - engine:
       long: engine
       help: |
