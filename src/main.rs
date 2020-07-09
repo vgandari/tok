@@ -117,9 +117,10 @@ fn main() -> std::io::Result<()> {
 
 	// Terminal output to view organization of topics without
 	// generating/viewing PDF
+	println!("");
+	println!("========================================");
 	println!("Order of files in document:");
 	println!("COST | HEADING DEPTH | FILE | LABEL");
-	println!("");
 	for n in sorted_nodes.iter().rev() {
 		for heading_title in n.borrow().data().heading_titles.clone() {
 			if heading_title.is_empty() == false {
@@ -135,6 +136,11 @@ fn main() -> std::io::Result<()> {
 		);
 	}
 	println!("{} total nodes", sorted_nodes.len());
+	let time_to_build_dag = start_time.to(PreciseTime::now());
+	println!(
+		"Time to build DAG: {} ms.",
+		time_to_build_dag.num_milliseconds()
+	);
 
 	// Create document source file (TeX/MD) and compile document
 	// (TeX->PDF, MD->HTML)
@@ -187,15 +193,21 @@ fn main() -> std::io::Result<()> {
 	write_bib(&sorted_nodes);
 
 	// Report time
-	println!("========================================");
 	println!(
-		"Time to generate tex file: {} ms.",
-		(start_time.to(PreciseTime::now())).num_milliseconds()
+		"Time to generate TEX file: {} ms.",
+		(start_time.to(PreciseTime::now()) - time_to_build_dag)
+			.num_milliseconds()
 	);
+	println!("========================================");
 
 	// Compile PDF
 	if options.make_pdf == true {
 		compile_pdf(&options);
+		println!(
+			"Time to generate TEX+PDF: {} ms.",
+			(start_time.to(PreciseTime::now()) - time_to_build_dag)
+				.num_milliseconds()
+		);
 	}
 	println!("Finished.");
 

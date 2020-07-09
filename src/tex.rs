@@ -104,6 +104,7 @@ pub fn write_to_tex(
 			file
 				.read_to_string(&mut contents)
 				.expect("Cannot read to string");
+			println!("Using custom preamble");
 			contents
 		} else {
 			println!("Using default preamble");
@@ -118,6 +119,7 @@ pub fn write_to_tex(
 			file
 				.read_to_string(&mut contents)
 				.expect("Cannot read to string");
+			println!("Using custom frontmatter");
 			contents
 		} else {
 			println!("Using default frontmatter");
@@ -132,6 +134,7 @@ pub fn write_to_tex(
 			file
 				.read_to_string(&mut contents)
 				.expect("Cannot read to string");
+			println!("Using custom backmatter");
 			contents
 		} else {
 			println!("Using default backmatter");

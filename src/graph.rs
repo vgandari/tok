@@ -121,7 +121,6 @@ pub fn topological_sort<T>(
 			// Iterative DFS
 			if v.borrow().times_visited() >= v.borrow().num_successors() {
 				for w in v.borrow().predecessors().iter() {
-					println!("{}::{}", v.borrow().path, w.borrow().path);
 					stack.push(w.clone());
 				}
 			}
