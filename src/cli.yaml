@@ -4,11 +4,10 @@ author: Victor Gandarillas
 about: Tree of Knowledge -- textbook and to do list generator
 args:
   - crib:
-      short: C
+      short: c
       long: crib
       help: |
-        [INOP] "Crib sheet" or "Cheat sheet" mode
-        (overrides -a or --all flag; default is "full text" mode)
+        "Crib sheet" or "Cheat sheet" mode; default is "full text" mode
       takes_value: false
   - draft:
       short: d
@@ -18,22 +17,15 @@ args:
         watermark)
       takes_value: false
   - engine:
-      short: e
       long: engine
       help: |
         [INOP] Choose LaTeX engine (default is xelatex)
-      takes_value: false
+      takes_value: true
   - examples:
       short: g
       long: examples
       help: |
         [INOP] Include examples in textbook (default is hidden)
-      takes_value: false
-  - preamble:
-      short: P
-      long: preamble
-      help: |
-        [INOP] Choose preamble file
       takes_value: false
   - proofs:
       short: p
@@ -111,21 +103,13 @@ args:
         paths in case sequence as successors (default is
         opposite)
       takes_value: false
-  - config:
-      short: c
-      long: config
-      value_name: FILE
-      help: |
-        [INOP] read from config file specifying formatting
-        options (default is .tok-config in same directory)
-      takes_value: true
   - title:
       long: title
-      help: Set title for document generated
+      help: Overwrite title for document generated
       takes_value: true
   - author:
       long: author
-      help: Set author of document generated
+      help: Overwrite author of document generated
       takes_value: true
   - date:
       long: date
@@ -138,11 +122,10 @@ args:
   - depth:
       long: depth
       help: |
-        Depth of successor branch; default is to load all
-        successors, but placing a limit may reduce the size
-        of a document; setting --depth="0" guarantees that no
-        appendix is generated; a negative number leads to
-        default behavior
+        [INOP] Depth of successor branch; default is to load all
+        successors, but placing a limit may reduce the size of a
+        document; setting --depth="0" guarantees that no appendix is
+        generated; a negative number leads to default behavior
       takes_value: true
   - FILES:
       required: true
