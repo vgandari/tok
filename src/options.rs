@@ -1,4 +1,5 @@
 pub struct Options {
+	pub verbose: bool,
 	pub yaml: bool,
 	pub reverse: bool,
 	pub show_wiki: bool,
@@ -25,6 +26,7 @@ pub struct Options {
 impl Options {
 	pub fn new(matches: clap::ArgMatches) -> Self {
 		Options {
+			verbose: matches.is_present("verbose"),
 			reverse: matches.is_present("reverse"),
 			yaml: matches.is_present("yaml"),
 			show_wiki: matches.is_present("wiki"),

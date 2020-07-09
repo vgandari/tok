@@ -45,6 +45,12 @@ args:
       help: |
         Show links to URLs
       takes_value: false
+  - verbose:
+      short: v
+      long: verbose
+      help: |
+        [INOP] Verbose output
+      takes_value: false
   - wiki:
       short: w
       long: wiki
