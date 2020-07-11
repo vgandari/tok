@@ -145,7 +145,7 @@ pub fn create_topic(
 			filename.to_string()
 		};
 		// Remove file extension
-		let file_extension_start = label.find('.').unwrap_or(0);
+		let file_extension_start = label.rfind('.').unwrap_or(0);
 		label = label[0..file_extension_start].to_string();
 		// Replace underscores with spaces, change to titlecase
 		titlecase(&label.replace("_", " ")[..])
@@ -200,21 +200,19 @@ pub fn create_topic(
 		}
 	}
 	// Update node cost
-	if (data.env == "task") | (data.env == "checked") {
-		// node.borrow_mut().cost = 1;
-		if (data.ys > 0) | (data.ye > 0) {
+	if data.env == "task" || data.env == "done" {
+		if data.ys > 0 || data.ye > 0 {
 			let a = Utc.ymd(data.ys, data.ms, data.ds);
 			let b = Utc.ymd(data.ye, data.me, data.de + 1);
 			if b > a {
 				data.duration = (b - a).num_days();
 			}
 		}
-	} else {
-		node.borrow_mut().cost = 1
-			+ data.main.len() as usize
-			+ data.pre.len() as usize
-			+ data.post.len() as usize;
 	}
+	node.borrow_mut().cost = 1
+		+ data.main.len() as usize
+		+ data.pre.len() as usize
+		+ data.post.len() as usize;
 
 	let dag_cost = node.borrow().cost;
 	{

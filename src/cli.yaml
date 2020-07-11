@@ -7,12 +7,14 @@ args:
       short: c
       long: crib
       help: |
-        "Crib sheet" or "Cheat sheet" mode; default is "full text" mode
+        "Crib sheet" or "Cheat sheet" mode, ignores -w option, meant for
+        printing on a sheet of paper for exams; default is "full text"
+        mode
       takes_value: false
   - engine:
       long: engine
       help: |
-        [INOP] Choose LaTeX engine (default is xelatex)
+        Choose LaTeX engine (default is xelatex)
       takes_value: true
   - examples:
       short: g

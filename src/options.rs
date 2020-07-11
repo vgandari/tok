@@ -1,3 +1,5 @@
+use titlecase::titlecase;
+
 pub struct Options {
 	pub verbose: bool,
 	pub yaml: bool,
@@ -20,6 +22,7 @@ pub struct Options {
 	pub author: String,
 	pub date: String,
 	pub output: String,
+	pub engine: String,
 	pub files: Vec<String>,
 }
 
@@ -48,9 +51,42 @@ impl Options {
 				.unwrap_or("-1")
 				.parse::<i32>()
 				.unwrap_or(-1),
-			title: matches.value_of("title").unwrap_or("").to_string(),
+			// Replace title with title from command line, or if none given
+			// and only single file is passed as input, replace title with
+			// single file's label
+			title: if matches.values_of_lossy("FILES").unwrap().len() == 1
+				&& matches
+					.value_of("title")
+					.unwrap_or("")
+					.to_string()
+					.is_empty()
+					== true
+			{
+				// Get filename
+				let mut filename = matches.values_of_lossy("FILES").unwrap()[0]
+					.replace("./", "");
+
+				// Remove file extension
+				let file_extension_start = filename.rfind('.').unwrap_or(0);
+				filename = filename[0..file_extension_start].to_string();
+
+				// Extract label from filename, exclude environment
+				let first_underscore = filename.find('_').unwrap_or(0);
+				let label: String = if first_underscore > 0 {
+					filename[first_underscore + 1..].to_string()
+				} else {
+					filename.to_string()
+				};
+
+				// Replace underscores with spaces, change to titlecase
+				titlecase(&label.replace("_", " ")[..])
+			} else {
+				println!("{}", matches.values_of_lossy("FILES").unwrap().len());
+				matches.value_of("title").unwrap_or("").to_string()
+			},
 			author: matches.value_of("author").unwrap_or("").to_string(),
 			date: matches.value_of("date").unwrap_or("").to_string(),
+			engine: matches.value_of("engine").unwrap_or("").to_string(),
 			output: matches.value_of("output").unwrap_or("").to_string(),
 			files: matches.values_of_lossy("FILES").unwrap(),
 		}

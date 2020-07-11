@@ -12,17 +12,25 @@ pub fn compile_pdf(options: &Options) {
 	// set output directory for tex file
 	let latex_args =
 		["-output-directory=../output", "../output/main.tex"];
-	let mut latex_cmd = Command::new("xelatex");
+	let mut latex_cmd = match options.engine.as_str() {
+		"pdflatex" => Command::new("pdflatex"),
+		"lualatex" => Command::new("lualatex"),
+		"xelatex" => Command::new("xelatex"),
+		_ => Command::new("xelatex"),
+	};
 	latex_cmd.current_dir("../output").args(&latex_args);
 
-	// compile
+	// Run LaTeX
 	println!("Compiling PDF ...");
-
-	// Run XeLaTeX
-	println!("Running XeLaTeX (1 of 3) ...");
+	match options.engine.as_str() {
+		"pdflatex" => println!("Running PDFLaTeX (1 of 3) ..."),
+		"lualatex" => println!("Running LuaLaTeX (1 of 3) ..."),
+		"xelatex" => println!("Running XeLaTeX (1 of 3) ..."),
+		_ => println!("Running XeLaTeX (1 of 3) ..."),
+	};
 	let _ = latex_cmd
 		.output()
-		.expect("xelatex command failed to start; it may not be installed");
+		.expect("LaTeX command failed to start; it may not be installed");
 
 	// BibTeX
 	println!("Running BibTeX ...");
@@ -32,15 +40,25 @@ pub fn compile_pdf(options: &Options) {
 		.output()
 		.expect("bibtex failed to start");
 
-	// Rerun XeLaTeX
-	println!("Running XeLaTeX (2 of 3) ...");
+	// Rerun LaTeX
+	match options.engine.as_str() {
+		"pdflatex" => println!("Running PDFLaTeX (2 of 3) ..."),
+		"lualatex" => println!("Running LuaLaTeX (2 of 3) ..."),
+		"xelatex" => println!("Running XeLaTeX (2 of 3) ..."),
+		_ => println!("Running XeLaTeX (2 of 3) ..."),
+	};
 	let _ = latex_cmd
 		.output()
-		.expect("xelatex command failed to start; it may not be installed");
-	println!("Running XeLaTeX (3 of 3) ...");
+		.expect("LaTeX command failed to start; it may not be installed");
+	match options.engine.as_str() {
+		"pdflatex" => println!("Running PDFLaTeX (3 of 3) ..."),
+		"lualatex" => println!("Running LuaLaTeX (3 of 3) ..."),
+		"xelatex" => println!("Running XeLaTeX (3 of 3) ..."),
+		_ => println!("Running XeLaTeX (3 of 3) ..."),
+	};
 	let _ = latex_cmd
 		.output()
-		.expect("xelatex command failed to start; it may not be installed");
+		.expect("LaTeX command failed to start; it may not be installed");
 	println!("Finished compiling PDF.");
 	println!("Check logfiles for any errors.");
 
@@ -169,14 +187,13 @@ pub fn write_to_tex(
 	// Write title and frontmatter to file
 	file.write_all(b"\n").expect("");
 	file.write_all(b"\\begin{document}").expect("");
-	file
-		.write_all(b"\n\n\\maketitle\n\\frontmatter\n")
-		.expect("");
+	file.write_all(b"\n\n\\maketitle\n\n").expect("");
 
 	if frontmatter.is_empty() == false {
+		file.write_all(b"\\frontmatter\n\n").expect("");
 		file.write_all(frontmatter.as_bytes()).expect("");
+		file.write_all(b"\n\n\\mainmatter\n\n").expect("");
 	}
-	file.write_all(b"\n\\mainmatter\n\n").expect("");
 
 	// Write content in each node
 	let mut write_appendix = false;
@@ -268,12 +285,12 @@ pub fn write_to_tex(
 
 		// Write source YAML file name
 		if options.yaml == true {
-			file.write_all(b"\\begin{verbatim}\n").expect("");
+			file.write_all(b"\\texttt{").expect("");
 			file.write_all(node.borrow().path.as_bytes()).expect("");
-			file.write_all(b"\n\\end{verbatim}\n\n").expect("");
+			file.write_all(b"}\n\n").expect("");
 		}
 
-		// Write label if env is unspecified
+		// Write label in bold text if env is `plain`
 		if node.borrow().data().env.as_str() == "plain" {
 			if node.borrow().data().label.is_empty() == false {
 				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
@@ -296,9 +313,10 @@ pub fn write_to_tex(
 				file
 					.write_all(b"\\marginpar{$\\square$  \\textbf{TO DO}}\n")
 					.expect("");
-				file
-					.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
-					.expect("");
+				// file
+				// 	.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
+				// 	.expect("");
+				file.write_all(b"\\reversemarginpar\n").expect("");
 			}
 			"done" => {
 				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
@@ -309,9 +327,10 @@ pub fn write_to_tex(
 				file
 					.write_all(b"\\marginpar{\\ding{51} \\textbf{DONE}}\n")
 					.expect("");
-				file
-					.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
-					.expect("");
+				// file
+				// 	.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
+				// 	.expect("");
+				file.write_all(b"\\reversemarginpar\n").expect("");
 			}
 			_ => (),
 		}
@@ -335,11 +354,6 @@ pub fn write_to_tex(
 				.expect("");
 			file.write_all(b"\n").expect("");
 		}
-
-		// file
-		// 	.write_all(node.borrow().data().label.as_bytes())
-		// 	.expect("");
-		// file.write_all(b"\n\n").expect("");
 
 		// Write main text
 		match node.borrow().data().env.as_str() {
@@ -588,27 +602,27 @@ pub fn write_to_tex(
 			file.write_all(b"\n\n\\noindent\n").expect("");
 			file.write_all(b"\\href{").expect("");
 			if node.borrow().data().wiki.is_empty() == true {
-				let mut wiki_search_url: String =
+				let wiki_search_url: String =
 					"https://en.wikipedia.org/w/index.php?search=".to_string();
-				let wiki_search_term: String = node
-					.borrow()
-					.data()
-					.label
-					.chars()
-					.map(|x| match x {
-						' ' => '+',
-						_ => x,
-					})
-					.collect();
-				wiki_search_url.push_str(wiki_search_term.as_str());
-
-				file.write_all(wiki_search_url.as_bytes()).expect("");
-			} else {
+				let wiki_search_term: String =
+					node.borrow().data().label.clone();
+				file
+					.write_all((wiki_search_url + &wiki_search_term).as_bytes())
+					.expect("");
+			} else if options.crib == false {
 				file
 					.write_all(node.borrow().data().wiki.as_bytes())
 					.expect("");
 			}
-			file.write_all(b"}{Search for ``").expect("");
+
+			// Hyperlink label
+			file.write_all(b"}{").expect("");
+			if node.borrow().data().wiki.is_empty() == true {
+				// If author does not provide direct link, do not suggest that
+				// the link merely searches for the Wikipedia page
+				file.write_all(b"Search for ").expect("");
+			}
+			file.write_all(b"``").expect("");
 			file
 				.write_all(node.borrow().data().label.as_bytes())
 				.expect("");
@@ -656,9 +670,11 @@ pub fn write_to_tex(
 	}
 
 	// Write backmatter
-	file.write_all(b"\n\\backmatter\n").expect("");
-	file.write_all(backmatter.as_bytes()).expect("");
-	file.write_all(b"\n\\end{document}").expect("");
+	if backmatter.is_empty() == false {
+		file.write_all(b"\n\n\\backmatter\n\n").expect("");
+		file.write_all(backmatter.as_bytes()).expect("");
+	}
+	file.write_all(b"\n\n\\end{document}").expect("");
 }
 
 /// Generate BibTeX file from sources

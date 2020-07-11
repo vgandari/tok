@@ -75,15 +75,27 @@
 - [ ] ~~Add key for using `minted` package for listings~~
 - [ ] ~~display which paths can be traversed in parallel~~
 - [x] generate chapters, sections, subsections, etc.
+- [ ] ~~why: include motivation for introducing current topic; keeps
+      motivation and discussion separate~~
+- [ ] ~~Publish docs on GitHub Pages (not helpful since this isn't a
+      library)~~
+- [ ] ~~Default preamble: choose book or article based on sections
+      generated~~ Default is memoir class; article option does this for
+      you
+- [x] User option to select LaTeX engine
 
 ## Next Steps
 
+- [ ] Clean up
 - [ ] Create symlinks instead of copying images and code directories
-  - [ ] Mac/UNIX
+  - [x] Mac/UNIX
   - [ ] Linux
   - [ ] Windows
-- [ ] Use directory name where tok is run as name of TEX and PDF output
-      file names
+- [ ] place references at end of each chapter, if any chapters are generated
+  - if max heading depth <= 3 (no chapters), then print
+    `\begin{refsection}`, `\end{refsection}` at begining and end of
+    document.
+  - default backmatter is empty.
 
 ### Paper/Article Output
 
@@ -92,16 +104,10 @@
       etc.), for generating headings for conference papers and journal
       articles within sections defined using `sec` values
 - [ ] Flag to suppress heading generation to only generate subsections
-- [ ] place references at end of each chapter, if any chapters are generated
-  - if max heading depth <= 3 (no chapters), then print
-    `\begin{refsection}`, `\end{refsection}` at begining and end of
-    document.
-  - default backmatter is empty.
 
 ## Functionality
 
 - [ ] support unicode text
-  - [ ] verify that tok writes unicode text
 - [ ] Add keys that can be set as predecessors or successors in option
       flags
       - keys
@@ -132,7 +138,6 @@
 ## LaTeX Formatting
 
 - [ ] Default frontmatter/preamble: Hide lists of figures and tables if empty
-- [ ] Default preamble: choose book or article based on sections generated
 - [ ] Hide appendix if there are no nodes in appendix
 - [ ] Generate section headings within appendix
 - [ ] Option to select with sans serif font for computer screens and
@@ -155,29 +160,24 @@
       formatting of newly committed files.
 - [ ] Test with JSON files (as YAML is a superset of JSON)
 - [ ] add options
-  - [ ] Select LaTeX engine
   - [ ] output file directory
   - [ ] output file name
   - [ ] exclude exercises
-  - [ ] clean up generated files
 - [ ] Electron app to visually create files and draw dependency
       relationships
 
 ## Documentation
 
-- [ ] Create GitHub page
 - [ ] Provide really good examples of acceptable YAML files
 - [ ] Write guidelines for writing a good YAML file
 - [ ] exercises (gather exercises from a section, and put them at the end)
 
 ## Markdown/Web
 
-- [ ] generate md file
+- [ ] generate md file, use pandoc filters; render html
 
 ## Keys to Add Later
 
-- [ ] why: include motivation for introducing current topic; keeps
-      motivation and discussion separate
 - [ ] nowiki boolean key suppresses wiki links in case you know there is
       no Wikipedia page available; wiki key has no effect; root node's
       nowiki set to false
