@@ -316,7 +316,7 @@ pub fn write_to_tex(
 				// file
 				// 	.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
 				// 	.expect("");
-				file.write_all(b"\\reversemarginpar\n").expect("");
+				file.write_all(b"\\reversemarginpar\n\n").expect("");
 			}
 			"done" => {
 				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
@@ -330,7 +330,7 @@ pub fn write_to_tex(
 				// file
 				// 	.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
 				// 	.expect("");
-				file.write_all(b"\\reversemarginpar\n").expect("");
+				file.write_all(b"\\reversemarginpar\n\n").expect("");
 			}
 			_ => (),
 		}
