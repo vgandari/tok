@@ -2,8 +2,8 @@
 
 ## Introduction
 
-`tok` is a command line tool that takes your notes and organizes them so
-that they are easy to follow.
+`tok` (Tree of Knowledge) is a command line tool that takes your notes
+and organizes them so that they are easy to follow.
 Think of `tok` as a texbook generator that lifts the burden of figuring
 out where to put each paragraph.
 
@@ -119,6 +119,127 @@ The output of `tok` and `xelatex` will be under a directory called
 `../output` relative to where `tok` was run (e.g. if running `tok` in
 `project/yaml/` above, the outout will be located in `project/output/`).
 
+### Example YAML File/`tok` Node
+
+[Here's a nice guide for learning the YAML syntax.](https://learnxinyminutes.com/docs/yaml/)
+Below is an example of a YAML file suitable for a project made for
+`tok`.
+The values that `tok` recognizes are explained more generally in the
+next sections.
+Note the pipes `|` where multiline strings are required.
+
+```yaml
+pre: |
+  Here's some text that will appear in the document, introducing the
+  topic stored in this file.
+  Maybe we want to motivate a definition, or provide some general
+  context for the main content.
+  Put whatever you think is appropriate before introducing the main
+  text.
+main: |
+  Here is wehre we write the main text.
+  If the file name has a prefix `def`, `thm`, etc., then the text here
+  will appear as a definition, theorem, etc. in the final LaTeX
+  document.
+  All text inside of `pre` and `post` will appear as regular text in the
+  document body.
+post: |
+  Now that we've presented the main idea, we can discuss it a little
+  further.
+  Maybe you want to clarify something that people often get confused.
+  Maybe you can discuss how the theorem you've just presented is
+  applied.
+eli5: |
+  If you want to really dumb things down before overwhelming your
+  audience with pre/main/post, you can "Explain like I'm Five".
+  This is a special section where you can provide simple, if not toally
+  accurate explanations of the current concept.
+  It's great for an introductory text, a rough draft, or an idea that
+  came to you in the middle of the night that you simple have to write
+  down right now.
+
+# Here we tell tok which files to include earlier in the document.
+req:
+  - ./required_file_1.yaml
+  - ./required_file_2.yaml
+
+# Some topics aren't required for the reader to understand the current
+# topic, but you may feel the need to include these toics anyway for
+# completeness. This is where you should tell tok to include these
+# files.
+# They will appear after this topic in the final document.
+# If there are any files included in the document that are not required
+# for any of the files passed to tok in the command line, an appendix
+# will be generated.
+incl:
+  - ./some_other_file_1.yaml
+  - ./some_other_file_2.yaml
+
+# URLS are key-value pairs.
+# They key is the text you want to display in text, and the value is the
+# URL for the link.
+urls:
+  google: https://google.com
+  ? |
+    long_name
+  : |
+    https://long_url.com
+
+# Any questions you need to answer
+# If you're taking notes, these could be
+q:
+  - Why does the Earth go around the Sun?
+  - Find original source for this.
+
+# BibTeX style references.
+# You can use the same references across different files.
+# tok will gather references from all the relevant YAML files, generate
+# a BIB file, and automatically remove duplicates.
+# You can cite these references from anywhere in the resulting TEX file.
+# Beause these sources can be cites from anywhere in the TEX file,
+# it's possible to cite sources declared in a different YAML file.
+# Because it's hard to keep track of what other YAML files will
+# ultimately be included in the final document, it is recommended to
+# include the sources you're going to cite in the same YAML file where
+# you cite them.
+# Since tok removes duplicate entries, it'e better to err on the side of
+# declaring too many sources in a single file and declaring duplicates
+# across many files than to attempt to keep track of which sources are
+# included in other files.
+src:
+  - |
+    @article{src1
+      ...
+    }
+  - |
+    @article{src2
+      ...
+    }
+
+# For files with prefixes thm, lem, cor, rem, you can include proofs and
+# tok will include them in a proof environment.
+# You can include as  many proofs as you like
+pfs:
+  - |
+    A proof
+  - |
+    Another, more elegant proof
+  - |
+    Yet another proof taking a different approach
+
+# Indicate that there is no Wikipedia page for this topic -- you've
+# checked.
+# For files with a prefix `x`, this option is automatically set to true.
+nowiki: true
+
+# The name of this topic as it appears in the final document is on
+# Wikipedia under a different name, or in a section of a Wikipedia
+# article.
+# Links like this will appear as "Name" on Wikipedia, instead of Search
+# for "Name" on Wikipedia to indicate that the page definitely exists.
+wiki: https://wikipedia.org/name_different_from_file_name
+```
+
 ### Defining a Dependency Graph
 
 Each YAML file in your project represents a node.
@@ -202,7 +323,9 @@ environment.
 - `lem` - lemma
 - `plain` - plain text, show title in bold before any text from this
   node
-- `x` - plain text, hide title, set `nowiki: true`
+- `x` - plain text, hide title, set `nowiki: true`; actually, you can
+  use any prefix that `tok` does not have rules for and use a custom
+  environment defined in your preamble for your `main` text.
 - `task` - plain text, show title in bold before any text from this
   node, show "TASK" with empty checkbox in left margin
 - `done` - plain text, show title in bold before any text from this
