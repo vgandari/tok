@@ -594,6 +594,20 @@ pub fn write_to_tex(
 			}
 		}
 
+		// Print alternate names
+		file
+			.write_all(
+				b"\n\n\\noindent\textbf{Also known as:}\\newline\n\\noindent\n",
+			)
+			.expect("");
+		file.write_all(b"\\begin{itemize}\n").expect("");
+		for name in node.borrow().data().aka.clone() {
+			file.write_all(b"\\item ").expect("");
+			file.write_all(name.as_bytes()).expect("");
+			file.write_all(b"\n").expect("");
+		}
+		file.write_all(b"\\end{itemize}\n").expect("");
+
 		// Link to Wikipedia
 		if (options.crib == false)
 			& (options.show_wiki == true)

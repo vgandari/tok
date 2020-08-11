@@ -28,6 +28,8 @@ pub struct Topic {
 	pub listtext: String,
 	/// Specify language for syntax highlighting in listings
 	pub lang: String,
+	/// Other names used to refer to this topic
+	pub aka: Vec<String>,
 	/// Lines to include from a listing from a file
 	pub lines: Vec<usize>,
 	/// List of proofs to place immediately after `main` text (intended
@@ -168,6 +170,7 @@ pub fn create_topic(
 					data.label = serde_yaml::from_value(v).expect("");
 				}
 			}
+			"aka" => data.aka = serde_yaml::from_value(v).expect(""),
 			"lang" => data.lang = serde_yaml::from_value(v).expect(""),
 			"eli5" => data.eli5 = serde_yaml::from_value(v).expect(""),
 			"pre" => data.pre = serde_yaml::from_value(v).expect(""),
