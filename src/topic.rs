@@ -175,13 +175,7 @@ pub fn create_topic(
 			"post" => data.post = serde_yaml::from_value(v).expect(""),
 			"lsttext" => data.listtext = serde_yaml::from_value(v).expect(""),
 			"wiki" => data.wiki = serde_yaml::from_value(v).expect(""),
-			"nowiki" => {
-				data.nowiki = if data.env == "x" || data.env == "0" {
-					true
-				} else {
-					serde_yaml::from_value(v).expect("")
-				}
-			}
+			"nowiki" => data.nowiki = serde_yaml::from_value(v).expect(""),
 			"urls" => data.urls = serde_yaml::from_value(v).expect(""),
 			"q" => data.q = serde_yaml::from_value(v).expect(""),
 			"pfs" => data.pfs = serde_yaml::from_value(v).expect(""),

@@ -285,7 +285,7 @@ pub fn write_to_tex(
 
 		// Write source YAML file name
 		if options.yaml == true {
-			file.write_all(b"\\texttt{").expect("");
+			file.write_all(b"\\noindent\n\\texttt{").expect("");
 			file.write_all(node.borrow().path.as_bytes()).expect("");
 			file.write_all(b"}\n\n").expect("");
 		}
@@ -597,6 +597,7 @@ pub fn write_to_tex(
 		// Link to Wikipedia
 		if (options.crib == false)
 			& (options.show_wiki == true)
+			& (node.borrow().data().env != "x")
 			& (node.borrow().data().nowiki == false)
 		{
 			file.write_all(b"\n\n\\noindent\n").expect("");
