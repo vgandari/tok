@@ -1,4 +1,4 @@
-# `tok`
+# Tree of Knowledge/`tok`
 
 ## Introduction
 
@@ -18,8 +18,8 @@ on each other.
 `tok` reads files in YAML format.
 Each file contains text for a topic, some formatting metadata, and
 dependency relationships.
-`tok` uses dependency relationships to determine the "best" order to place
-your notes.
+`tok` uses dependency relationships to determine the "best" order to
+place your notes.
 Once `tok` computes the "best" order to sort the topics, it writes your
 notes in a TEX file and generates a PDF.
 
@@ -27,8 +27,8 @@ notes in a TEX file and generates a PDF.
 files they depend on.
 This means that `tok` may generate a document that contains a subset of
 your notes.
-That is, `tok` leaves out the irrelevant topics and sticks to the focus of
-the document you are generating.
+That is, `tok` leaves out the irrelevant topics and sticks to the focus
+of the document you are generating.
 
 ### Goals
 
@@ -43,8 +43,8 @@ The goals of `tok` are as follows
   topics**.
 - **Unburden readers from the task of revisiting information** presented
   earlier/later in a text in order to understand information presented
-  later/earlier; i.e., produce a **text designed to be read and studied
-  sequentially**.
+  later/earlier; i.e., produce a **document designed to be read and
+  studied sequentially**.
 - Allow **authors to focus on individual topics in isolation** and
   remove the burden of finding the optimal order in which to present
   topics to readers.
@@ -55,6 +55,15 @@ The goals of `tok` are as follows
   ordering of topics, the **reader no longer has to "hunt" for relevant
   information**.
 
+I use `tok` as:
+
+- A textbook for everything I've learned from classes, papers, etc.
+- My research/lab notebook
+- Task/project manager
+
+See
+["Everything...Or at Least Some of It"](https://github.com/vgandari/everything)
+
 ## Install
 
 `tok` requires Rust and the `cargo` utility.
@@ -64,7 +73,7 @@ Install Rust and `cargo` from
 If you would like to install `tok` to your PATH, run
 
 ```sh
-$ cargo install --path .
+cargo install --path .
 ```
 
 from the `tok` project root.
@@ -73,38 +82,52 @@ Make sure this is in your PATH.
 If you configured `cargo` to install binaries somewhere else, make sure
 that directory is in your PATH.
 
+To update, navigate to the directory where you cloned `tok` and run
+
+```sh
+git pull
+cargo install --path . --force
+```
+
 ## Usage
 
 See `tok --help` for command line options.
 Options marked `[INOP]` are inoperable and have no effect.
 
-At the moment, `tok` is hardcoded to use `xelatex` to compile PDFs.
-If you would like to use a different LaTeX engine, you can still process
-the generated TEX file on your own using that LaTeX engine.
+By default, `tok` uses `xelatex` to compile PDFs.
+You can use a different engine to compile the generated TEX file by
+specifying `--engine=pdflatex` or `--engine=luatex`.
+You can also generate a TEX file without compiling to PDF using the
+`--no-pdf` option.
+You can always generate the PDF with whatever LaTeX engine you want once
+the TEX file is generated.
 
 To include _all_ files in your document's project directory (*nix
 systems), run
 
 ```sh
-tok `find . -name '*.yaml' -print`
+tok $(find . -name '*.yaml' -print)
 ```
 
 ### Structuring a Project for `tok`
 
 ```
 project/
-|-code/               <-- for code listings
-|-images/             <-- for figures
-|-output/             <-- all output will go here; see .gitignore
-|-texinput/
-|  |-backmatter.tex   <-- optional
-|  |-frontmatter.tex  <-- optional
-|  |-preamble.tex     <-- optional
-|-<any_other_name>/   <-- location of yaml files; can be any name;
-                          also where the `tok` command is run
+|_ code/               <-- for code listings
+|_ images/             <-- for figures
+|_ output/             <-- all output will go here;
+|                          see .gitignore
+|_ texinput/
+|  |_ backmatter.tex   <-- optional
+|  |_ frontmatter.tex  <-- optional
+|  |_ preamble.tex     <-- optional
+|_ main/               <-- location of yaml files;
+                           can be any name;
+                           also where the `tok` command is run
 ```
 
-If using Git as your SCM, include the following in your `.gitignore`:
+If using Git as your VCS/SCM, include the following in your
+`.gitignore`:
 
 ```
 !code/
@@ -115,9 +138,19 @@ output/
 !texinput/backmatter.tex
 ```
 
-The output of `tok` and `xelatex` will be under a directory called
+The output of `tok` and LaTeX will be under a directory called
 `../output` relative to where `tok` was run (e.g. if running `tok` in
-`project/yaml/` above, the outout will be located in `project/output/`).
+`project/main/` above, the output files will be located in
+`project/output/`).
+
+Each file should be named with the assumption that it will appear as a
+chapter or section heading, even if the prefix is `x`.
+This is because the `--headings` and `--extra-headings` options will
+make `tok` analyze the structure of the document and insert chapter and
+section headings where appropriate; the user does not decide where the
+headings are inserted.
+More information about headings can be found under [Heading
+Generation]().
 
 ### Example YAML File/`tok` Node
 
@@ -129,6 +162,10 @@ next sections.
 Note the pipes `|` where multiline strings are required.
 
 ```yaml
+aka:
+  - dog
+  - canine
+  - good boy
 pre: |
   Here's some text that will appear in the document, introducing the
   topic stored in this file.
@@ -137,7 +174,7 @@ pre: |
   Put whatever you think is appropriate before introducing the main
   text.
 main: |
-  Here is wehre we write the main text.
+  Here is where we write the main text.
   If the file name has a prefix `def`, `thm`, etc., then the text here
   will appear as a definition, theorem, etc. in the final LaTeX
   document.
@@ -152,8 +189,8 @@ post: |
 eli5: |
   If you want to really dumb things down before overwhelming your
   audience with pre/main/post, you can "Explain like I'm Five".
-  This is a special section where you can provide simple, if not toally
-  accurate explanations of the current concept.
+  This is a special section where you can provide simple, if not totally
+  precise explanations of the current concept.
   It's great for an introductory text, a rough draft, or an idea that
   came to you in the middle of the night that you simple have to write
   down right now.
@@ -164,7 +201,7 @@ req:
   - ./required_file_2.yaml
 
 # Some topics aren't required for the reader to understand the current
-# topic, but you may feel the need to include these toics anyway for
+# topic, but you may feel the need to include these topics anyway for
 # completeness. This is where you should tell tok to include these
 # files.
 # They will appear after this topic in the final document.
@@ -185,8 +222,9 @@ urls:
   : |
     https://long_url.com
 
-# Any questions you need to answer
-# If you're taking notes, these could be
+# Any questions you need to answer.
+# If you're taking notes in class, these could be questions you will
+# look up later after lecture.
 q:
   - Why does the Earth go around the Sun?
   - Find original source for this.
@@ -196,13 +234,13 @@ q:
 # tok will gather references from all the relevant YAML files, generate
 # a BIB file, and automatically remove duplicates.
 # You can cite these references from anywhere in the resulting TEX file.
-# Beause these sources can be cites from anywhere in the TEX file,
+# Beause these sources can be cited from anywhere in the TEX file,
 # it's possible to cite sources declared in a different YAML file.
 # Because it's hard to keep track of what other YAML files will
 # ultimately be included in the final document, it is recommended to
 # include the sources you're going to cite in the same YAML file where
 # you cite them.
-# Since tok removes duplicate entries, it'e better to err on the side of
+# Since tok removes duplicate entries, it's better to err on the side of
 # declaring too many sources in a single file and declaring duplicates
 # across many files than to attempt to keep track of which sources are
 # included in other files.
@@ -218,7 +256,7 @@ src:
 
 # For files with prefixes thm, lem, cor, rem, you can include proofs and
 # tok will include them in a proof environment.
-# You can include as  many proofs as you like
+# You can include as many proofs as you like
 pfs:
   - |
     A proof
@@ -229,7 +267,8 @@ pfs:
 
 # Indicate that there is no Wikipedia page for this topic -- you've
 # checked.
-# For files with a prefix `x`, this option is automatically set to true.
+# Files with a prefix `x`, are treated as if this option is
+# automatically set to true.
 nowiki: true
 
 # The name of this topic as it appears in the final document is on
@@ -237,7 +276,7 @@ nowiki: true
 # article.
 # Links like this will appear as "Name" on Wikipedia, instead of Search
 # for "Name" on Wikipedia to indicate that the page definitely exists.
-wiki: https://wikipedia.org/name_different_from_file_name
+wiki: https://wikipedia.org/name_different_from_file_name#or_name_of_section
 ```
 
 ### Defining a Dependency Graph
@@ -257,7 +296,7 @@ The following keys are for expressing dependency relationships:
    nodes the author has decided to include anyway.
 
 For example, if node A depends on node B (i.e. text stored in A must
-appear later in the document than text stroed in B), then you may write
+appear later in the document than text stored in B), then you may write
 
 ```yaml
 req:
@@ -288,18 +327,19 @@ Each node is represented by a YAML file from which `tok` loads data.
 The following keys are available for storing information that appears in
 the PDF:
 
- - `pre`: Text for introducing the main text, outside of any LaTeX
-   environment.
- - `main`: The main text that appears inside your environment
- - `post`: Text for providing more discussion after the main text,
-   outside of any LaTeX environment.
- - `pfs`: If using the `thm`, `lem`, `cor`, or `rem` environments,
-   include one or more proofs
- - `urls`: Any URLs that might be helpful
- - `eli5`: "Explain like I'm five", a simple explanation, even if not
-   technically correct.
- - `src`: BibTeX items; `tok` will automatically generate a BIB file
-   free of duplicates
+- `aka`: "Also known as", for including alternate labels in document
+- `pre`: Text for introducing the main text, outside of any LaTeX
+  environment.
+- `main`: The main text that appears inside your environment
+- `post`: Text for providing more discussion after the main text,
+  outside of any LaTeX environment.
+- `pfs`: If using the `thm`, `lem`, `cor`, or `rem` environments,
+  include one or more proofs
+- `urls`: Any URLs that might be helpful
+- `eli5`: "Explain like I'm five", a simple explanation, even if not
+  technically correct.
+- `src`: BibTeX items; `tok` will automatically generate a BIB file
+  free of duplicates
 
 > NOTE: All keys must contain valid LaTeX code.
 
@@ -360,3 +400,25 @@ This is useful for topics with very specific headings that do not have
 Wikipedia pages, or if you don't bother adding a specific link to your
 node, a reader can still find a related page on Wikipedia without
 manually copying and pasting text.
+
+### Heading Generation
+
+The `--headings` and `--extra-headings` options generate and insert
+headings into the generated document to break it up into sections.
+Depending on what `tok` determines to be the maximum heading depth,
+headings will be generated based on the table below.
+The maximum heading depth computed is higher with the `--extra-headings`
+option than with the `--headings` option.
+For short documents, `--headings` has no effect.
+Even for longer documents, `--headings` is recommended for generating a
+draft that is closer to the final version of the document.
+
+Max Depth | Heading Types
+-- | --
+0 | No headings
+1 | Sections
+2 | Sections, Subsections
+3 | Chapters, Sections, Subsections
+4 | Chapters, Sections, Subsections, Subsubsections
+5 | Parts, Chapters, Sections, Subsections, Subsubsections
+6 | Books/Volumes, Parts, Chapters, Sections, Subsections, Subsubsections
