@@ -94,6 +94,7 @@ impl Topic {
 			main: String::from(""),
 			listtext: String::from(""),
 			lang: String::from(""),
+			aka: vec![],
 			lines: vec![],
 			post: String::from(""),
 			pfs: vec![],

@@ -285,9 +285,11 @@ pub fn write_to_tex(
 
 		// Write source YAML file name
 		if options.yaml == true {
-			file.write_all(b"\\noindent\n\\texttt{").expect("");
+			file
+				.write_all(b"\\noindent\n\\begin{verbatim}\n")
+				.expect("");
 			file.write_all(node.borrow().path.as_bytes()).expect("");
-			file.write_all(b"}\n\n").expect("");
+			file.write_all(b"\n\\end{verbatim}\n\n").expect("");
 		}
 
 		// Write label in bold text if env is `plain`
@@ -595,18 +597,20 @@ pub fn write_to_tex(
 		}
 
 		// Print alternate names
-		file
+		if node.borrow().data().aka.len() > 0 {
+			file
 			.write_all(
-				b"\n\n\\noindent\textbf{Also known as:}\\newline\n\\noindent\n",
+				b"\n\n\\noindent\\textbf{Also known as:}\\newline\n\\noindent\n",
 			)
 			.expect("");
-		file.write_all(b"\\begin{itemize}\n").expect("");
-		for name in node.borrow().data().aka.clone() {
-			file.write_all(b"\\item ").expect("");
-			file.write_all(name.as_bytes()).expect("");
-			file.write_all(b"\n").expect("");
+			file.write_all(b"\\begin{itemize}\n").expect("");
+			for name in node.borrow().data().aka.clone() {
+				file.write_all(b"\\item ").expect("");
+				file.write_all(name.as_bytes()).expect("");
+				file.write_all(b"\n").expect("");
+			}
+			file.write_all(b"\\end{itemize}\n").expect("");
 		}
-		file.write_all(b"\\end{itemize}\n").expect("");
 
 		// Link to Wikipedia
 		if (options.crib == false)
