@@ -1,4 +1,9 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, cmp::Ordering, rc::Rc};
+type NodeComparison<T> = fn(
+	reverse: bool,
+	&Rc<RefCell<Node<T>>>,
+	&Rc<RefCell<Node<T>>>,
+) -> Ordering;
 
 /// Node info for constructing tree
 pub struct Node<T> {
@@ -230,23 +235,30 @@ impl<T> Node<T> {
 		self.dag_cost
 	}
 
-	/// Sort predecessors by tree cost so that shorter branches appear
-	/// before/after longer branches, depending on option selected
+	/// Sort predecessors by tree cost so that branches with deadlines
+	/// appear first, earlier deadlines appear earlier than later
+	/// deadlines, branches without deadlines appear later, and shorter
+	/// branches without deadlines appear before/after longer branches
+	/// without deadlines, depending on option selected
 	pub fn sort_predecessor_branches(
 		&mut self,
 		reverse: bool,
+		compare: NodeComparison<T>,
 	) {
-		match reverse {
-			true => {
-				self.predecessors.sort_by(|a, b| {
-					a.borrow().dag_cost.cmp(&b.borrow().dag_cost)
-				});
-			}
-			false => {
-				self.predecessors.sort_by(|b, a| {
-					a.borrow().dag_cost.cmp(&b.borrow().dag_cost)
-				});
-			}
-		}
+		self.predecessors.sort_by(|a, b| compare(reverse, a, b));
+	}
+}
+
+/// Compare DAG cost between Nodes, used for sorting branches without
+/// deadlines
+pub fn compare_dag_cost<T>(
+	reverse: bool,
+	a: &Rc<RefCell<Node<T>>>,
+	b: &Rc<RefCell<Node<T>>>,
+) -> Ordering {
+	if reverse == true {
+		a.borrow().dag_cost.cmp(&b.borrow().dag_cost)
+	} else {
+		b.borrow().dag_cost.cmp(&a.borrow().dag_cost)
 	}
 }

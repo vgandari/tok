@@ -14,7 +14,7 @@ use crate::headings::{
 use crate::node::Node;
 use crate::options::Options;
 use crate::tex::{compile_pdf, write_bib, write_to_tex};
-use crate::topic::{create_topic, Topic};
+use crate::topic::{compute_ordering, create_topic, Topic};
 use crate::yaml::read_from_yaml;
 use std::{
 	cell::RefCell, cmp::max, collections::HashMap, collections::HashSet,
@@ -76,7 +76,8 @@ fn main() -> std::io::Result<()> {
 	// critical path first; user may select "lowest hanging fruit"
 	// ordering)
 	for (_, n) in nodes.clone() {
-		n.borrow_mut().sort_predecessor_branches(options.reverse);
+		n.borrow_mut()
+			.sort_predecessor_branches(options.reverse, compute_ordering);
 	}
 
 	// Topological sort

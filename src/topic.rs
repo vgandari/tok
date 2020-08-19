@@ -1,7 +1,7 @@
-use crate::node::Node;
+use crate::node::{compare_dag_cost, Node};
 use crate::yaml::DeserializedMap;
 use chrono::offset::{TimeZone, Utc};
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, cmp::Ordering, collections::HashMap, rc::Rc};
 use titlecase::titlecase;
 
 pub struct Topic {
@@ -57,6 +57,8 @@ pub struct Topic {
 	pub start: Option<Vec<usize>>,
 	/// Completion date for a task
 	pub complete: Option<Vec<usize>>,
+	/// Task deadline
+	pub deadline: Option<Vec<usize>>,
 	/// Expected duration of a task (in days)
 	pub expected: usize,
 	/// Actual duration of a task (in days)
@@ -96,6 +98,7 @@ impl Topic {
 			q: vec![],
 			start: None,
 			complete: None,
+			deadline: None,
 			duration: 0,
 			expected: 0,
 			gen: vec![],
@@ -177,6 +180,9 @@ pub fn create_topic(
 			"complete" => {
 				data.complete = serde_yaml::from_value(v).expect("")
 			}
+			"deadline" => {
+				data.deadline = serde_yaml::from_value(v).expect("")
+			}
 			"gen" => data.gen = serde_yaml::from_value(v).expect(""),
 			"case" => data.case = serde_yaml::from_value(v).expect(""),
 			"src" => data.src = serde_yaml::from_value(v).expect(""),
@@ -184,7 +190,6 @@ pub fn create_topic(
 		}
 	}
 
-	// TODO: deadlines
 	// Update node cost
 	if data.env == "task" {
 		if data.start.is_some() && data.complete.is_some() {
@@ -225,4 +230,54 @@ pub fn create_topic(
 		node.borrow_mut().dedup_before();
 	}
 	node.clone()
+}
+
+// FIXME: Will need to propagate deadlines from leaf nodes to root
+pub fn compute_ordering(
+	reverse: bool,
+	a: &Rc<RefCell<Node<Topic>>>,
+	b: &Rc<RefCell<Node<Topic>>>,
+) -> Ordering {
+	if a.borrow().data().deadline.is_none()
+		&& b.borrow().data().deadline.is_none()
+	{
+		// Nodes do not have deadlines, compute ordering based on dag_cost
+		compare_dag_cost(reverse, a, b)
+	} else if a.borrow().data().deadline.is_some()
+		&& b.borrow().data().deadline.is_none()
+	{
+		Ordering::Less
+	} else if a.borrow().data().deadline.is_none()
+		&& b.borrow().data().deadline.is_some()
+	{
+		Ordering::Greater
+	} else {
+		// both nodes have deadlines
+		// compare deadlines, starting with years
+		let adl = a.borrow().data().deadline.clone().unwrap();
+		let bdl = b.borrow().data().deadline.clone().unwrap();
+
+		// compare years
+		if adl[0] > bdl[0] {
+			Ordering::Greater
+		} else if adl[0] < bdl[0] {
+			Ordering::Less
+		} else {
+			// same year, compare months
+			if adl[1] > bdl[1] {
+				Ordering::Greater
+			} else if adl[1] < bdl[1] {
+				Ordering::Less
+			} else {
+				// same month, compare dates
+				if adl[2] > bdl[2] {
+					Ordering::Greater
+				} else if adl[2] < bdl[2] {
+					Ordering::Less
+				} else {
+					Ordering::Equal
+				}
+			}
+		}
+	}
 }

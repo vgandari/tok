@@ -8,6 +8,37 @@ use std::{
 	rc::Rc,
 };
 
+// TODO: Show time remaining before deadline
+fn print_deadline(
+	node: Rc<RefCell<Node<Topic>>>,
+	file: &mut File,
+) {
+	// Show deadline
+	if node.borrow().data().deadline.is_some() {
+		file.write_all(b"\\noindent").expect("");
+		let s: Vec<String> = node
+			.borrow()
+			.data()
+			.deadline
+			.clone()
+			.unwrap()
+			.iter()
+			.map(|x| {
+				if x < &10 {
+					let mut s = 0.to_string();
+					s.push_str(&x.to_string());
+					s
+				} else {
+					x.to_string()
+				}
+			})
+			.collect();
+		file.write_all(b"\\textbf{Deadline:} ").expect("");
+		file.write_all(s.join(&"-"[..]).as_bytes()).expect("");
+		file.write_all(b"\n\n").expect("");
+	}
+}
+
 fn print_start_end_dates(
 	node: Rc<RefCell<Node<Topic>>>,
 	file: &mut File,
@@ -391,6 +422,8 @@ pub fn write_to_tex(
 					.expect("");
 				file.write_all(b"\\reversemarginpar\n\n").expect("");
 
+				// Print deadline, start, and end dates
+				print_deadline(node.clone(), &mut file);
 				print_start_end_dates(node.clone(), &mut file);
 			}
 
@@ -430,8 +463,8 @@ pub fn write_to_tex(
 					}
 				}
 
-				// TODO: Show time remaining before deadline
-				// Print start and end dates
+				// Print deadline, start, and end dates
+				print_deadline(node.clone(), &mut file);
 				print_start_end_dates(node.clone(), &mut file);
 			}
 			_ => (),
