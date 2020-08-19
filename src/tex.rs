@@ -389,6 +389,7 @@ pub fn write_to_tex(
 				file
 					.write_all(b"\\marginpar{\\ding{51} \\textbf{DONE}}\n")
 					.expect("");
+				file.write_all(b"\\reversemarginpar\n\n").expect("");
 
 				print_start_end_dates(node.clone(), &mut file);
 			}
