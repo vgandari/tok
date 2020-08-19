@@ -8,6 +8,78 @@ use std::{
 	rc::Rc,
 };
 
+fn print_start_end_dates(
+	node: Rc<RefCell<Node<Topic>>>,
+	file: &mut File,
+) {
+	// Do not indent start/end dates
+	if node.borrow().data().start.is_some()
+		|| node.borrow().data().complete.is_some()
+	{
+		file.write_all(b"\\noindent").expect("");
+	}
+
+	// Show start date if present
+	if node.borrow().data().start.is_some() {
+		let s: Vec<String> = node
+			.borrow()
+			.data()
+			.start
+			.clone()
+			.unwrap()
+			.iter()
+			.map(|x| {
+				if x < &10 {
+					let mut s = 0.to_string();
+					s.push_str(&x.to_string());
+					s
+				} else {
+					x.to_string()
+				}
+			})
+			.collect();
+		file.write_all(b"\\textbf{Begin:} ").expect("");
+		file.write_all(s.join(&"-"[..]).as_bytes()).expect("");
+		if node.borrow().data().complete.is_some() {
+			file.write_all(b", ").expect("");
+		}
+	}
+
+	// Show completion date if present
+	if node.borrow().data().complete.is_some() {
+		let s: Vec<String> = node
+			.borrow()
+			.data()
+			.complete
+			.clone()
+			.unwrap()
+			.iter()
+			.map(|x| {
+				if x < &10 {
+					let mut s = 0.to_string();
+					s.push_str(&x.to_string());
+					s
+				} else {
+					x.to_string()
+				}
+			})
+			.collect();
+		file.write_all(b"\\textbf{End:} ").expect("");
+		file.write_all(s.join(&"-"[..]).as_bytes()).expect("");
+	}
+
+	// Show actual duration
+	// NOTE: Expect duration to be > 0 iff start and comple are defined
+	if node.borrow().data().duration > 0 {
+		file.write_all(b", \\textbf{Actual Duration:} ").expect("");
+		file
+			.write_all(node.borrow().data().duration.to_string().as_bytes())
+			.expect("");
+		file.write_all(b" days").expect("");
+	}
+	file.write_all(b"\n\n").expect("");
+}
+
 pub fn compile_pdf(options: &Options) {
 	// set output directory for tex file
 	let latex_args =
@@ -305,34 +377,61 @@ pub fn write_to_tex(
 
 		// If environment is a task, print status before "pre" text
 		match node.borrow().data().env.as_str() {
-			// Task
-			"task" => {
-				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
-				file
-					.write_all(node.borrow().data().label.as_bytes())
-					.expect("");
-				file.write_all(b"}").expect("");
-				file
-					.write_all(b"\\marginpar{$\\square$  \\textbf{TO DO}}\n")
-					.expect("");
-				// file
-				// 	.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
-				// 	.expect("");
-				file.write_all(b"\\reversemarginpar\n\n").expect("");
-			}
+			// Completed task; useful if completion date is unknown
 			"done" => {
 				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
 				file
 					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
 				file.write_all(b"}").expect("");
+
+				// Show task status
 				file
 					.write_all(b"\\marginpar{\\ding{51} \\textbf{DONE}}\n")
 					.expect("");
-				// file
-				// 	.write_all(b"\\reversemarginpar\n\\newline\n\\indent\n")
-				// 	.expect("");
+
+				print_start_end_dates(node.clone(), &mut file);
+			}
+
+			// Task not started, or with more info
+			"task" => {
+				// Display label
+				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
+				file
+					.write_all(node.borrow().data().label.as_bytes())
+					.expect("");
+				file.write_all(b"}").expect("");
+
+				// Show task status
+				if node.borrow().data().complete.is_some() {
+					file
+						.write_all(b"\\marginpar{\\ding{51} \\textbf{DONE}}\n")
+						.expect("");
+				} else {
+					file
+						.write_all(b"\\marginpar{$\\square$  \\textbf{TO DO}}\n")
+						.expect("");
+				}
 				file.write_all(b"\\reversemarginpar\n\n").expect("");
+
+				// Display expected duration for task if incomplete
+				if node.borrow().data().complete.is_none() {
+					if node.borrow().data().expected > 0 {
+						file
+							.write_all(b"\\noindent\\textbf{Expected Duration:} ")
+							.expect("");
+						file
+							.write_all(
+								node.borrow().data().expected.to_string().as_bytes(),
+							)
+							.expect("");
+						file.write_all(b" days\n\n").expect("");
+					}
+				}
+
+				// TODO: Show time remaining before deadline
+				// Print start and end dates
+				print_start_end_dates(node.clone(), &mut file);
 			}
 			_ => (),
 		}

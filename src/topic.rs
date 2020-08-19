@@ -36,8 +36,6 @@ pub struct Topic {
 	/// for `env=thm` only);
 	/// input as sequence of multiline strings in YAML file
 	pub pfs: Vec<String>,
-	/// Alternate labels
-	pub alt: Vec<String>,
 	// example of other items that will not be included as successors
 	// pub example_of: Vec<String>,
 	// examples of this item to include
@@ -53,24 +51,16 @@ pub struct Topic {
 	/// Other author-provided links (e.g. Mathworld, Stack Exchange,
 	/// academic websites)
 	pub urls: HashMap<String, String>,
-	// bibliography items
-	// sources: BibTeXItem,
 	/// Questions for author to answer in subsequent drafts
 	pub q: Vec<String>,
-	/// Year start (for task types)
-	pub ys: i32,
-	/// Month start (for task types)
-	pub ms: u32,
-	/// Date start (for task types)
-	pub ds: u32,
-	/// Year end (for task types)
-	pub ye: i32,
-	/// Month end (for task types)
-	pub me: u32,
-	/// Date end (for task types)
-	pub de: u32,
-	/// Duration (for task types)
-	pub duration: i64,
+	/// Start date for a task
+	pub start: Option<Vec<usize>>,
+	/// Completion date for a task
+	pub complete: Option<Vec<usize>>,
+	/// Expected duration of a task (in days)
+	pub expected: usize,
+	/// Actual duration of a task (in days)
+	pub duration: usize,
 	// we allow different types of predecessors
 	// so that we can talk about relationships between items
 	pub gen: Vec<String>,
@@ -98,20 +88,16 @@ impl Topic {
 			lines: vec![],
 			post: String::from(""),
 			pfs: vec![],
-			alt: vec![],
 			// example_of: vec![],
 			// example_paths: vec![],
 			wiki: String::from(""),
 			nowiki: false,
 			urls: HashMap::new(),
 			q: vec![],
-			ys: 0,
-			ms: 1,
-			ds: 1,
-			ye: 0,
-			me: 1,
-			de: 1,
+			start: None,
+			complete: None,
 			duration: 0,
+			expected: 0,
 			gen: vec![],
 			case: vec![],
 			src: vec![],
@@ -184,33 +170,46 @@ pub fn create_topic(
 			"q" => data.q = serde_yaml::from_value(v).expect(""),
 			"pfs" => data.pfs = serde_yaml::from_value(v).expect(""),
 			"lines" => data.lines = serde_yaml::from_value(v).expect(""),
-			"alt" => data.alt = serde_yaml::from_value(v).expect(""),
-			"ys" => data.ys = serde_yaml::from_value(v).expect(""),
-			"ye" => data.ye = serde_yaml::from_value(v).expect(""),
-			"ms" => data.ms = serde_yaml::from_value(v).expect(""),
-			"me" => data.me = serde_yaml::from_value(v).expect(""),
-			"ds" => data.ds = serde_yaml::from_value(v).expect(""),
-			"de" => data.de = serde_yaml::from_value(v).expect(""),
+			"start" => data.start = serde_yaml::from_value(v).expect(""),
+			"expected" => {
+				data.expected = serde_yaml::from_value(v).expect("")
+			}
+			"complete" => {
+				data.complete = serde_yaml::from_value(v).expect("")
+			}
 			"gen" => data.gen = serde_yaml::from_value(v).expect(""),
 			"case" => data.case = serde_yaml::from_value(v).expect(""),
 			"src" => data.src = serde_yaml::from_value(v).expect(""),
 			_ => (),
 		}
 	}
+
+	// TODO: deadlines
 	// Update node cost
-	if data.env == "task" || data.env == "done" {
-		if data.ys > 0 || data.ye > 0 {
-			let a = Utc.ymd(data.ys, data.ms, data.ds);
-			let b = Utc.ymd(data.ye, data.me, data.de + 1);
-			if b > a {
-				data.duration = (b - a).num_days();
+	if data.env == "task" {
+		if data.start.is_some() && data.complete.is_some() {
+			// Start and completion dates known; compute duration
+			let s = data.start.clone().unwrap();
+			let c = data.complete.clone().unwrap();
+			let a = Utc.ymd(s[0] as i32, s[1] as u32, s[2] as u32);
+			let b = Utc.ymd(c[0] as i32, c[1] as u32, c[2] as u32);
+			if b < a {
+				panic!("Completion date must not be before start date.")
+			} else {
+				data.duration = (b - a).num_days() as usize;
 			}
+			node.borrow_mut().cost = 1 + data.duration;
+		} else {
+			// Start date or completion date missing; only know expected duration
+			node.borrow_mut().cost = 1 + data.expected;
 		}
+	} else {
+		// Not a task; use amount of text as a heuristic for computing cost
+		node.borrow_mut().cost = 1
+			+ data.main.len() as usize
+			+ data.pre.len() as usize
+			+ data.post.len() as usize;
 	}
-	node.borrow_mut().cost = 1
-		+ data.main.len() as usize
-		+ data.pre.len() as usize
-		+ data.post.len() as usize;
 
 	let dag_cost = node.borrow().cost;
 	{
