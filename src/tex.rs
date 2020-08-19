@@ -503,27 +503,6 @@ pub fn write_to_tex(
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
-				if node.borrow().data().duration > 1 {
-					file.write_all(b"\n{\\bfseries Task Duration: ").expect("");
-					file
-						.write_all(
-							node.borrow().data().duration.to_string().as_bytes(),
-						)
-						.expect("");
-					file.write_all(b" days}").expect("");
-					file.write_all(b"\n").expect("");
-				} else if node.borrow().data().duration > 0 {
-					file.write_all(b"\n{\\bfseries Task Duration: ").expect("");
-					file
-						.write_all(
-							node.borrow().data().duration.to_string().as_bytes(),
-						)
-						.expect("");
-					file.write_all(b" day}").expect("");
-					file.write_all(b"\n").expect("");
-				} else {
-					file.write_all(b"\n").expect("");
-				}
 			}
 			// Motivation
 			"mot" => (),
@@ -819,6 +798,7 @@ pub fn write_to_tex(
 				file.write_all(b"\\end{itemize}\n").expect("");
 			}
 		}
+		file.write_all(b"\n\n").expect("");
 	}
 
 	// Write backmatter
