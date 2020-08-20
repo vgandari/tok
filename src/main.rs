@@ -72,9 +72,10 @@ fn main() -> std::io::Result<()> {
 	root.borrow_mut().compute_dag_cost();
 
 	// Sort branches for topological sort (default is to sort branches so
-	// that generted document presents topics in an order that traverses
-	// critical path first; user may select "lowest hanging fruit"
-	// ordering)
+	// that generated document presents topics in an order that traverses
+	// critical path first, more suitable for reference/textbook
+	// generation; user may select "lowest hanging fruit" ordering, more
+	// suitable for tasks)
 	for (_, n) in nodes.clone() {
 		n.borrow_mut()
 			.sort_predecessor_branches(options.reverse, compute_ordering);

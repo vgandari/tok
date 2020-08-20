@@ -232,7 +232,8 @@ pub fn create_topic(
 	node.clone()
 }
 
-// FIXME: Will need to propagate deadlines from leaf nodes to root
+// FIXME: Move trees/DAGs where ROOT node has deadline ahead of
+// trees/DAGs where root node has no deadline
 pub fn compute_ordering(
 	reverse: bool,
 	a: &Rc<RefCell<Node<Topic>>>,
