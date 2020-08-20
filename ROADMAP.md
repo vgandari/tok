@@ -2,8 +2,9 @@
 
 ## Next Steps
 
-- [ ] Incorporate deadlines for task nodes
-- [ ] Require prefix (panic if no prefix)
+- [ ] Allow for changing dependency relationships (generalizations)
+- [ ] `hist` key for providing historical context, not necessary for
+      technical understanding
 - [ ] Compile data from predicted vs actual duration and export to csv,
       perform analysis on data in separate tool
 - [ ] Add `scale` key for scaling tree cost for a node, to push it
@@ -13,8 +14,6 @@
       - Create node based on whether node is topic or task
       - Compute costs based on duration, float/wait time, and deadline
         - requires signed types
-- [ ] `hist` key for providing historical context, not necessary for
-      technical understanding
 - [ ] Create symlinks instead of copying images and code directories
   - [x] Mac/UNIX
   - [ ] Linux
@@ -46,8 +45,10 @@
 - [ ] If book headings are inserted, generate an appendix per book
 - [ ] If chapter heading generated after appendix, use the appendix
       chapter style
+
 ### Bugs
 
+- [ ] Incorporate deadlines for task nodes (see FIXME in `topic.rs`)
 - [ ] Do not insert a section heading if the depth increases by 2
       instead of 1 (e.g. do not generate subsection if there are no
       sections)
@@ -237,3 +238,4 @@
       start and completion dates after label
 - [x] Compute cost based on actual duration; if incomplete, compute cost
       based on expected duration
+- [x] Require prefix for files to specify environment (panic if no prefix)

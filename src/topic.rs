@@ -121,26 +121,23 @@ pub fn create_topic(
 	let mut data = Topic::new();
 
 	// Extract environment from filename
-	let first_underscore = filename.find('_').unwrap_or(0);
-	data.env = if first_underscore > 0 {
-		filename[0..first_underscore].to_string()
-	} else {
-		"".to_string()
-	};
+	let first_underscore = filename.find('_').expect(
+		"File has no prefix
+	  to specify environment",
+	);
+	data.env = filename[0..first_underscore].to_string();
 
 	// Extract label from filename
 	data.label = {
 		// Exclude environment
-		let mut label: String = if first_underscore > 0 {
-			filename[first_underscore + 1..].to_string()
-		} else {
-			filename.to_string()
-		};
+		let label: String = filename[first_underscore + 1..]
+			.to_string()
+			.replace("_", " ");
+
 		// Remove file extension
 		let file_extension_start = label.rfind('.').unwrap_or(0);
-		label = label[0..file_extension_start].to_string();
 		// Replace underscores with spaces, change to titlecase
-		titlecase(&label.replace("_", " ")[..])
+		titlecase(&label[0..file_extension_start].to_string()[..])
 	};
 
 	for (k, v) in yaml_content.pairs {
