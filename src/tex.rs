@@ -700,12 +700,13 @@ pub fn write_to_tex(
 			}
 
 			// Plain text
-			_ => {
+			"plain" | "x" => {
 				// file.write_all(b"\n").expect("");
 				file
 					.write_all(node.borrow().data().main.as_bytes())
 					.expect("");
 			}
+			_ => panic!("Invalid environment specified for node"),
 		}
 
 		// Print alternate names
