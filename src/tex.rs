@@ -410,11 +410,13 @@ pub fn write_to_tex(
 		match node.borrow().data().env.as_str() {
 			// Completed task; useful if completion date is unknown
 			"done" => {
-				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
+				file
+					.write_all(b"\n\\vspace{5mm}\n\\noindent\n\\textbf{")
+					.expect("");
 				file
 					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
-				file.write_all(b"}").expect("");
+				file.write_all(b"}\n").expect("");
 
 				// Show task status
 				file
@@ -430,11 +432,13 @@ pub fn write_to_tex(
 			// Task not started, or with more info
 			"task" => {
 				// Display label
-				file.write_all(b"\n\\noindent\n\\textbf{").expect("");
+				file
+					.write_all(b"\n\\vspace{5mm}\n\\noindent\n\\textbf{")
+					.expect("");
 				file
 					.write_all(node.borrow().data().label.as_bytes())
 					.expect("");
-				file.write_all(b"}").expect("");
+				file.write_all(b"}\n").expect("");
 
 				// Show task status
 				if node.borrow().data().complete.is_some() {
