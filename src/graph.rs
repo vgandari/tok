@@ -184,3 +184,57 @@ fn build_dag_forward<T, U>(
 	);
 	sbranch.remove(&leaf_path);
 }
+
+/// Modified Depth First Search; does not "discover" a node until all
+/// branches leading to that node have been traversed; sorting branches
+/// in the DAG will affect the output; recommended to use
+/// `Node::sort_predecessor_branches()` method on root node before
+/// sorting
+pub fn topological_sort_deadlines<T>(
+	node: Rc<RefCell<Node<T>>>
+) -> Vec<Rc<RefCell<Node<T>>>> {
+	let mut sorted_nodes = vec![];
+	if node.borrow().sorted == false {
+		let mut stack = vec![node.clone()];
+		while stack.is_empty() == false {
+			let v = stack.pop().unwrap();
+			// Use <= instead of < to ensure that the root node (with zero
+			// successors) is visited; otherwise, 0 nodes will be added to the
+			// list of sorted nodes
+			if v.borrow().times_visited() <= v.borrow().num_successors() {
+				// Delay discovery until node has been visited as many times as it
+				// has successors; this is so that the ordering of predecessors
+				// affects the final list of sorted nodes
+				v.borrow_mut().incr_times_visited();
+
+				// Iterative DFS for a DAG, taking into account number of parent
+				// nodes
+				if v.borrow().times_visited() >= v.borrow().num_successors() {
+					for w in v.borrow().predecessors().iter() {
+						if w.borrow().sorted == false {
+							stack.push(w.clone());
+						}
+					}
+				}
+
+				// Node will only be marked discovered if `times_visited ==
+				// num_successors`; For the root node, this will be `1 == 0`,
+				// which is false, so the root node does not appear in the list of
+				// sorted nodes
+				if v.borrow().is_discovered() == true {
+					if v.borrow_mut().sorted == false {
+						// Modify DFS so that nodes that have previously been
+						// sorted (e.g. nodes that represent tasks with deadlines)
+						// do not appear twice; once for the additional rule
+						// placed on sorting (e.g. push earlier based on
+						// deadline), and once more as if the extra restriction
+						// were not placed on the ordering
+						v.borrow_mut().sorted = true;
+						sorted_nodes.push(v.clone());
+					}
+				}
+			}
+		}
+	}
+	sorted_nodes
+}

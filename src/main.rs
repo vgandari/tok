@@ -7,6 +7,7 @@ pub mod topic;
 pub mod yaml;
 use crate::graph::{
 	build_dag_from_nodes, remove_indirect_predecessors, topological_sort,
+	topological_sort_deadlines,
 };
 use crate::headings::{
 	add_heading_titles_to_nodes, compute_min_dag_costs, set_heading_depth,
@@ -17,8 +18,8 @@ use crate::tex::{compile_pdf, write_bib, write_to_tex};
 use crate::topic::{compute_ordering, create_topic, Topic};
 use crate::yaml::read_from_yaml;
 use std::{
-	cell::RefCell, cmp::max, collections::HashMap, collections::HashSet,
-	env, path::Path, process::Command, rc::Rc,
+	cell::RefCell, cmp::max, cmp::min, collections::HashMap,
+	collections::HashSet, env, path::Path, process::Command, rc::Rc,
 };
 #[macro_use]
 extern crate clap;
@@ -71,6 +72,47 @@ fn main() -> std::io::Result<()> {
 	// Compute DAG costs
 	root.borrow_mut().compute_dag_cost();
 
+	// Create list of nodes, sorted by deadline
+	let nodes_by_deadline = {
+		let mut values: Vec<Rc<RefCell<Node<Topic>>>> =
+			nodes.values().cloned().collect();
+		values.sort_by(|a, b| compute_ordering(options.reverse, a, b));
+		values
+	};
+
+	// {
+	// 	println!(
+	// 		"DAG costs when nodes are sorted by deadline, reverse=={}",
+	// 		options.reverse.to_string()
+	// 	);
+	// 	let costs = nodes_by_deadline
+	// 		.clone()
+	// 		.into_iter()
+	// 		.map(|x| x.borrow().dag_cost());
+	// 	let deadlines = nodes_by_deadline
+	// 		.clone()
+	// 		.into_iter()
+	// 		.map(|x| x.borrow().data().deadline.clone());
+	// 	let it: Vec<(usize, Option<Vec<usize>>)> =
+	// 		costs.zip(deadlines).collect();
+	// 	for i in it.iter() {
+	// 		if i.1.is_none() {
+	// 			println!("{}", i.0.to_string());
+	// 		} else {
+	// 			let date = i.1.clone().unwrap();
+	// 			println!(
+	// 				"{}, {}-{}-{}",
+	// 				i.0.to_string(),
+	// 				date[0].to_string(),
+	// 				date[1].to_string(),
+	// 				date[2].to_string(),
+	// 			);
+	// 		}
+	// 	}
+	// }
+
+	// TODO: propagate deadlines from leaf to root
+
 	// Sort branches for topological sort (default is to sort branches so
 	// that generated document presents topics in an order that traverses
 	// critical path first, more suitable for reference/textbook
@@ -80,9 +122,40 @@ fn main() -> std::io::Result<()> {
 		n.borrow_mut()
 			.sort_predecessor_branches(options.reverse, compute_ordering);
 	}
+	// nodes.into_iter().map(|pair| -> () {
+	// 	let n = pair.1;
+	// 	n.borrow_mut()
+	// 		.sort_predecessor_branches(options.reverse, compute_ordering);
+	// });
+
+	// Sort nodes while preserving dependency relationships; sort by cost
+	// except where deadlines are defined
+	let sorted_nodes = {
+		// Construct DAGs rooted at each node with deadline
+		let mut sorted_nodes_with_deadlines = vec![];
+		'search_dl: for n in nodes_by_deadline.clone() {
+			if n.borrow().data().deadline.is_some() {
+				let mut s = topological_sort_deadlines(n.clone());
+				s.reverse();
+				if s.is_empty() == false {
+					sorted_nodes_with_deadlines.append(&mut s);
+				}
+			} else {
+				sorted_nodes_with_deadlines.reverse();
+				break 'search_dl;
+			}
+		}
+
+		// Construct DAG from remaining nodes
+		let mut sorted_nodes_no_deadlines =
+			topological_sort_deadlines(root.clone());
+		sorted_nodes_no_deadlines.append(&mut sorted_nodes_with_deadlines);
+		sorted_nodes_no_deadlines
+		// sorted_nodes_with_deadlines
+	};
 
 	// Topological sort
-	let sorted_nodes = topological_sort(root.clone());
+	// let sorted_nodes_no_deadlines = topological_sort(root.clone());
 
 	// Generate headings
 	if options.generate_headings == true || options.extra_headings == true
@@ -114,7 +187,7 @@ fn main() -> std::io::Result<()> {
 		}
 		// Even if we don't generate headings, we still need to provide this
 		// argument to `tex::write_tex`
-		mhd
+		min(mhd, 6)
 	};
 
 	// Terminal output to view organization of topics without

@@ -2,6 +2,26 @@
 
 ## Next Steps
 
+- [ ] Flag problematic deadlines
+  - set flag indicating if any children have later deadline
+    - start at root, go to leaf nodes, check if any children have later
+      deadline than parent, set flag in parent indicating that a child
+      has a later deadline if child has later deadline, or child flag
+      set to true
+    - if flag is set to true, show deadline of this node in
+      red
+- [ ] Update README with tasks vs topics, and deadline keys
+- [ ] Put references at end of chapter (or document if max heading depth
+      < 3)
+- [ ] Add examples as immediate successors
+  - Topic has `examples: Vec<Node<?>>` field
+  - print examples in `write_tex` function
+- [ ] Add exercises at end of chapters
+  - only if chapters are generated
+  - Topic has `exercises: Vec<Node<?>>` field
+  - gather and print exercises in `write_tex` function
+  - set flag indicating that all nodes in a chapter lack exercises to
+    avoid unnecessary loop over nodes
 - [ ] Allow for changing dependency relationships (generalizations)
 - [ ] `hist` key for providing historical context, not necessary for
       technical understanding
@@ -24,6 +44,8 @@
     document.
   - default backmatter is empty.
 - [ ] Reimplement heading generation as another tree?
+- [ ] Include exercises at end of chapter, similar to how examples are
+      immediate successors
 
 ### Paper/Article Output
 
@@ -239,3 +261,17 @@
 - [x] Compute cost based on actual duration; if incomplete, compute cost
       based on expected duration
 - [x] Require prefix for files to specify environment (panic if no prefix)
+- [x] Take deadlines into account
+  - nodes with earlier deadlines appear before nodes with later deadlines
+    - sort nodes by deadline
+      - starting with node with earliest deadline, run topological sort
+        - don't reintroduce a child of a node with an earlier deadline
+          - inside topological sort, if node is in sorted_nodes (bool
+            value in Node<T>), then skip
+        - don't add a child with a later deadline after its parent
+          - if node is in sorted_nodes (bool value in Node<T>), then don't
+            run topological sort on that node again
+  - nodes without deadlines appear after nodes with deadlines
+    - after running topological sort on nodes with deadlines, run topological
+      sort on root node, and do not insert nodes that are already in
+      sorted_nodes

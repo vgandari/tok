@@ -7,6 +7,8 @@ type NodeComparison<T> = fn(
 
 /// Node info for constructing tree
 pub struct Node<T> {
+	/// Whether or not this node has been sorted for document
+	pub sorted: bool,
 	/// Cost of tree rooted at this node; used for sorting branches
 	dag_cost: usize,
 	/// Number of successors (used for breaking cycles in topological
@@ -51,6 +53,7 @@ impl<T> Node<T> {
 		data: T,
 	) -> Rc<RefCell<Node<T>>> {
 		Rc::new(RefCell::new(Node::<T> {
+			sorted: false,
 			path: String::from(filename.clone()),
 			predecessors: vec![],
 			successors: vec![],
