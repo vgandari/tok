@@ -1,7 +1,7 @@
 name: tok
 version: "1.0"
 author: Victor Gandarillas
-about: Tree of Knowledge -- textbook and to do list generator
+about: Tree of Knowledge -- Knowledge and Project Management Tool
 args:
   - crib:
       short: c
@@ -80,6 +80,11 @@ args:
       long: eli5
       help: Include simple explanations/"Explain Like I'm Five"; OFF by default
       takes_value: false
+  - make_tex:
+      # short: n
+      long: no-tex
+      help: Do not generate TEX (--no-pdf also set)
+      takes_value: false
   - make_pdf:
       short: n
       long: no-pdf
@@ -97,12 +102,13 @@ args:
         Automatically generate chapter, section, subsection, etc.
         headings; OFF by default
       takes_value: false
-  - generalizations_before:
-      long: gen-before
+  - generalizations_first:
+      long: gen-first
       help: |
-        [INOP] Treat paths in `gen` sequence as predecessors and
-        paths in case sequence as successors (default is
-        opposite)
+        Treat paths in `gen` sequence as predecessors (present
+        first in document) and paths in `case` sequence as successors
+        (use for generating technical references; default is to present
+        special cases first)
       takes_value: false
   - title:
       long: title

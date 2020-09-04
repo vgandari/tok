@@ -5,9 +5,9 @@ use std::{cell::RefCell, cmp::Ordering, collections::HashMap, rc::Rc};
 use titlecase::titlecase;
 
 pub struct Topic {
-	/// Name as it should appear in textbook
+	/// Name as it should appear in document
 	pub label: String,
-	/// LaTeX environment
+	/// LaTeX environment for node
 	pub env: String,
 	/// "Explain Like I'm Five" explanation; separate from all other text
 	pub eli5: String,
@@ -33,7 +33,7 @@ pub struct Topic {
 	/// Lines to include from a listing from a file
 	pub lines: Vec<usize>,
 	/// List of proofs to place immediately after `main` text (intended
-	/// for `env=thm` only);
+	/// for theorem environments only);
 	/// input as sequence of multiline strings in YAML file
 	pub pfs: Vec<String>,
 	// example of other items that will not be included as successors
@@ -74,6 +74,8 @@ pub struct Topic {
 	/// Heading title if this topic forms the start of a chapter, section,
 	/// subsection, etc.
 	pub heading_titles: Vec<String>,
+	/// Assignee(s) for tasks
+	pub assgn: Vec<String>,
 }
 
 impl Topic {
@@ -107,6 +109,7 @@ impl Topic {
 			heading_depth: 0,
 			heading_depth_start: 0,
 			heading_titles: vec![],
+			assgn: vec![],
 		}
 	}
 }
@@ -183,6 +186,7 @@ pub fn create_topic(
 			"gen" => data.gen = serde_yaml::from_value(v).expect(""),
 			"case" => data.case = serde_yaml::from_value(v).expect(""),
 			"src" => data.src = serde_yaml::from_value(v).expect(""),
+			"assgn" => data.assgn = serde_yaml::from_value(v).expect(""),
 			_ => (),
 		}
 	}

@@ -15,6 +15,7 @@ pub struct Options {
 	pub write_appendix: bool,
 	pub eli5: bool,
 	pub make_pdf: bool,
+	pub make_tex: bool,
 	pub generate_headings: bool,
 	pub extra_headings: bool,
 	pub depth: i32,
@@ -44,6 +45,7 @@ impl Options {
 			write_appendix: !matches.is_present("write_appendix"),
 			eli5: matches.is_present("eli5"),
 			make_pdf: !matches.is_present("make_pdf"),
+			make_tex: !matches.is_present("make_tex"),
 			generate_headings: matches.is_present("generate_headings"),
 			extra_headings: matches.is_present("extra_headings"),
 			depth: matches
