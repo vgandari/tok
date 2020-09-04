@@ -2,6 +2,19 @@
 
 ## Next Steps
 
+- [ ] deadlines
+  - load all nodes (requires building complete DAG)
+    - no nodes need to be dropped later
+  - find nodes with deadlines
+    - if no nodes have deadlines, don't delete anything
+  - store paths of nodes with deadlines, and sort paths by deadlines
+  - loop over paths with earliest deadlines from earliest to latest
+    - reset num_successors for all nodes with corresponding paths
+    - do not reset sorted status
+    - build DAG for each path (no nodes will be loaded), excluding
+      paths in `incl` list
+    - topological sort
+  - topological sort at root
 - [ ] Flag problematic deadlines
   - set flag indicating if any children have later deadline
     - start at root, go to leaf nodes, check if any children have later
@@ -10,7 +23,6 @@
       set to true
     - if flag is set to true, show deadline of this node in
       red
-- [ ] Update README with tasks vs topics, and deadline keys
 - [ ] Put references at end of chapter (or document if max heading depth
       < 3)
 - [ ] Add examples as immediate successors
@@ -275,3 +287,6 @@
     - after running topological sort on nodes with deadlines, run topological
       sort on root node, and do not insert nodes that are already in
       sorted_nodes
+- [x] Update README with tasks vs topics, and deadline keys
+- [x] Add `assgn` key for tasks
+- [x] Add `--no-tex` option

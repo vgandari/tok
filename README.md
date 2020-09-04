@@ -1,9 +1,12 @@
-# Tree of Knowledge/`tok`
+# Tree of Knowledge
 
 ## Introduction
 
-`tok` (Tree of Knowledge) is a command line tool that takes your notes
-and organizes them so that they are easy to follow.
+Tree of Knowledge `tok` is a knowledge and project management tool that
+
+1. takes your notes and organizes them so that they are easy to follow
+2. takes your tasks and sorts them by deadline
+
 Think of `tok` as a texbook generator that lifts the burden of figuring
 out where to put each paragraph.
 
@@ -17,18 +20,24 @@ The answers to both of these questions depend on how the topics depend
 on each other.
 `tok` reads files in YAML format.
 Each file contains text for a topic, some formatting metadata, and
-dependency relationships.
+dependency relationships (see an example [below](#example-yaml-file)).
 `tok` uses dependency relationships to determine the "best" order to
 place your notes.
 Once `tok` computes the "best" order to sort the topics, it writes your
 notes in a TEX file and generates a PDF.
 
+The "best" order to sort topics always respects dependency relationships
+except where dependency relationships form a cycle.
+When using `tok` to manage a project, the sorting is modified to push
+tasks with deadlines towards the beginning of the final document.
+This is explained more in [Tasks and Deadlines](#tasks-and-deadlines).
+
 `tok` generates a document based on the input files and whatever other
 files they depend on.
 This means that `tok` may generate a document that contains a subset of
-your notes.
-That is, `tok` leaves out the irrelevant topics and sticks to the focus
-of the document you are generating.
+your notes/project.
+That is, `tok` leaves out the irrelevant topics/tasks and sticks to the
+focus of the document you are generating.
 
 ### Goals
 
@@ -54,15 +63,16 @@ The goals of `tok` are as follows
   By stripping away unneccesary information and maintaining an optimal
   ordering of topics, the **reader no longer has to "hunt" for relevant
   information**.
+- **Generate a to do list that scales to a large project**, based on
+  dependencies between tasks and deadlines, if applicable.
 
 I use `tok` as:
 
-- A textbook for everything I've learned from classes, papers, etc.
 - My research/lab notebook
 - Task/project manager
-
-See
-["Everything...Or at Least Some of It"](https://github.com/vgandari/everything)
+- A textbook for everything I've learned from classes, papers, etc. that
+  I can reference or share with students. See
+  ["Everything...Or at Least Some of It"](https://github.com/vgandari/everything).
 
 ## Install
 
@@ -150,9 +160,9 @@ make `tok` analyze the structure of the document and insert chapter and
 section headings where appropriate; the user does not decide where the
 headings are inserted.
 More information about headings can be found under [Heading
-Generation]().
+Generation](#heading-generation).
 
-### Example YAML File/`tok` Node
+### Example YAML File
 
 [Here's a nice guide for learning the YAML syntax.](https://learnxinyminutes.com/docs/yaml/)
 Below is an example of a YAML file suitable for a project made for
@@ -277,6 +287,17 @@ nowiki: true
 # Links like this will appear as "Name" on Wikipedia, instead of Search
 # for "Name" on Wikipedia to indicate that the page definitely exists.
 wiki: https://wikipedia.org/name_different_from_file_name#or_name_of_section
+
+# The folloing are ignored for environments that are not task
+# Dates are stored [YYYY, MM, DD] and are shown here using JSON syntax,
+# since YAML is a superset of JSON.
+deadline: [1642, 12, 25]
+start: [1642, 12, 25]
+complete: [1642, 12, 25]
+# If this node represents a task, we expect it to take about a week, so
+# we put 7, indicating that this task should take seven days to
+# complete.
+expected: 7
 ```
 
 ### Defining a Dependency Graph
@@ -327,19 +348,27 @@ Each node is represented by a YAML file from which `tok` loads data.
 The following keys are available for storing information that appears in
 the PDF:
 
-- `aka`: "Also known as", for including alternate labels in document
-- `pre`: Text for introducing the main text, outside of any LaTeX
-  environment.
-- `main`: The main text that appears inside your environment
-- `post`: Text for providing more discussion after the main text,
-  outside of any LaTeX environment.
-- `pfs`: If using the `thm`, `lem`, `cor`, or `rem` environments,
-  include one or more proofs
-- `urls`: Any URLs that might be helpful
-- `eli5`: "Explain like I'm five", a simple explanation, even if not
-  technically correct.
-- `src`: BibTeX items; `tok` will automatically generate a BIB file
-  free of duplicates
+- topics and tasks
+  - `aka`: "Also known as", for including alternate labels in document
+  - `pre`: Text for introducing the main text, outside of any LaTeX
+    environment.
+  - `main`: The main text that appears inside your environment
+  - `post`: Text for providing more discussion after the main text,
+    outside of any LaTeX environment.
+  - `urls`: Any URLs that might be helpful
+  - `eli5`: "Explain like I'm five", a simple explanation, even if not
+    technically correct.
+  - `src`: BibTeX items; `tok` will automatically generate a BIB file
+    free of duplicates
+- topics
+  - `pfs`: If using the `thm`, `lem`, `cor`, or `rem` environments,
+    include one or more proofs
+- tasks
+  - `deadline`: deadline of a task, e.g. `[1642, 12, 25]`
+  - `expected`: expected duration of a task, in days
+  - `start`: start date of a task, e.g. `[1642, 12, 25]`
+  - `complete`: completion date of a task, e.g. `[1642, 12, 25]`
+  - `assgn`: list of names of people to whom a task is assigned
 
 > NOTE: All keys must contain valid LaTeX code.
 
@@ -401,6 +430,42 @@ Wikipedia pages, or if you don't bother adding a specific link to your
 node, a reader can still find a related page on Wikipedia without
 manually copying and pasting text.
 
+### Tasks and Deadlines
+
+Tasks can be assigned deadlines, and those deadlines will affect the
+order in which node content appears in the final document.
+All nodes that use the `task` "environment" and also have a deadline
+defined will appear before nodes that do not have deadlines.
+The only exception is if nodes with deadlines have dependencies that are
+not tasks or do not have deadlines.
+
+Tasks can also be assigned expected duration, which affects which
+branches containing a series of nodes appear first in the document.
+In order to keep track of performance, tasks also have start dates and
+completion dates.
+The actual duration of a task is computed from thedifference between the
+start and completion dates.
+
+- [ ] TODO: Export expected and actual durations
+
+You can export the times (expected and actual durations, start dates,
+deadlines, completion dates) for a person responsible for tastks or for
+a project more broadly to perform analysis of
+individual/team/organizatio performance, etc.
+
+Because `tok` is designed to allow users to focus on documenting
+individual nodes without needing to take into account everything in a
+textbook or project at once, you may accidentally set a deadline for a
+task that is earlier than a deadline for one or more of its subtasks.
+
+If there is a dependency relationship between two tasks, `tok` will not
+break that relationship, even if it results in a task with a later
+deadline appearing before a task with an earlier deadline.
+In that scenario, the task with the earlier deadline (the one that
+appears later) will show its deadline in red, indicating that something
+might be wrong with this project's schedule -- a task should not have an
+earlier deadline than the task(s) it depends on.
+
 ### Heading Generation
 
 The `--headings` and `--extra-headings` options generate and insert
@@ -422,3 +487,29 @@ Max Depth | Heading Types
 4 | Chapters, Sections, Subsections, Subsubsections
 5 | Parts, Chapters, Sections, Subsections, Subsubsections
 6 | Books/Volumes, Parts, Chapters, Sections, Subsections, Subsubsections
+
+
+## tok
+
+
+
+
+- [ ] provide field for adding multiple interpretations
+- [ ] deadlines
+
+    - set flag indicating node has not been added to sorted nodes
+  - from nodes, select nodes with no children marked incomplete
+    (leaf nodes have no children at all) with earliest deadline first
+    - if node has any children, sort children (already set up to sort by
+      deadline first)
+    - add to sorted nodes list
+    - set flag indicating node has been added to sorted nodes
+  - then find nodes that do not have
+
+- [ ] Research question: Ensure no NaNs/bounds violations during model
+      evaluation?
+      - serves overall goal of verifying model is correct and prevents
+        runtime errors (as opposed to errors at setup)
+      - miniTT
+      - evaluate setup at compile time: use `#error` and `static_assert`
+        during setup instead of exceptions when using C++ API

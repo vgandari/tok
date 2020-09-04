@@ -227,30 +227,32 @@ fn main() -> std::io::Result<()> {
 	// }
 
 	// Write text stored in nodes to tex file
-	write_to_tex(
-		&options,
-		&sorted_nodes,
-		options.files.clone(),
-		max_heading_depth,
-	);
-	write_bib(&sorted_nodes);
+	if options.make_tex == true {
+		write_to_tex(
+			&options,
+			&sorted_nodes,
+			options.files.clone(),
+			max_heading_depth,
+		);
+		write_bib(&sorted_nodes);
 
-	// Report time
-	println!(
-		"Time to generate TEX file: {} ms.",
-		(start_time.to(PreciseTime::now()) - time_to_build_dag)
-			.num_milliseconds()
-	);
-	println!("========================================");
-
-	// Compile PDF
-	if options.make_pdf == true {
-		compile_pdf(&options);
+		// Report time
 		println!(
-			"Time to generate TEX+PDF: {} ms.",
+			"Time to generate TEX file: {} ms.",
 			(start_time.to(PreciseTime::now()) - time_to_build_dag)
 				.num_milliseconds()
 		);
+		println!("========================================");
+
+		// Compile PDF
+		if options.make_pdf == true {
+			compile_pdf(&options);
+			println!(
+				"Time to generate TEX+PDF: {} ms.",
+				(start_time.to(PreciseTime::now()) - time_to_build_dag)
+					.num_milliseconds()
+			);
+		}
 	}
 	println!("Finished.");
 

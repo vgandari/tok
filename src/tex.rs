@@ -1,12 +1,45 @@
 use crate::{node::Node, options::Options, topic::Topic};
 use std::{
 	cell::RefCell,
+	cmp::max,
 	fs::File,
 	io::{prelude::*, Write},
 	path::Path,
 	process::Command,
 	rc::Rc,
 };
+
+fn print_assignees(
+	node: Rc<RefCell<Node<Topic>>>,
+	file: &mut File,
+) {
+	// Show assignees
+	if node.borrow().data().assgn.is_empty() == false {
+		file.write_all(b"\\noindent").expect("");
+		file.write_all(b"\\textbf{Assigned to:} ").expect("");
+	}
+	if node.borrow().data().assgn.len() == 1 {
+		file
+			.write_all(node.borrow().data().assgn.first().unwrap().as_bytes())
+			.expect("");
+	} else if node.borrow().data().assgn.len() > 1 {
+		file
+			.write_all(node.borrow().data().assgn.first().unwrap().as_bytes())
+			.expect("");
+		file.write_all(b", ").expect("");
+		for i in 1..node.borrow().data().assgn.len() - 1 {
+			file
+				.write_all(node.borrow().data().assgn[i].as_bytes())
+				.expect("");
+			file.write_all(b", ").expect("");
+		}
+		file
+			.write_all(node.borrow().data().assgn.last().unwrap().as_bytes())
+			.expect("");
+	} else {
+	}
+	file.write_all(b"\n\n").expect("");
+}
 
 // TODO: Show time remaining before deadline
 fn print_deadline(
@@ -300,6 +333,10 @@ pub fn write_to_tex(
 
 	// Write content in each node
 	let mut write_appendix = false;
+	let mut first_chapter = true;
+	let mut last_chapter = false;
+
+	let mut prev_heading_depth_start = 0;
 	for node in &mut sorted_nodes.iter().rev() {
 		let node_path = node.borrow().path.clone();
 		if final_nodes.is_empty() == false
@@ -321,57 +358,115 @@ pub fn write_to_tex(
 				.expect("");
 		}
 
-		// Write heading title
-		let heading_cmds = match max_heading_depth {
-			0 => vec!["", "", "", "", "", ""],
-			1 => vec!["", "section", "", "", "", "", ""],
-			2 => vec!["", "section", "subsection", "", "", "", ""],
-			3 => vec!["", "chapter", "section", "subsection", "", "", ""],
-			4 => vec![
-				"",
-				"chapter",
-				"section",
-				"subsection",
-				"subsubsection",
-				"",
-				"",
-			],
-			5 => vec![
-				"",
-				"part",
-				"chapter",
-				"section",
-				"subsection",
-				"subsubsection",
-				"",
-			],
+		// Select heading style and heading label prefixes for headings
+		// based on max heading depth
+		let t = match max_heading_depth {
+			0 => (vec!["", "", "", "", "", ""], vec!["", "", "", "", "", ""]),
+			1 => (
+				vec!["", "section", "", "", "", "", ""],
+				vec!["", "sec", "", "", "", "", ""],
+			),
+			2 => (
+				vec!["", "section", "subsection", "", "", "", ""],
+				vec!["", "sec", "ssec", "", "", "", ""],
+			),
+			3 => (
+				vec!["", "chapter", "section", "subsection", "", "", ""],
+				vec!["", "ch", "sec", "ssec", "", "", ""],
+			),
+			4 => (
+				vec![
+					"",
+					"chapter",
+					"section",
+					"subsection",
+					"subsubsection",
+					"",
+					"",
+				],
+				vec!["", "ch", "sec", "ssec", "sssec", "", ""],
+			),
+			5 => (
+				vec![
+					"",
+					"part",
+					"chapter",
+					"section",
+					"subsection",
+					"subsubsection",
+					"",
+				],
+				vec!["", "pt", "ch", "sec", "ssec", "sssec", ""],
+			),
+
 			// ignore anything deeper than 6 levels
-			_ => vec![
-				"",
-				"book",
-				"part",
-				"chapter",
-				"section",
-				"subsection",
-				"subsubsection",
-			],
+			_ => (
+				vec![
+					"",
+					"book",
+					"part",
+					"chapter",
+					"section",
+					"subsection",
+					"subsubsection",
+				],
+				vec!["", "bk", "pt", "ch", "sec", "ssec", "sssec"],
+			),
 		};
-		// Write heading title
-		let heading_label_pfx = match max_heading_depth {
-			0 => vec!["", "", "", "", "", ""],
-			1 => vec!["", "sec", "", "", "", "", ""],
-			2 => vec!["", "sec", "ssec", "", "", "", ""],
-			3 => vec!["", "ch", "sec", "ssec", "", "", ""],
-			4 => vec!["", "ch", "sec", "ssec", "sssec", "", ""],
-			5 => vec!["", "pt", "ch", "sec", "ssec", "sssec", ""],
-			// ignore anything deeper than 6 levels
-			_ => vec!["", "bk", "pt", "ch", "sec", "ssec", "sssec"],
+
+		let heading_cmds = t.0;
+		let heading_label_pfx = t.1;
+
+		let chapter_depth = match max_heading_depth {
+			0 | 1 | 2 => 0,
+			3 | 4 => 1,
+			5 => 2,
+			6 => 3,
+			_ => 0,
 		};
 
 		let mut i = node.borrow().data().heading_depth_start;
 		for ht in node.borrow().data().heading_titles.clone() {
+			prev_heading_depth_start =
+				node.borrow().data().heading_depth_start;
 			if i <= max_heading_depth {
 				if ht.is_empty() == false {
+					// Make chapters refsections so that bibliography is printed
+					// at the end of chapters
+					if chapter_depth > 0 && i > 0 {
+						file.write_all(i.to_string().as_bytes()).expect("");
+						file
+							.write_all(
+								prev_heading_depth_start.to_string().as_bytes(),
+							)
+							.expect("");
+						// We only end a refsection if we end a chapter; we do not
+						// end a chapter before the first chapter; the beginning of
+						// a chapter follows headings that are at least as deep as
+						// the chapter depth; refsections are allowed to end before
+						// a new part or book
+						let end_of_ch_sec_ssec_sssec =
+							prev_heading_depth_start >= chapter_depth;
+						// FIXME: When else does a chapter end?
+						let begin_bk_pt_ch = i <= chapter_depth;
+						if first_chapter == false
+							&& end_of_ch_sec_ssec_sssec == true
+							&& begin_bk_pt_ch == true
+						{
+							// end refsection for previous chapter
+							file
+								.write_all(b"\\printbibliography\\end{refsection}\n")
+								.expect("");
+						} else if first_chapter == true && i == chapter_depth {
+							// no previous chapter or refsection exists
+							first_chapter = false;
+						}
+
+						// begin refsection for a chapter
+						if i == chapter_depth {
+							file.write_all(b"\\begin{refsection}\n").expect("");
+						}
+					}
 					file.write_all(b"\\").expect("");
 					file.write_all(heading_cmds[i].as_bytes()).expect("");
 					file.write_all(b"{").expect("");
@@ -426,6 +521,7 @@ pub fn write_to_tex(
 
 				// Print deadline, start, and end dates
 				print_deadline(node.clone(), &mut file);
+				print_assignees(node.clone(), &mut file);
 				print_start_end_dates(node.clone(), &mut file);
 			}
 
@@ -469,6 +565,7 @@ pub fn write_to_tex(
 
 				// Print deadline, start, and end dates
 				print_deadline(node.clone(), &mut file);
+				print_assignees(node.clone(), &mut file);
 				print_start_end_dates(node.clone(), &mut file);
 			}
 			_ => (),
