@@ -101,6 +101,20 @@ impl<T> Node<T> {
 		self.times_visited == self.num_successors
 	}
 
+	pub fn num_predecessors(&self) -> usize {
+		self.predecessors.len()
+	}
+
+	pub fn reset(&mut self) {
+		self.num_successors = 0;
+		self.times_visited = 0;
+		self.dag_cost = 0;
+		for n in self.predecessors.iter() {
+			n.borrow_mut().reset();
+		}
+		self.predecessors.clear();
+	}
+
 	pub fn num_successors(&self) -> usize {
 		self.num_successors
 	}

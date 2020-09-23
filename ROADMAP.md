@@ -2,19 +2,7 @@
 
 ## Next Steps
 
-- [ ] deadlines
-  - load all nodes (requires building complete DAG)
-    - no nodes need to be dropped later
-  - find nodes with deadlines
-    - if no nodes have deadlines, don't delete anything
-  - store paths of nodes with deadlines, and sort paths by deadlines
-  - loop over paths with earliest deadlines from earliest to latest
-    - reset num_successors for all nodes with corresponding paths
-    - do not reset sorted status
-    - build DAG for each path (no nodes will be loaded), excluding
-      paths in `incl` list
-    - topological sort
-  - topological sort at root
+- [ ] Add `sdepth` CLI option and documentation
 - [ ] Flag problematic deadlines
   - set flag indicating if any children have later deadline
     - start at root, go to leaf nodes, check if any children have later
@@ -149,13 +137,13 @@
 
 ## Interface
 
-- [ ] Test with JSON files (as YAML is a superset of JSON)
 - [ ] add options
   - [ ] output file directory
   - [ ] output file name
   - [ ] exclude exercises
 - [ ] Electron app to visually create files and draw dependency
       relationships
+- [ ] Export deadlines to calendar
 
 ## Documentation
 
@@ -290,3 +278,5 @@
 - [x] Update README with tasks vs topics, and deadline keys
 - [x] Add `assgn` key for tasks
 - [x] Add `--no-tex` option
+- [x] push tasks with deadlines and their dependencies to front of
+      document

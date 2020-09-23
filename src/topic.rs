@@ -233,8 +233,8 @@ pub fn create_topic(
 	node.clone()
 }
 
-// FIXME: Move trees/DAGs where ROOT node has deadline ahead of
-// trees/DAGs where root node has no deadline
+// TODO: if complete with no deadline, treat completion date as
+// deadline
 pub fn compute_ordering(
 	reverse: bool,
 	a: &Rc<RefCell<Node<Topic>>>,

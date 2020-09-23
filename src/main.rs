@@ -25,10 +25,50 @@ extern crate clap;
 use clap::App;
 use time::PreciseTime;
 
+fn build_graph_wrapper(
+	root: Rc<RefCell<Node<Topic>>>,
+	nodes: &mut HashMap<String, Rc<RefCell<Node<Topic>>>>,
+	options: &Options,
+	sdepth: i64,
+) {
+	{
+		let mut pbranch: HashSet<String> = HashSet::new();
+		let mut sbranch: HashSet<String> = HashSet::new();
+		build_dag_from_nodes(
+			root.clone(),
+			nodes,
+			&mut pbranch,
+			&mut sbranch,
+			read_from_yaml,
+			create_topic,
+			sdepth,
+		);
+	}
+
+	// Remove indirect predecessors to generate unique DAG and compute
+	// costs accurately
+	for n in nodes.values() {
+		remove_indirect_predecessors(n.clone());
+	}
+
+	// Compute DAG costs
+	root.borrow_mut().compute_dag_cost();
+
+	// Sort branches for topological sort (default is to sort branches so
+	// that generated document presents topics in an order that traverses
+	// critical path first, more suitable for reference/textbook
+	// generation; user may select "lowest hanging fruit" ordering, more
+	// suitable for tasks)
+	for n in nodes.values() {
+		n.borrow_mut()
+			.sort_predecessor_branches(options.reverse, compute_ordering);
+	}
+}
+
 /// The main function that executes when tok is called from the command
 /// line
 fn main() -> std::io::Result<()> {
-	// Measure duration to output to user
+	// Get start time to measure duration to output to user
 	let start_time = PreciseTime::now();
 
 	// Get command line options and arguments
@@ -38,92 +78,99 @@ fn main() -> std::io::Result<()> {
 
 	// Create root node
 	let root_path = String::from("//");
-	let root = Node::new(&root_path, Topic::new());
+	let root = Node::new(&root_path.clone(), Topic::new());
 
 	// Do not attempt to include root node in final document
 	root.borrow_mut().sorted = true;
 
-	// Construct directed acyclic graph
+	// Create root node and register file names from command line
 	let mut nodes: HashMap<String, Rc<RefCell<Node<Topic>>>> =
 		HashMap::new();
-	nodes.insert(root_path, root.clone());
-	for filename in options.files.clone() {
-		let clean_filename = filename.replace("../", "").replace("./", "");
+	nodes.insert(root.borrow().path.clone(), root.clone());
+	for filename in options.files.iter() {
+		let clean_filename = filename
+			.replace("../", "")
+			.replace("..\\", "")
+			.replace("./", "")
+			.replace(".\\", "");
 		root.borrow_mut().req.push(clean_filename.to_string());
 	}
+
+	// Load nodes and construct DAG; if nodes don't have deadlines, then
+	// this graph will be preserved
 	println!("Building Directed Acyclic Graph (ignoring cycles)...");
-	{
-		let mut pbranch: HashSet<String> = HashSet::new();
-		let mut sbranch: HashSet<String> = HashSet::new();
-		build_dag_from_nodes(
-			root.clone(),
-			&mut nodes,
-			&mut pbranch,
-			&mut sbranch,
-			read_from_yaml,
-			create_topic,
-		);
-	}
+	build_graph_wrapper(
+		root.clone(),
+		&mut nodes,
+		&options,
+		options.sdepth,
+	);
 
-	// Remove indirect predecessors to generate unique DAG and compute
-	// costs accurately
-	for (_, n) in nodes.clone() {
-		remove_indirect_predecessors(n.clone());
-	}
-
-	// Compute DAG costs
-	root.borrow_mut().compute_dag_cost();
-
-	// Create list of nodes, sorted by deadline
-	let nodes_by_deadline = {
-		let mut values: Vec<Rc<RefCell<Node<Topic>>>> =
-			nodes.values().cloned().collect();
-		values.sort_by(|a, b| compute_ordering(options.reverse, a, b));
-		values
-	};
-
-	// TODO: propagate deadlines from leaf to root
-
-	// Sort branches for topological sort (default is to sort branches so
-	// that generated document presents topics in an order that traverses
-	// critical path first, more suitable for reference/textbook
-	// generation; user may select "lowest hanging fruit" ordering, more
-	// suitable for tasks)
-	for (_, n) in nodes.clone() {
-		n.borrow_mut()
-			.sort_predecessor_branches(options.reverse, compute_ordering);
-	}
-
-	// Sort nodes while preserving dependency relationships; sort by cost
-	// except where deadlines are defined
+	// Sort nodes while preserving dependency relationships; deadlines
+	// override branch traversal; otherwise, cost influences order of
+	// branch traversal
 	let sorted_nodes = {
-		// Construct DAGs rooted at each node with deadline
-		let mut dl = vec![];
-		'search_dl: for n in nodes_by_deadline.clone() {
-			if n.borrow().data().deadline.is_some() {
-				println!("node with deadline: {}", n.borrow().path);
-				if n.borrow().sorted == false {
-					println!("not yet sorted");
-					let mut later = topological_sort(n.clone());
-					if later.is_empty() == false {
-						println!("got some nodes!");
-						later.append(&mut dl);
-						dl = later;
-					}
-				}
-			} else {
-				// Once we sort the nodes with deadlines, we don't need
-				// to check the rest
-				break 'search_dl;
+		// Create list of nodes with deadline, sorted by deadline
+		let nodes_with_deadlines = {
+			let mut values: Vec<Rc<RefCell<Node<Topic>>>> =
+				nodes.values().cloned().collect();
+			values.sort_by(|a, b| compute_ordering(options.reverse, a, b));
+			let filtered_values: Vec<Rc<RefCell<Node<Topic>>>> = values
+				.into_iter()
+				.filter(|x| x.borrow().data().deadline.is_some())
+				.collect();
+			filtered_values
+		};
+
+		// Build DAGs from nodes with deadlines, sort nodes within each DAG
+		// respecting dependency relationships, and sort lists respecting
+		// deadlines
+		let mut dl_list: Vec<Rc<RefCell<Node<Topic>>>> = vec![];
+		if nodes_with_deadlines.len() > 0 {
+			// Destroy edges in DAG; will prevent nodes with multiple
+			// successors from being excluded in final document
+			for n in nodes_with_deadlines.iter() {
+				// Construct directed acyclic graph
+				root.borrow_mut().reset();
+				root.borrow_mut().req.clear();
+				root.borrow_mut().req.push(n.borrow().path.clone());
+				build_graph_wrapper(root.clone(), &mut nodes, &options, 0);
+
+				// for each task with deadline, run topological sort
+				let mut tmp_list = topological_sort(root.clone());
+				tmp_list.append(&mut dl_list);
+				dl_list = tmp_list.clone();
 			}
+
+			// Construct DAG again
+			root.borrow_mut().reset();
+			root.borrow_mut().req.clear();
+			nodes.insert(root.borrow().path.clone(), root.clone());
+			for filename in options.files.iter() {
+				let clean_filename = filename
+					.replace("../", "")
+					.replace("..\\", "")
+					.replace("./", "")
+					.replace(".\\", "");
+				root.borrow_mut().req.push(clean_filename.to_string());
+			}
+			build_graph_wrapper(
+				root.clone(),
+				&mut nodes,
+				&options,
+				options.sdepth,
+			);
 		}
 
-		// Construct DAG from remaining nodes
-		let mut sorted_nodes_no_deadlines = topological_sort(root.clone());
-		sorted_nodes_no_deadlines.append(&mut dl);
-		sorted_nodes_no_deadlines
-		// dl
+		// run topological sort on nodes without deadlines, without adding
+		// tasks with deadlines or their predecessors a second time, and
+		// concatenate lists
+		let mut sorted_nodes: Vec<Rc<RefCell<Node<Topic>>>> =
+			topological_sort(root.clone());
+		sorted_nodes.append(&mut dl_list);
+		sorted_nodes
 	};
+	println!("Finished sorting nodes in DAG.");
 
 	// Generate headings
 	if options.generate_headings == true || options.extra_headings == true

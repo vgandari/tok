@@ -25,6 +25,7 @@ pub fn build_dag_from_nodes<T, U>(
 	sbranch: &mut HashSet<String>,
 	read_from_file: fn(&String) -> U,
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
+	sdepth: i64,
 ) {
 	build_dag_backward(
 		node.clone(),
@@ -33,6 +34,7 @@ pub fn build_dag_from_nodes<T, U>(
 		sbranch,
 		read_from_file,
 		create_node,
+		sdepth,
 	);
 }
 
@@ -45,6 +47,7 @@ fn build_dag_backward<T, U>(
 	sbranch: &mut HashSet<String>,
 	read_from_file: fn(&String) -> U,
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
+	sdepth: i64,
 ) {
 	let node_path = { node.borrow().path.clone() };
 	pbranch.insert(node_path.clone());
@@ -68,6 +71,7 @@ fn build_dag_backward<T, U>(
 				sbranch,
 				read_from_file,
 				create_node,
+				if sdepth > 0 { sdepth - 1 } else { sdepth },
 			);
 		}
 	}
@@ -150,32 +154,36 @@ fn build_dag_forward<T, U>(
 	sbranch: &mut HashSet<String>,
 	read_from_file: fn(&String) -> U,
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
+	sdepth: i64,
 ) {
 	let leaf_path = { leaf.borrow().path.clone() };
 	sbranch.insert(leaf_path.clone());
-	let root = nodes[&"//".to_string()].clone();
-	let paths = leaf.borrow().incl.clone();
+	if sdepth != 0 {
+		let root = nodes[&"//".to_string()].clone();
+		let paths = leaf.borrow().incl.clone();
 
-	for dirty_path in paths {
-		let path = dirty_path.replace("../", "").replace("./", "");
-		let cycle = sbranch.contains(&path);
-		if cycle == false {
-			load_node(nodes, &path, read_from_file, create_node);
-			let successor = nodes[&path].clone();
-			{
-				if leaf.borrow().has_predecessor(successor.clone()) == false {
-					root.borrow_mut().add_predecessor_node(successor.clone());
-					successor.borrow_mut().add_predecessor_node(leaf.clone());
+		for dirty_path in paths {
+			let path = dirty_path.replace("../", "").replace("./", "");
+			let cycle = sbranch.contains(&path);
+			if cycle == false {
+				load_node(nodes, &path, read_from_file, create_node);
+				let successor = nodes[&path].clone();
+				{
+					if leaf.borrow().has_predecessor(successor.clone()) == false {
+						root.borrow_mut().add_predecessor_node(successor.clone());
+						successor.borrow_mut().add_predecessor_node(leaf.clone());
+					}
 				}
+				build_dag_forward(
+					successor.clone(),
+					nodes,
+					pbranch,
+					sbranch,
+					read_from_file,
+					create_node,
+					if sdepth > 0 { sdepth - 1 } else { sdepth },
+				);
 			}
-			build_dag_forward(
-				successor.clone(),
-				nodes,
-				pbranch,
-				sbranch,
-				read_from_file,
-				create_node,
-			);
 		}
 	}
 	build_dag_backward(
@@ -185,6 +193,7 @@ fn build_dag_forward<T, U>(
 		sbranch,
 		read_from_file,
 		create_node,
+		sdepth,
 	);
 	sbranch.remove(&leaf_path);
 }

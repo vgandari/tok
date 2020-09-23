@@ -18,7 +18,7 @@ pub struct Options {
 	pub make_tex: bool,
 	pub generate_headings: bool,
 	pub extra_headings: bool,
-	pub depth: i32,
+	pub sdepth: i64,
 	pub title: String,
 	pub author: String,
 	pub date: String,
@@ -48,10 +48,10 @@ impl Options {
 			make_tex: !matches.is_present("make_tex"),
 			generate_headings: matches.is_present("generate_headings"),
 			extra_headings: matches.is_present("extra_headings"),
-			depth: matches
+			sdepth: matches
 				.value_of("depth")
 				.unwrap_or("-1")
-				.parse::<i32>()
+				.parse::<i64>()
 				.unwrap_or(-1),
 			// Replace title with title from command line, or if none given
 			// and only single file is passed as input, replace title with
