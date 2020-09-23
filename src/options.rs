@@ -49,7 +49,7 @@ impl Options {
 			generate_headings: matches.is_present("generate_headings"),
 			extra_headings: matches.is_present("extra_headings"),
 			sdepth: matches
-				.value_of("depth")
+				.value_of("sdepth")
 				.unwrap_or("-1")
 				.parse::<i64>()
 				.unwrap_or(-1),
