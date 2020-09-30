@@ -487,29 +487,3 @@ Max Depth | Heading Types
 4 | Chapters, Sections, Subsections, Subsubsections
 5 | Parts, Chapters, Sections, Subsections, Subsubsections
 6 | Books/Volumes, Parts, Chapters, Sections, Subsections, Subsubsections
-
-
-## tok
-
-
-
-
-- [ ] provide field for adding multiple interpretations
-- [ ] deadlines
-
-    - set flag indicating node has not been added to sorted nodes
-  - from nodes, select nodes with no children marked incomplete
-    (leaf nodes have no children at all) with earliest deadline first
-    - if node has any children, sort children (already set up to sort by
-      deadline first)
-    - add to sorted nodes list
-    - set flag indicating node has been added to sorted nodes
-  - then find nodes that do not have
-
-- [ ] Research question: Ensure no NaNs/bounds violations during model
-      evaluation?
-      - serves overall goal of verifying model is correct and prevents
-        runtime errors (as opposed to errors at setup)
-      - miniTT
-      - evaluate setup at compile time: use `#error` and `static_assert`
-        during setup instead of exceptions when using C++ API
