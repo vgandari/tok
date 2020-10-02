@@ -131,7 +131,7 @@ args:
       help: |
         Depth of successor branch; default is to load all
         successors, but placing a limit may reduce the size of a
-        document; setting --depth="0" guarantees that no appendix is
+        document; setting --sdepth=0 guarantees that no appendix is
         generated; a negative number leads to default behavior
       takes_value: true
   - FILES:

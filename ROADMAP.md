@@ -2,7 +2,7 @@
 
 ## Next Steps
 
-- [ ] Add `sdepth` CLI option and documentation
+- [ ] Export expected and actual durations
 - [ ] Flag problematic deadlines
   - set flag indicating if any children have later deadline
     - start at root, go to leaf nodes, check if any children have later
@@ -280,3 +280,4 @@
 - [x] Add `--no-tex` option
 - [x] push tasks with deadlines and their dependencies to front of
       document
+- [x] Add `sdepth` CLI option and documentation

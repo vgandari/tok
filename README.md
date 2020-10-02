@@ -4,11 +4,14 @@
 
 Tree of Knowledge `tok` is a knowledge and project management tool that
 
-1. takes your notes and organizes them so that they are easy to follow
-2. takes your tasks and sorts them by deadline
+1. takes your notes and organizes them so that they are easy to follow.
+2. takes your tasks, assigns a priority, and generates a to do list, or
+   project plan.
 
-Think of `tok` as a texbook generator that lifts the burden of figuring
-out where to put each paragraph.
+For the first case, think of `tok` as a texbook generator that lifts the
+burden of figuring out where to put each paragraph.
+For the second case, ask, "What should I work on first/right now," and
+`tok` will give you the answer.
 
 Let's say you have a bunch of files, each containing notes covering a
 particular topic.
@@ -16,9 +19,15 @@ particular topic.
 - How should you arrange these topics so that they are easy to follow?
 - Which topics should you include?
 
-The answers to both of these questions depend on how the topics depend
-on each other.
-`tok` reads files in YAML format.
+Equivalently,
+
+- How should I sort my tasks so that I start only what I can start?
+- Which subtasks are relevant to a task/Which tasks are relevant to a
+  project?
+
+The answers to these questions depend on how the topics/tasks depend on
+each other.
+Each topic/task is defined in a YAML file.
 Each file contains text for a topic, some formatting metadata, and
 dependency relationships (see an example [below](#example-yaml-file)).
 `tok` uses dependency relationships to determine the "best" order to
@@ -30,23 +39,21 @@ The "best" order to sort topics always respects dependency relationships
 except where dependency relationships form a cycle.
 When using `tok` to manage a project, the sorting is modified to push
 tasks with deadlines towards the beginning of the final document.
+That is, tasks with a deadline always take priority over tasks without a
+deadline.
 This is explained more in [Tasks and Deadlines](#tasks-and-deadlines).
 
 `tok` generates a document based on the input files and whatever other
 files they depend on.
 This means that `tok` may generate a document that contains a subset of
-your notes/project.
+your notes/tasks.
 That is, `tok` leaves out the irrelevant topics/tasks and sticks to the
 focus of the document you are generating.
 
 ### Goals
 
-`tok` aims to solve problems for both readers (students) and authors
-(instructors).
-The goals of `tok` are as follows
-
-- **Organize notes automatically** so that they may serve as a **quick,
-  but comprehensive reference**
+- **Organize notes automatically** so that they may serve as a
+  **comprehensive reference without unnecessary information**.
 - Provide readers with a way to **customize organization of a document
   while respecting the author-specified dependency relationships between
   topics**.
@@ -64,7 +71,7 @@ The goals of `tok` are as follows
   ordering of topics, the **reader no longer has to "hunt" for relevant
   information**.
 - **Generate a to do list that scales to a large project**, based on
-  dependencies between tasks and deadlines, if applicable.
+  deadlines (if applicable) and dependencies between tasks.
 
 I use `tok` as:
 
@@ -79,6 +86,8 @@ I use `tok` as:
 `tok` requires Rust and the `cargo` utility.
 Install Rust and `cargo` from
 [here](https://www.rust-lang.org/tools/install).
+To generate PDFs, `tok` also requires
+[LaTeX](https://www.latex-project.org/get/).
 
 If you would like to install `tok` to your PATH, run
 
@@ -176,6 +185,13 @@ aka:
   - dog
   - canine
   - good boy
+eli5: |
+  To avoid overwhelming your audience, you can "Explain like I'm Five".
+  This is a special section where you can provide possibly
+  oversimplified explanations of the current concept.
+  It's great for an introductory text, a rough draft, or an idea that
+  came to you in the middle of the night that you simple have to write
+  down right now.
 pre: |
   Here's some text that will appear in the document, introducing the
   topic stored in this file.
@@ -186,9 +202,8 @@ pre: |
 main: |
   Here is where we write the main text.
   If the file name has a prefix `def`, `thm`, etc., then the text here
-  will appear as a definition, theorem, etc. in the final LaTeX
-  document.
-  All text inside of `pre` and `post` will appear as regular text in the
+  will appear as a definition, theorem, etc. in the final document.
+  All text inside of `pre` and `post` will appear as plain text in the
   document body.
 post: |
   Now that we've presented the main idea, we can discuss it a little
@@ -196,16 +211,8 @@ post: |
   Maybe you want to clarify something that people often get confused.
   Maybe you can discuss how the theorem you've just presented is
   applied.
-eli5: |
-  If you want to really dumb things down before overwhelming your
-  audience with pre/main/post, you can "Explain like I'm Five".
-  This is a special section where you can provide simple, if not totally
-  precise explanations of the current concept.
-  It's great for an introductory text, a rough draft, or an idea that
-  came to you in the middle of the night that you simple have to write
-  down right now.
-
-# Here we tell tok which files to include earlier in the document.
+# Here we tell tok which files to include that must appear earlier in
+# the document.
 req:
   - ./required_file_1.yaml
   - ./required_file_2.yaml
@@ -214,7 +221,7 @@ req:
 # topic, but you may feel the need to include these topics anyway for
 # completeness. This is where you should tell tok to include these
 # files.
-# They will appear after this topic in the final document.
+# They will appear later in the final document.
 # If there are any files included in the document that are not required
 # for any of the files passed to tok in the command line, an appendix
 # will be generated.
@@ -237,7 +244,7 @@ urls:
 # look up later after lecture.
 q:
   - Why does the Earth go around the Sun?
-  - Find original source for this.
+  - Find original source for this node.
 
 # BibTeX style references.
 # You can use the same references across different files.
@@ -277,8 +284,8 @@ pfs:
 
 # Indicate that there is no Wikipedia page for this topic -- you've
 # checked.
-# Files with a prefix `x`, are treated as if this option is
-# automatically set to true.
+# Files with a prefix `x`, `task`, and `done`, are treated as if this
+# option is automatically set to true.
 nowiki: true
 
 # The name of this topic as it appears in the final document is on
@@ -314,7 +321,9 @@ The following keys are for expressing dependency relationships:
  - `incl`: Text stored in this node must appear "before" all text
    contained in the files in this list. Nodes listed under "incl" are
    not required for understanding material in this node's text, but are
-   nodes the author has decided to include anyway.
+   nodes the author has decided to include anyway. These nodes do not
+   appear if the option `--sdepth=0` is passed to the command line. The
+   size of the document grows with increasing value for `sdepth`.
 
 For example, if node A depends on node B (i.e. text stored in A must
 appear later in the document than text stored in B), then you may write
@@ -370,7 +379,8 @@ the PDF:
   - `complete`: completion date of a task, e.g. `[1642, 12, 25]`
   - `assgn`: list of names of people to whom a task is assigned
 
-> NOTE: All keys must contain valid LaTeX code.
+> NOTE: `pre`, `main`, `post`, `pfs`, and `eli5` keys must contain valid
+> LaTeX code.
 
 > NOTE: When using the `-c` option ("crib sheet"), text in `pre` and
 > `post` will not appear n the document.
@@ -399,12 +409,6 @@ environment.
   node, show "TASK" with empty checkbox in left margin
 - `done` - plain text, show title in bold before any text from this
   node, show "DONE" with an "X" in left margin
-
-> NOTE: It is not recommended to create a document that includes `task`
-> and `done` along with any other environments.
-
-> NOTE: It is not recommended to overwrite the `env` key within a YAML
-> file.
 
 If an environment is selected so that the title/label appears in the
 text, underscores are replaced with spaces and the title/label is
@@ -446,17 +450,15 @@ completion dates.
 The actual duration of a task is computed from thedifference between the
 start and completion dates.
 
-- [ ] TODO: Export expected and actual durations
+<!-- You can export the times (expected and actual durations, start dates, -->
+<!-- deadlines, completion dates) for a person responsible for tastks or for -->
+<!-- a project more broadly to perform analysis of -->
+<!-- individual/team/organizatio performance, etc. -->
 
-You can export the times (expected and actual durations, start dates,
-deadlines, completion dates) for a person responsible for tastks or for
-a project more broadly to perform analysis of
-individual/team/organizatio performance, etc.
-
-Because `tok` is designed to allow users to focus on documenting
-individual nodes without needing to take into account everything in a
-textbook or project at once, you may accidentally set a deadline for a
-task that is earlier than a deadline for one or more of its subtasks.
+<!-- Because `tok` is designed to allow users to focus on documenting -->
+<!-- individual nodes without needing to take into account everything in a -->
+<!-- textbook or project at once, you may accidentally set a deadline for a -->
+<!-- task that is earlier than a deadline for one or more of its subtasks. -->
 
 If there is a dependency relationship between two tasks, `tok` will not
 break that relationship, even if it results in a task with a later
@@ -472,11 +474,6 @@ The `--headings` and `--extra-headings` options generate and insert
 headings into the generated document to break it up into sections.
 Depending on what `tok` determines to be the maximum heading depth,
 headings will be generated based on the table below.
-The maximum heading depth computed is higher with the `--extra-headings`
-option than with the `--headings` option.
-For short documents, `--headings` has no effect.
-Even for longer documents, `--headings` is recommended for generating a
-draft that is closer to the final version of the document.
 
 Max Depth | Heading Types
 -- | --
@@ -487,3 +484,9 @@ Max Depth | Heading Types
 4 | Chapters, Sections, Subsections, Subsubsections
 5 | Parts, Chapters, Sections, Subsections, Subsubsections
 6 | Books/Volumes, Parts, Chapters, Sections, Subsections, Subsubsections
+
+The maximum heading depth computed is higher with the `--extra-headings`
+option than with the `--headings` option.
+For short documents, `--headings` has no effect.
+Even for longer documents, `--headings` is recommended for generating a
+draft that is closer to the final version of the document.
