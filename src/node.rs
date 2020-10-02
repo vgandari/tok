@@ -108,10 +108,7 @@ impl<T> Node<T> {
 	pub fn reset(&mut self) {
 		self.num_successors = 0;
 		self.times_visited = 0;
-		self.dag_cost = 0;
-		for n in self.predecessors.iter() {
-			n.borrow_mut().reset();
-		}
+		self.dag_cost = self.cost;
 		self.predecessors.clear();
 	}
 
@@ -237,11 +234,15 @@ impl<T> Node<T> {
 	/// Compute cost of graph with this node as root; ignores cycles;
 	/// required for sorting branches;
 	pub fn compute_dag_cost(&mut self) -> usize {
+		// let self_path = { self.path.clone() };
 		for it in self.predecessors.iter() {
 			// There are still cycles that we need to ignore
+			// let it_path = { it.borrow().path.clone() };
 			let cycle = { it.try_borrow_mut().is_err() };
 			if cycle == false {
 				self.dag_cost += it.borrow_mut().compute_dag_cost();
+				// } else {
+				// println!("{} forms a cycle with{}", self_path, it_path);
 			}
 		}
 		self.dag_cost
