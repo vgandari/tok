@@ -8,13 +8,18 @@ pub fn load_node<T, U>(
 	path: &String,
 	read_from_file: fn(&String) -> U,
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
-) {
-	if nodes.contains_key(path) == false {
-		println!("Reading {}", path);
-		let dm = read_from_file(&path);
-		let new_node = create_node(&path, dm);
-		nodes.insert(path.clone(), new_node.clone());
+) -> Rc<RefCell<Node<T>>> {
+	let clean_path = path
+		.replace("../", "")
+		.replace("..\\", "")
+		.replace("./", "")
+		.replace(".\\", "");
+	if nodes.contains_key(&clean_path) == false {
+		let dm = read_from_file(&clean_path);
+		let new_node = create_node(&clean_path, dm);
+		nodes.insert(clean_path.clone(), new_node.clone());
 	}
+	nodes[&clean_path].clone()
 }
 
 /// Build directed acyclic graph from nodes
@@ -27,52 +32,62 @@ pub fn build_dag_from_nodes<T, U>(
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
 	sdepth: i64,
 ) {
-	build_dag_backward(
-		node.clone(),
-		nodes,
-		pbranch,
-		sbranch,
-		read_from_file,
-		create_node,
-		sdepth,
-	);
-}
+	let node_path = node.borrow().path.clone();
 
-/// Build directed acyclic graph from nodes, starting at root; `nodes`
-/// must contain a node with "//" as a value
-fn build_dag_backward<T, U>(
-	node: Rc<RefCell<Node<T>>>,
-	nodes: &mut HashMap<String, Rc<RefCell<Node<T>>>>,
-	pbranch: &mut HashSet<String>,
-	sbranch: &mut HashSet<String>,
-	read_from_file: fn(&String) -> U,
-	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
-	sdepth: i64,
-) {
-	let node_path = { node.borrow().path.clone() };
+	// Add successors
+	// if sdepth != 0 {
+	// sbranch.insert(node_path.clone());
+	// let incl_list = node.borrow().incl.clone();
+	// for incl_path in incl_list.iter() {
+	// let incl_node =
+	// load_node(nodes, incl_path, read_from_file, create_node);
+	// let already_in_dag = incl_node.borrow().has_predecessor(&node);
+	// let cycle = sbranch.contains(incl_path);
+	// if cycle == false {
+	// if already_in_dag == false {
+	// println!(
+	// 	"{} precedes {}",
+	// node.borrow().path,
+	// incl_node.borrow().path
+	// );
+	// incl_node.borrow_mut().add_predecessor_node(node.clone());
+	// build_dag_from_nodes(
+	// incl_node.clone(),
+	// nodes,
+	// &mut HashSet::new(),
+	// sbranch,
+	// read_from_file,
+	// create_node,
+	// if sdepth > 0 { sdepth - 1 } else { sdepth },
+	// );
+	// }
+	// }
+	// }
+	// sbranch.remove(&node_path);
+	// }
+
+	// Add predecessors
 	pbranch.insert(node_path.clone());
-
-	let paths = node.borrow().req.clone();
-	for dirty_path in paths {
-		let path = dirty_path.replace("../", "").replace("./", "");
-		let cycle = pbranch.contains(&path);
+	let req_list = node.borrow().req.clone();
+	for req_path in req_list.iter() {
+		let req_node =
+			load_node(nodes, req_path, read_from_file, create_node);
+		let already_in_dag =
+			node.borrow().has_predecessor(req_node.clone());
+		let cycle = pbranch.contains(req_path);
 		if cycle == false {
-			load_node(nodes, &path, read_from_file, create_node);
-			let predecessor = nodes[&path].clone();
-			{
-				if predecessor.borrow().has_predecessor(node.clone()) == false {
-					node.borrow_mut().add_predecessor_node(predecessor.clone());
-				}
+			if already_in_dag == false {
+				node.borrow_mut().add_predecessor_node(req_node.clone());
+				build_dag_from_nodes(
+					req_node.clone(),
+					nodes,
+					pbranch,
+					&mut HashSet::new(),
+					read_from_file,
+					create_node,
+					sdepth,
+				);
 			}
-			build_dag_forward(
-				predecessor.clone(),
-				nodes,
-				pbranch,
-				sbranch,
-				read_from_file,
-				create_node,
-				if sdepth > 0 { sdepth - 1 } else { sdepth },
-			);
 		}
 	}
 	pbranch.remove(&node_path);
@@ -143,57 +158,4 @@ pub fn topological_sort<T>(
 		}
 	}
 	sorted_nodes
-}
-
-/// Build directed acyclic graph from nodes, starting at leaf; `nodes`
-/// must contain a node with "//" as a value
-fn build_dag_forward<T, U>(
-	leaf: Rc<RefCell<Node<T>>>,
-	nodes: &mut HashMap<String, Rc<RefCell<Node<T>>>>,
-	pbranch: &mut HashSet<String>,
-	sbranch: &mut HashSet<String>,
-	read_from_file: fn(&String) -> U,
-	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
-	sdepth: i64,
-) {
-	let leaf_path = { leaf.borrow().path.clone() };
-	sbranch.insert(leaf_path.clone());
-	if sdepth != 0 {
-		let root = nodes[&"//".to_string()].clone();
-		let paths = leaf.borrow().incl.clone();
-
-		for dirty_path in paths {
-			let path = dirty_path.replace("../", "").replace("./", "");
-			let cycle = sbranch.contains(&path);
-			if cycle == false {
-				load_node(nodes, &path, read_from_file, create_node);
-				let successor = nodes[&path].clone();
-				{
-					if leaf.borrow().has_predecessor(successor.clone()) == false {
-						root.borrow_mut().add_predecessor_node(successor.clone());
-						successor.borrow_mut().add_predecessor_node(leaf.clone());
-					}
-				}
-				build_dag_forward(
-					successor.clone(),
-					nodes,
-					pbranch,
-					sbranch,
-					read_from_file,
-					create_node,
-					if sdepth > 0 { sdepth - 1 } else { sdepth },
-				);
-			}
-		}
-	}
-	build_dag_backward(
-		leaf.clone(),
-		nodes,
-		pbranch,
-		sbranch,
-		read_from_file,
-		create_node,
-		sdepth,
-	);
-	sbranch.remove(&leaf_path);
 }

@@ -11,14 +11,16 @@ pub struct DeserializedMap {
 
 /// Read data from a YAML file
 pub fn read_from_yaml(filename: &String) -> DeserializedMap {
-	let clean_filename = filename.replace("../", "").replace("./", "");
-	// println!("Reading {}", clean_filename);
-	let mut file = File::open(&clean_filename).expect("Can't open file!");
+	println!("Reading {}", filename);
+	let mut file = File::open(filename).expect("Can't open file!");
 	let mut contents = String::new();
 	file
 		.read_to_string(&mut contents)
 		.expect("Cannot read data");
-	let empty_map: HashMap<String, Value> = HashMap::new();
-	let empty_node = DeserializedMap { pairs: empty_map };
-	serde_yaml::from_str(&contents).unwrap_or(empty_node)
+	// let empty_map: HashMap<String, Value> = HashMap::new();
+	// let empty_node = DeserializedMap { pairs: empty_map };
+	// serde_yaml::from_str(&contents).unwrap_or(empty_node)
+	serde_yaml::from_str(&contents).unwrap_or(DeserializedMap {
+		pairs: HashMap::new(),
+	})
 }
