@@ -36,34 +36,33 @@ pub fn build_dag_from_nodes<T, U>(
 
 	// Add successors
 	// if sdepth != 0 {
-	// sbranch.insert(node_path.clone());
-	// let incl_list = node.borrow().incl.clone();
-	// for incl_path in incl_list.iter() {
-	// let incl_node =
-	// load_node(nodes, incl_path, read_from_file, create_node);
-	// let already_in_dag = incl_node.borrow().has_predecessor(&node);
-	// let cycle = sbranch.contains(incl_path);
-	// if cycle == false {
-	// if already_in_dag == false {
-	// println!(
-	// 	"{} precedes {}",
-	// node.borrow().path,
-	// incl_node.borrow().path
-	// );
-	// incl_node.borrow_mut().add_predecessor_node(node.clone());
-	// build_dag_from_nodes(
-	// incl_node.clone(),
-	// nodes,
-	// &mut HashSet::new(),
-	// sbranch,
-	// read_from_file,
-	// create_node,
-	// if sdepth > 0 { sdepth - 1 } else { sdepth },
-	// );
-	// }
-	// }
-	// }
-	// sbranch.remove(&node_path);
+	sbranch.insert(node_path.clone());
+	let incl_list = node.borrow().incl.clone();
+	for incl_path in incl_list.iter() {
+		let incl_node =
+			load_node(nodes, incl_path, read_from_file, create_node);
+		let already_in_dag =
+			incl_node.borrow().has_predecessor(node.clone());
+		let cycle = sbranch.contains(incl_path);
+		if cycle == false {
+			if already_in_dag == false {
+				incl_node.borrow_mut().add_predecessor_node(node.clone());
+				nodes[&"//".to_string()]
+					.borrow_mut()
+					.add_predecessor_node(incl_node.clone());
+				build_dag_from_nodes(
+					incl_node.clone(),
+					nodes,
+					&mut HashSet::new(),
+					sbranch,
+					read_from_file,
+					create_node,
+					sdepth,
+				);
+			}
+		}
+	}
+	sbranch.remove(&node_path);
 	// }
 
 	// Add predecessors

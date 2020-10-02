@@ -237,15 +237,15 @@ impl<T> Node<T> {
 	/// Compute cost of graph with this node as root; ignores cycles;
 	/// required for sorting branches;
 	pub fn compute_dag_cost(&mut self) -> usize {
-		let self_path = { self.path.clone() };
+		// let self_path = { self.path.clone() };
 		for it in self.predecessors.iter() {
 			// There are still cycles that we need to ignore
-			let it_path = { it.borrow().path.clone() };
+			// let it_path = { it.borrow().path.clone() };
 			let cycle = { it.try_borrow_mut().is_err() };
 			if cycle == false {
 				self.dag_cost += it.borrow_mut().compute_dag_cost();
-			} else {
-				println!("{} forms a cycle with{}", self_path, it_path);
+				// } else {
+				// println!("{} forms a cycle with{}", self_path, it_path);
 			}
 		}
 		self.dag_cost
