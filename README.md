@@ -125,7 +125,7 @@ To include _all_ files in your document's project directory (*nix
 systems), run
 
 ```sh
-tok $(find . -name '*.yaml' -print)
+tok $(find . -name '*.yml' -print)
 ```
 
 ### Structuring a Project for `tok`
@@ -214,8 +214,8 @@ post: |
 # Here we tell tok which files to include that must appear earlier in
 # the document.
 req:
-  - ./required_file_1.yaml
-  - ./required_file_2.yaml
+  - ./required_file_1.yml
+  - ./required_file_2.yml
 
 # Some topics aren't required for the reader to understand the current
 # topic, but you may feel the need to include these topics anyway for
@@ -226,8 +226,8 @@ req:
 # for any of the files passed to tok in the command line, an appendix
 # will be generated.
 incl:
-  - ./some_other_file_1.yaml
-  - ./some_other_file_2.yaml
+  - ./some_other_file_1.yml
+  - ./some_other_file_2.yml
 
 # URLS are key-value pairs.
 # They key is the text you want to display in text, and the value is the
@@ -330,17 +330,17 @@ appear later in the document than text stored in B), then you may write
 
 ```yaml
 req:
-  - B.yaml
+  - B.yml
 ```
 
-inside of `A.yaml`, and/or
+inside of `A.yml`, and/or
 
 ```yaml
 incl:
-  - A.yaml
+  - A.yml
 ```
 
-inside of `B.yaml`.
+inside of `B.yml`.
 
 Note that if a cycle happens to form within the graph you define (for
 larger projects, it's hard not to end up with any cycles!), then a
