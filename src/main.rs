@@ -41,6 +41,7 @@ fn build_graph_wrapper(
 			&mut sbranch,
 			read_from_yaml,
 			create_topic,
+			options,
 			sdepth,
 		);
 	}

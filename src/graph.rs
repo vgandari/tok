@@ -1,4 +1,5 @@
 use crate::node::Node;
+use crate::options::Options;
 use std::{
 	cell::RefCell, collections::HashMap, collections::HashSet, rc::Rc,
 };
@@ -30,40 +31,43 @@ pub fn build_dag_from_nodes<T, U>(
 	sbranch: &mut HashSet<String>,
 	read_from_file: fn(&String) -> U,
 	create_node: fn(&String, U) -> Rc<RefCell<Node<T>>>,
+	options: &Options,
 	sdepth: i64,
 ) {
 	let node_path = node.borrow().path.clone();
 
 	// Add successors
-	// if sdepth != 0 {
-	sbranch.insert(node_path.clone());
-	let incl_list = node.borrow().incl.clone();
-	for incl_path in incl_list.iter() {
-		let incl_node =
-			load_node(nodes, incl_path, read_from_file, create_node);
-		let already_in_dag =
-			incl_node.borrow().has_predecessor(node.clone());
-		let cycle = sbranch.contains(incl_path);
-		if cycle == false {
-			if already_in_dag == false {
-				incl_node.borrow_mut().add_predecessor_node(node.clone());
-				nodes[&"//".to_string()]
-					.borrow_mut()
-					.add_predecessor_node(incl_node.clone());
-				build_dag_from_nodes(
-					incl_node.clone(),
-					nodes,
-					&mut HashSet::new(),
-					sbranch,
-					read_from_file,
-					create_node,
-					sdepth,
-				);
+	if sdepth != 0 {
+		sbranch.insert(node_path.clone());
+		let incl_list = node.borrow().incl.clone();
+		for incl_path in incl_list.iter() {
+			let incl_node =
+				load_node(nodes, incl_path, read_from_file, create_node);
+			// These two conditions are required to guarantee termination
+			let already_in_dag =
+				incl_node.borrow().has_predecessor(node.clone());
+			let cycle = sbranch.contains(incl_path);
+			if cycle == false {
+				if already_in_dag == false {
+					incl_node.borrow_mut().add_predecessor_node(node.clone());
+					nodes[&"//".to_string()]
+						.borrow_mut()
+						.add_predecessor_node(incl_node.clone());
+					build_dag_from_nodes(
+						incl_node.clone(),
+						nodes,
+						&mut HashSet::new(),
+						sbranch,
+						read_from_file,
+						create_node,
+						options,
+						if sdepth > 0 { sdepth - 1 } else { sdepth },
+					);
+				}
 			}
 		}
+		sbranch.remove(&node_path);
 	}
-	sbranch.remove(&node_path);
-	// }
 
 	// Add predecessors
 	pbranch.insert(node_path.clone());
@@ -71,6 +75,7 @@ pub fn build_dag_from_nodes<T, U>(
 	for req_path in req_list.iter() {
 		let req_node =
 			load_node(nodes, req_path, read_from_file, create_node);
+		// These two conditions are required to guarantee termination
 		let already_in_dag =
 			node.borrow().has_predecessor(req_node.clone());
 		let cycle = pbranch.contains(req_path);
@@ -84,7 +89,8 @@ pub fn build_dag_from_nodes<T, U>(
 					&mut HashSet::new(),
 					read_from_file,
 					create_node,
-					sdepth,
+					options,
+					if sdepth > 0 { sdepth - 1 } else { sdepth },
 				);
 			}
 		}
