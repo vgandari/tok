@@ -108,7 +108,7 @@ impl<T> Node<T> {
 	pub fn reset(&mut self) {
 		self.num_successors = 0;
 		self.times_visited = 0;
-		self.dag_cost = 0;
+		self.dag_cost = self.cost;
 		for n in self.predecessors.iter() {
 			n.borrow_mut().reset();
 		}
