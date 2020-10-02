@@ -830,6 +830,8 @@ pub fn write_to_tex(
 		if (options.crib == false)
 			& (options.show_wiki == true)
 			& (node.borrow().data().env != "x")
+			& (node.borrow().data().env != "task")
+			& (node.borrow().data().env != "done")
 			& (node.borrow().data().nowiki == false)
 		{
 			file.write_all(b"\n\n\\noindent\n").expect("");
