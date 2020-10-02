@@ -131,7 +131,9 @@ fn main() -> std::io::Result<()> {
 			// successors from being excluded in final document
 			for n in nodes_with_deadlines.iter() {
 				// Construct directed acyclic graph
-				root.borrow_mut().reset();
+				for node in nodes.values() {
+					node.borrow_mut().reset();
+				}
 				root.borrow_mut().req.clear();
 				root.borrow_mut().req.push(n.borrow().path.clone());
 				build_graph_wrapper(root.clone(), &mut nodes, &options, 0);
@@ -143,7 +145,9 @@ fn main() -> std::io::Result<()> {
 			}
 
 			// Construct DAG again
-			root.borrow_mut().reset();
+			for node in nodes.values() {
+				node.borrow_mut().reset();
+			}
 			root.borrow_mut().req.clear();
 			nodes.insert(root.borrow().path.clone(), root.clone());
 			for filename in options.files.iter() {
